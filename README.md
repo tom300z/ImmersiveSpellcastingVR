@@ -4,7 +4,7 @@ This is a basic plugin template for use with CommonLibVR
 * [CMake](https://cmake.org/)
 	* Add this to your `PATH`
 * [The Elder Scrolls V: Skyrim Special Edition](https://store.steampowered.com/app/489830)
-	* Add the environment variable `Skyrim64Path` to point to the root installation of your game directory (the one containing `SkyrimSE.exe`).
+	* Add the environment variable `SkyrimVRPath` to point to the root installation of your game directory (the one containing `SkyrimVR.exe`).
 * [Vcpkg](https://github.com/microsoft/vcpkg)
 	* Add the environment variable `VCPKG_ROOT` with the value as the path to the folder containing vcpkg
 * [Visual Studio Community 2022](https://visualstudio.microsoft.com/)
