@@ -1,4 +1,4 @@
-This is a basic plugin template for use with CommonLibSSE
+This is a basic plugin template for use with CommonLibVR
 
 ## Requirements
 * [CMake](https://cmake.org/)
@@ -12,8 +12,10 @@ This is a basic plugin template for use with CommonLibSSE
 
 ## Building
 ```
-git clone https://github.com/Ryan-rsm-McKenzie/ExamplePlugin-CommonLibSSE
-cd ExamplePlugin-CommonLibSSE
+# TODO: Publish VR example plugin
+# git clone https://github.com/Ryan-rsm-McKenzie/ExamplePlugin-CommonLib SSE
+
+cd ExamplePlugin-CommonLibVR
 git submodule init
 git submodule update
 cmake --preset vs2022-windows

@@ -71,12 +71,12 @@ target_include_directories(
 		"${SOURCE_DIR}"
 )
 
-add_subdirectory("${ROOT_DIR}/external/CommonLibSSE" CommonLibSSE EXCLUDE_FROM_ALL)
+add_subdirectory("${ROOT_DIR}/external/CommonLibVR" CommonLibVR EXCLUDE_FROM_ALL)
 
 target_link_libraries(
 	"${PROJECT_NAME}"
 	PRIVATE
-		CommonLibSSE::CommonLibSSE
+		CommonLibVR::CommonLibVR
 )
 
 target_precompile_headers(
