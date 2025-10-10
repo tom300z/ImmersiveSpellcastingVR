@@ -1,3 +1,4 @@
+#include "spdlog/spdlog.h"
 
 #include <string_view>
 
@@ -7,30 +8,11 @@
 #include "SKSE/SKSE.h"
 #include "SKSE/API.h"
 #include "SKSE/Trampoline.h"
-#include "spdlog/spdlog.h"
 #include "AttackTicker.h"
+#include "util.h"
 
 using namespace RE;
 using namespace SKSE;
-
-
-void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
-{
-	switch (msg->type) {
-	case SKSE::MessagingInterface::kInputLoaded:
-		{
-			logger::info(FMT_STRING("kInputLoaded"), Plugin::NAME, Plugin::VERSION);
-			break;
-		}
-	case SKSE::MessagingInterface::kPostLoadGame:
-		{
-			logger::info(FMT_STRING("kPostLoadGame"), Plugin::NAME, Plugin::VERSION);
-			break;
-		}
-		break;
-	}
-}
-
 
 namespace
 {
@@ -77,6 +59,7 @@ namespace
 
 		LogHandItem("Left", true, player);
 		LogHandItem("Right", false, player);
+		return;
 	}
 
 	// --- Listener for equip events ---
@@ -99,26 +82,24 @@ namespace
 	};
 
 
-	// --- Listener for cell load events (scene load) ---
-	struct CellLoadHandler : BSTEventSink<TESCellFullyLoadedEvent>
+	void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 	{
-		BSEventNotifyControl ProcessEvent(const TESCellFullyLoadedEvent* evn, BSTEventSource<TESCellFullyLoadedEvent>*)
-		{
-			if (evn) {
-				logger::info("CellFullyLoadedEvent fired → logging equipped items");
-				LogEquippedItems();
-			}
-			return BSEventNotifyControl::kContinue;
+		logger::info("{}"sv, msg->type);
+		switch (msg->type) {
+		case SKSE::MessagingInterface::kInputLoaded:
+				{
+					logger::info(FMT_STRING("kInputLoaded"), Plugin::NAME, Plugin::VERSION);
+					break;
+				}
+			case SKSE::MessagingInterface::kPostLoadGame:
+				{
+					logger::info(FMT_STRING("kPostLoadGame"), Plugin::NAME, Plugin::VERSION);
+					LogEquippedItems();
+					break;
+				}
 		}
-
-		static CellLoadHandler* GetSingleton()
-		{
-			static CellLoadHandler singleton;
-			return std::addressof(singleton);
-		}
-	};
+	}
 }  // namespace
-
 
 
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
@@ -138,6 +119,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a
 
 	auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
 
+
 #ifndef NDEBUG
 	log->set_level(spdlog::level::trace);
 #else
@@ -146,7 +128,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a
 #endif
 
 	spdlog::set_default_logger(std::move(log));
-	spdlog::set_pattern("%g(%#): [%^%l%$] %v"s);
+	spdlog::set_pattern("%s(%#): [%^%l%$] %v"s);
 
 	logger::info(FMT_STRING("{} v{} queried"), Plugin::NAME, Plugin::VERSION);
 
@@ -190,8 +172,6 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	auto* sourceHolder = ScriptEventSourceHolder::GetSingleton();
 	if (sourceHolder) {
 		sourceHolder->AddEventSink(EquipEventHandler::GetSingleton());
-		sourceHolder->AddEventSink(CellLoadHandler::GetSingleton());
-		sourceHolder->AddEventSink(EventLogHandler::GetSingleton());
 		logger::info("Event handlers registered successfully.");
 	}
 

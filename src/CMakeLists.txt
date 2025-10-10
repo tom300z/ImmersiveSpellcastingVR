@@ -6,6 +6,9 @@ set(SOURCE_FILES
 	"${SOURCE_DIR}/AttackTicker.cpp"
 	"${SOURCE_DIR}/AttackTicker.h"
 	"${SOURCE_DIR}/PCH.h"
+	"${SOURCE_DIR}/util.cpp"
+	"${SOURCE_DIR}/util.h"
+
 )
 
 source_group(TREE "${ROOT_DIR}" FILES ${SOURCE_FILES})
