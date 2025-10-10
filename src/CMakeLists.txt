@@ -105,10 +105,13 @@ install(
 add_custom_command(
 	TARGET "${PROJECT_NAME}"
 	POST_BUILD
+	COMMAND "${PROJECT_SOURCE_DIR}/scripts/kill_skyrimvr.bat"
 	COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:${PROJECT_NAME}>" "${MO2Path}/overwrite/SKSE/Plugins/"
 	COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_PDB_FILE:${PROJECT_NAME}>" "${MO2Path}/overwrite/SKSE/Plugins/"
+	COMMAND "${PROJECT_SOURCE_DIR}/scripts/start_skyrimvr.bat"
 	VERBATIM
 )
+
 # endif()
 add_compile_definitions(SKYRIMVR)
 
