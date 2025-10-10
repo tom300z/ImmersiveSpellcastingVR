@@ -1,2 +1,1 @@
-@echo off
-powershell.exe -NoProfile -ExecutionPolicy Bypass -Command "& { $proc = Get-Process -Name 'SkyrimVR' -ErrorAction SilentlyContinue; if ($proc) { $proc | Stop-Process -Force } }"
+powershell.exe -NoProfile -ExecutionPolicy Bypass -Command " & { $proc = Get-Process -Name 'SkyrimVR' -ErrorAction SilentlyContinue; if ($proc) { Stop-Process -Name 'SkyrimVR' -Force; while (Get-Process -Name 'SkyrimVR' -ErrorAction SilentlyContinue) { Start-Sleep -Milliseconds 200 } }; exit 0 }"
