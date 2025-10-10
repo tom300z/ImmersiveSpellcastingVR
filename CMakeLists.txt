@@ -22,9 +22,12 @@ if(NOT DEFINED SkyrimVRPath)
 	message(FATAL_ERROR "SkyrimVRPath is not set")
 endif()
 
+set_from_environment(MO2Path)
+
 option(COPY_OUTPUT "copy the output of build operations to the game directory" OFF)
 
 list(APPEND CMAKE_MODULE_PATH "${PROJECT_SOURCE_DIR}/cmake")
 
 add_subdirectory(src)
 include(cmake/packaging.cmake)
+
