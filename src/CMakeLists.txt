@@ -3,6 +3,8 @@ set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/..")
 set(SOURCE_DIR "${ROOT_DIR}/src")
 set(SOURCE_FILES
 	"${SOURCE_DIR}/main.cpp"
+	"${SOURCE_DIR}/AttackTicker.cpp"
+	"${SOURCE_DIR}/AttackTicker.h"
 	"${SOURCE_DIR}/PCH.h"
 )
 
@@ -99,12 +101,14 @@ install(
 	COMPONENT "pdbs"
 )
 
-if("${COPY_OUTPUT}")
-	add_custom_command(
-		TARGET "${PROJECT_NAME}"
-		POST_BUILD
-		COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:${PROJECT_NAME}>" "${SkyrimVRPath}/Data/SKSE/Plugins/"
-		COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_PDB_FILE:${PROJECT_NAME}>" "${SkyrimVRPath}/Data/SKSE/Plugins/"
-		VERBATIM
-	)
-endif()
+# if("${COPY_OUTPUT}")
+add_custom_command(
+	TARGET "${PROJECT_NAME}"
+	POST_BUILD
+	COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:${PROJECT_NAME}>" "${MO2Path}/overwrite/SKSE/Plugins/"
+	COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_PDB_FILE:${PROJECT_NAME}>" "${MO2Path}/overwrite/SKSE/Plugins/"
+	VERBATIM
+)
+# endif()
+add_compile_definitions(SKYRIMVR)
+
