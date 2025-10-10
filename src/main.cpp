@@ -1,4 +1,6 @@
 
+#include <string_view>
+
 #include "SKSE/API.h"
 #include "SKSE/Interfaces.h"
 #include "RE/Skyrim.h"
@@ -32,6 +34,38 @@ void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 
 namespace
 {
+	constexpr std::string_view ToString(RE::MagicSystem::CastingType a_type)
+	{
+		using RE::MagicSystem::CastingType;
+		switch (a_type) {
+		case CastingType::kConstantEffect:
+			return "Constant Effect";
+		case CastingType::kFireAndForget:
+			return "Fire and Forget";
+		case CastingType::kConcentration:
+			return "Concentration";
+		case CastingType::kScroll:
+			return "Scroll";
+		default:
+			return "Unknown";
+		}
+	}
+
+	void LogHandItem(const std::string_view a_handLabel, bool a_isLeftHand, RE::PlayerCharacter* a_player)
+	{
+		if (auto* form = a_player->GetEquippedObject(a_isLeftHand)) {
+			logger::info("{} Hand: {} ({:08X})", a_handLabel, form->GetName(), form->GetFormID());
+
+			if (auto* spell = form->As<RE::SpellItem>()) {
+				const auto castingType = spell->GetCastingType();
+				logger::info("  Spell Casting Type: {}", ToString(castingType));
+				logger::info("  Spell Charge Time: {:.2f}s", spell->GetChargeTime());
+			}
+		} else {
+			logger::info("{} Hand: empty", a_handLabel);
+		}
+	}
+
 	// --- Our callback: log equipped item in each hand ---
 	void LogEquippedItems()
 	{
@@ -41,19 +75,8 @@ namespace
 			return;
 		}
 
-		// Left hand
-		if (auto* left = player->GetEquippedObject(true)) {
-			logger::info("Left Hand: {} ({:08X})", left->GetName(), left->GetFormID());
-		} else {
-			logger::info("Left Hand: empty");
-		}
-
-		// Right hand
-		if (auto* right = player->GetEquippedObject(false)) {
-			logger::info("Right Hand: {} ({:08X})", right->GetName(), right->GetFormID());
-		} else {
-			logger::info("Right Hand: empty");
-		}
+		LogHandItem("Left", true, player);
+		LogHandItem("Right", false, player);
 	}
 
 	// --- Listener for equip events ---
@@ -94,7 +117,6 @@ namespace
 			return std::addressof(singleton);
 		}
 	};
-
 }  // namespace
 
 
@@ -169,6 +191,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 	if (sourceHolder) {
 		sourceHolder->AddEventSink(EquipEventHandler::GetSingleton());
 		sourceHolder->AddEventSink(CellLoadHandler::GetSingleton());
+		sourceHolder->AddEventSink(EventLogHandler::GetSingleton());
 		logger::info("Event handlers registered successfully.");
 	}
 
