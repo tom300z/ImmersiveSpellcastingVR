@@ -10,97 +10,30 @@
 #include "SKSE/Trampoline.h"
 #include "AttackTicker.h"
 #include "util.h"
+//#include "InstantCharge.h"
+//#include "DMMF_API.h"
 
 using namespace RE;
 using namespace SKSE;
 
-namespace
+
+void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 {
-	constexpr std::string_view ToString(RE::MagicSystem::CastingType a_type)
-	{
-		using RE::MagicSystem::CastingType;
-		switch (a_type) {
-		case CastingType::kConstantEffect:
-			return "Constant Effect";
-		case CastingType::kFireAndForget:
-			return "Fire and Forget";
-		case CastingType::kConcentration:
-			return "Concentration";
-		case CastingType::kScroll:
-			return "Scroll";
-		default:
-			return "Unknown";
-		}
-	}
-
-	void LogHandItem(const std::string_view a_handLabel, bool a_isLeftHand, RE::PlayerCharacter* a_player)
-	{
-		if (auto* form = a_player->GetEquippedObject(a_isLeftHand)) {
-			logger::info("{} Hand: {} ({:08X})", a_handLabel, form->GetName(), form->GetFormID());
-
-			if (auto* spell = form->As<RE::SpellItem>()) {
-				const auto castingType = spell->GetCastingType();
-				logger::info("  Spell Casting Type: {}", ToString(castingType));
-				logger::info("  Spell Charge Time: {:.2f}s", spell->GetChargeTime());
+	logger::info("{}"sv, msg->type);
+	switch (msg->type) {
+	case SKSE::MessagingInterface::kInputLoaded:
+			{
+				logger::info(FMT_STRING("kInputLoaded"), Plugin::NAME, Plugin::VERSION);
+				break;
 			}
-		} else {
-			logger::info("{} Hand: empty", a_handLabel);
-		}
-	}
-
-	// --- Our callback: log equipped item in each hand ---
-	void LogEquippedItems()
-	{
-		auto* player = PlayerCharacter::GetSingleton();
-		if (!player) {
-			logger::info("Player not found.");
-			return;
-		}
-
-		LogHandItem("Left", true, player);
-		LogHandItem("Right", false, player);
-		return;
-	}
-
-	// --- Listener for equip events ---
-	struct EquipEventHandler : BSTEventSink<TESEquipEvent>
-	{
-		BSEventNotifyControl ProcessEvent(const TESEquipEvent* evn, BSTEventSource<TESEquipEvent>*)
-		{
-			if (evn && evn->actor.get() == PlayerCharacter::GetSingleton()) {
-				logger::info("EquipEvent fired → logging equipped items");
-				LogEquippedItems();
+		case SKSE::MessagingInterface::kPostLoadGame:
+			{
+				logger::info(FMT_STRING("kPostLoadGame"), Plugin::NAME, Plugin::VERSION);
+				log_utils::LogEquippedItems();
+				break;
 			}
-			return BSEventNotifyControl::kContinue;
-		}
-
-		static EquipEventHandler* GetSingleton()
-		{
-			static EquipEventHandler singleton;
-			return std::addressof(singleton);
-		}
-	};
-
-
-	void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
-	{
-		logger::info("{}"sv, msg->type);
-		switch (msg->type) {
-		case SKSE::MessagingInterface::kInputLoaded:
-				{
-					logger::info(FMT_STRING("kInputLoaded"), Plugin::NAME, Plugin::VERSION);
-					break;
-				}
-			case SKSE::MessagingInterface::kPostLoadGame:
-				{
-					logger::info(FMT_STRING("kPostLoadGame"), Plugin::NAME, Plugin::VERSION);
-					LogEquippedItems();
-					break;
-				}
-		}
 	}
-}  // namespace
-
+}
 
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
 {
@@ -153,14 +86,15 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
 {
 
-	#ifdef _DEBUG
+	#ifdef _DEBUGG
 		while (!::IsDebuggerPresent()) {
 		}
 	#endif
 
 	SKSE::Init(a_skse);
 
-    AttackToggle::Start();
+    //AttackToggle::Start();
+    //InstantCharge::Install();
 
 	auto messaging = SKSE::GetMessagingInterface();
 
@@ -171,7 +105,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 
 	auto* sourceHolder = ScriptEventSourceHolder::GetSingleton();
 	if (sourceHolder) {
-		sourceHolder->AddEventSink(EquipEventHandler::GetSingleton());
+		sourceHolder->AddEventSink(log_utils::EquipEventHandler::GetSingleton());
 		logger::info("Event handlers registered successfully.");
 	}
 

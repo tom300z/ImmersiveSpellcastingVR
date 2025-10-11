@@ -5,10 +5,12 @@ set(SOURCE_FILES
 	"${SOURCE_DIR}/main.cpp"
 	"${SOURCE_DIR}/AttackTicker.cpp"
 	"${SOURCE_DIR}/AttackTicker.h"
+	"${SOURCE_DIR}/InstantCharge.cpp"
+	"${SOURCE_DIR}/InstantCharge.h"
 	"${SOURCE_DIR}/PCH.h"
 	"${SOURCE_DIR}/util.cpp"
 	"${SOURCE_DIR}/util.h"
-
+	"${SOURCE_DIR}/openvr.h"
 )
 
 source_group(TREE "${ROOT_DIR}" FILES ${SOURCE_FILES})
