@@ -10,7 +10,6 @@ set(SOURCE_FILES
 	"${SOURCE_DIR}/PCH.h"
 	"${SOURCE_DIR}/util.cpp"
 	"${SOURCE_DIR}/util.h"
-	"${SOURCE_DIR}/openvr.h"
 )
 
 source_group(TREE "${ROOT_DIR}" FILES ${SOURCE_FILES})
@@ -84,6 +83,7 @@ target_link_libraries(
 	"${PROJECT_NAME}"
 	PRIVATE
 		CommonLibVR::CommonLibVR
+		"${ROOT_DIR}/external/CommonLibVR/extern/openvr/lib/win64/openvr_api.lib"
 )
 
 target_precompile_headers(

@@ -1,6 +1,9 @@
 #include "spdlog/spdlog.h"
 
+#include <atomic>
+#include <chrono>
 #include <string_view>
+#include <thread>
 
 #include "SKSE/API.h"
 #include "SKSE/Interfaces.h"
@@ -9,6 +12,7 @@
 #include "SKSE/API.h"
 #include "SKSE/Trampoline.h"
 #include "AttackTicker.h"
+#include "openvr.h"
 #include "util.h"
 //#include "InstantCharge.h"
 //#include "DMMF_API.h"
@@ -16,14 +20,115 @@
 using namespace RE;
 using namespace SKSE;
 
+namespace
+{
+	std::atomic_bool g_palmLoggerRunning{ false };
+	std::thread g_palmLoggerThread;
+
+	std::string_view RoleToString(vr::ETrackedControllerRole role)
+	{
+		using vr::ETrackedControllerRole;
+		switch (role) {
+		case ETrackedControllerRole::TrackedControllerRole_LeftHand:
+			return "left"sv;
+		case ETrackedControllerRole::TrackedControllerRole_RightHand:
+			return "right"sv;
+		default:
+			return "unknown"sv;
+		}
+	}
+
+	void PalmButtonLoggerLoop()
+	{
+		using namespace std::chrono_literals;
+
+		bool reportedMissingSystem = false;
+		bool leftTouched = false;
+		bool rightTouched = false;
+
+		while (g_palmLoggerRunning.load(std::memory_order_acquire)) {
+			auto* system = vr::VRSystem();
+			if (!system) {
+				if (!reportedMissingSystem) {
+					logger::warn("OpenVR system not ready; waiting before polling palm button events."sv);
+					reportedMissingSystem = true;
+				}
+				leftTouched = false;
+				rightTouched = false;
+				std::this_thread::sleep_for(500ms);
+				continue;
+			}
+
+			reportedMissingSystem = false;
+
+			const auto pollGripTouch = [&](vr::ETrackedControllerRole role, bool& wasTouched) {
+				const vr::TrackedDeviceIndex_t index = system->GetTrackedDeviceIndexForControllerRole(role);
+				if (index == vr::k_unTrackedDeviceIndexInvalid) {
+					wasTouched = false;
+					return;
+				}
+
+				if (system->GetTrackedDeviceClass(index) != vr::TrackedDeviceClass_Controller) {
+					wasTouched = false;
+					return;
+				}
+
+				vr::VRControllerState_t controllerState{};
+				if (!system->GetControllerState(index, &controllerState, sizeof(controllerState))) {
+					return;
+				}
+
+				const bool isTouched = (controllerState.ulButtonTouched & vr::ButtonMaskFromId(vr::k_EButton_Grip)) != 0;
+				if (isTouched && !wasTouched) {
+					logger::info("Palm button touched on {} controller (device {})", RoleToString(role), index);
+				}
+				wasTouched = isTouched;
+			};
+
+			pollGripTouch(vr::ETrackedControllerRole::TrackedControllerRole_LeftHand, leftTouched);
+			pollGripTouch(vr::ETrackedControllerRole::TrackedControllerRole_RightHand, rightTouched);
+
+			std::this_thread::sleep_for(10ms);  // Roughly 100 Hz polling to mirror VR framerate.
+		}
+	}
+
+	void StartPalmButtonLogger()
+	{
+		if (g_palmLoggerRunning.exchange(true)) {
+			return;
+		}
+
+		g_palmLoggerThread = std::thread(PalmButtonLoggerLoop);
+		logger::info("Palm button logger started."sv);
+	}
+
+	void StopPalmButtonLogger()
+	{
+		if (!g_palmLoggerRunning.exchange(false)) {
+			return;
+		}
+
+		if (g_palmLoggerThread.joinable()) {
+			g_palmLoggerThread.join();
+		}
+
+		logger::info("Palm button logger stopped."sv);
+	}
+
+	struct PalmButtonLoggerGuard
+	{
+		~PalmButtonLoggerGuard() { StopPalmButtonLogger(); }
+	} g_palmButtonLoggerGuard;
+}
+
 
 void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 {
-	logger::info("{}"sv, msg->type);
 	switch (msg->type) {
 	case SKSE::MessagingInterface::kInputLoaded:
 			{
 				logger::info(FMT_STRING("kInputLoaded"), Plugin::NAME, Plugin::VERSION);
+				StartPalmButtonLogger();
 				break;
 			}
 		case SKSE::MessagingInterface::kPostLoadGame:
