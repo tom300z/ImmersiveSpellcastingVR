@@ -88,7 +88,7 @@ add_subdirectory("${ROOT_DIR}/external/CommonLibVR" CommonLibVR EXCLUDE_FROM_ALL
 target_link_libraries(
 	"${PROJECT_NAME}"
 	PRIVATE
-		CommonLibVR	^wewqa::CommonLibVR
+		CommonLibVR::CommonLibVR
 		"${ROOT_DIR}/external/CommonLibVR/extern/openvr/lib/win64/openvr_api.lib"
 )
 
