@@ -3,8 +3,9 @@
 #include "RE/Skyrim.h"
 #include "SKSE/SKSE.h"
 
-namespace util
+namespace utils
 {
+	bool InGame();
 	void ExecuteConsoleCommand(std::string_view command);
 }
 

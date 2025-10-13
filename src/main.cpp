@@ -10,10 +10,10 @@
 #include "RE/Skyrim.h"
 #include "SKSE/SKSE.h"
 #include "SKSE/Trampoline.h"
-#include "AttackTicker.h"
+#include "AttackState.h"
 #include "InputInterceptor.h"
 #include "openvr.h"
-#include "util.h"
+#include "utils.h"
 //#include "InstantCharge.h"
 //#include "DMMF_API.h"
 
@@ -199,7 +199,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 
 	SKSE::Init(a_skse);
 
-    AttackToggle::Start();
+    AttackState::Start();
     //InstantCharge::Install();
 
 

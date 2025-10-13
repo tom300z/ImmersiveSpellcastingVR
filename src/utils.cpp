@@ -1,7 +1,7 @@
 #include "RE/Skyrim.h"
 #include "SKSE/SKSE.h"
 
-namespace util
+namespace utils
 {
     void ExecuteConsoleCommand(std::string_view command)
     {
@@ -17,6 +17,24 @@ namespace util
         script->~Script();  // Free object memory manually
         SKSE::log::info("Executed script command: {}", command);
     }
+
+	
+	bool InGame()
+	{
+		auto* ui = RE::UI::GetSingleton();
+		if (!ui || ui->GameIsPaused())
+			return false;
+
+		static constexpr std::string_view blockedMenus[] = {
+			"Console", "InventoryMenu", "MagicMenu", "ContainerMenu", "BarterMenu",
+			"Dialogue Menu", "MapMenu", "Journal Menu"
+		};
+		for (auto m : blockedMenus) {
+			if (ui->IsMenuOpen(m))
+				return false;
+		}
+		return true;
+	}
 }
 
 namespace log_utils

@@ -1,5 +1,7 @@
 #include "InputInterceptor.h"
 #include "sksevr_api.h"
+#include "utils.h"
+#include "AttackState.h"
 
 namespace InputInterceptor
 {
@@ -7,8 +9,10 @@ namespace InputInterceptor
 	{
 		std::atomic_bool g_installed{ false };
 	}
-	
-		// Returns a canonical string name for a given OpenVR controller key code
+
+	static vr::EVRButtonId g_castingButtonId = vr::EVRButtonId::k_EButton_Axis2;
+
+	// Returns a canonical string name for a given OpenVR controller key code
 	inline const char* GetOpenVRButtonName(std::uint32_t keyCode)
 	{
 		// see also RE::BSOpenVRControllerDevice::
@@ -38,31 +42,41 @@ namespace InputInterceptor
 
 	void ControllerCallback(uint32_t unControllerDeviceIndex, vr::VRControllerState001_t* pControllerState, uint32_t unControllerStateSize, bool& state)
 	{
+		// Skip if this is not for a hand
 		auto role = vr::VRSystem()->GetControllerRoleForTrackedDeviceIndex(unControllerDeviceIndex);
-		std::string side;
-		switch (role) {
-		case vr::TrackedControllerRole_LeftHand:
-			side = "Left";
-			break;
-		case vr::TrackedControllerRole_RightHand:
-			side = "Right";
-			break;
-		default:
-			side = "Unknown";
-			break;
+		if (!(role == vr::TrackedControllerRole_LeftHand || role == vr::TrackedControllerRole_RightHand)) {
+			return;
 		}
-		for (uint32_t id = 0; id < vr::k_EButton_Max; ++id) {
-			auto buttonId = static_cast<vr::EVRButtonId>(id);
-			uint64_t mask = vr::ButtonMaskFromId(buttonId);
-			if (pControllerState->ulButtonPressed & mask) {
-				const char* name = GetOpenVRButtonName(id);
-				logger::info("Pressed: {} {} (id={})", side, name ? name : "Unknown", id);
+		const bool isLeftHand = role == vr::TrackedControllerRole_LeftHand;
 
-				if (buttonId == vr::EVRButtonId::k_EButton_SteamVR_Trigger) {
-					pControllerState->ulButtonPressed &= ~vr::ButtonMaskFromId(buttonId);
-					logger::info("Unpressed: {} {} (id={})", side, name ? name : "Unknown", id);
-				}
-			}
+		// Skip if player is not ready, in game and has weapons drawn
+		auto player = RE::PlayerCharacter::GetSingleton();
+		if (!(player && utils::InGame() && player->actorState2.weaponState == RE::WEAPON_STATE::kDrawn)) {
+			return;
+		}
+
+		// Get equipped object, proceed if spell
+		auto equippedObj = player->GetEquippedObject(isLeftHand);
+		if (!(equippedObj->GetFormType() == RE::FormType::Spell)) {
+			return;
+		}
+		auto spell = (RE::SpellItem*)equippedObj;
+
+		// Get spell type	
+		bool isConcentrationSpell = spell->GetCastingType() == RE::MagicSystem::CastingType::kConcentration;
+
+		// Check if the casting button is pressed
+		const bool castingButtonPressed = (pControllerState->ulButtonPressed & vr::ButtonMaskFromId(g_castingButtonId));
+
+		// Hide the pressed casting button from the game to avoid unwanted input
+		pControllerState->ulButtonPressed &= ~vr::ButtonMaskFromId(g_castingButtonId);
+
+		if (isConcentrationSpell) {
+			// For concentration spells, the input is inverted, so that the spell is fired while the hand is open
+			AttackState::SetDesiredAttackingState(isLeftHand, !castingButtonPressed);
+		} else {
+			// For Fire&Forget spells & scrolls, pass the trigger state normally
+			AttackState::SetDesiredAttackingState(isLeftHand, castingButtonPressed);
 		}
 	}
 
