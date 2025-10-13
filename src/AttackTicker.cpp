@@ -49,7 +49,7 @@ namespace AttackToggle
 				0,                           // idCode
 				value,                       // 1.0=down, 0.0=up
 				heldSec,                     // 0.0 new press; >0.0 signals release
-				ue->rightAttack              // BSFixedString user event
+				ue->leftAttack              // BSFixedString user event
 			);
 
 			spdlog::info("[AttackToggle] RightAttack {}", press ? "pressed" : "released");

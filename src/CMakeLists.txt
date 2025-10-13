@@ -2,15 +2,20 @@ set(ROOT_DIR "${CMAKE_CURRENT_SOURCE_DIR}/..")
 
 set(SOURCE_DIR "${ROOT_DIR}/src")
 set(SOURCE_FILES
+	"${SOURCE_DIR}/PCH.h"
 	"${SOURCE_DIR}/main.cpp"
 	"${SOURCE_DIR}/AttackTicker.cpp"
 	"${SOURCE_DIR}/AttackTicker.h"
-	"${SOURCE_DIR}/InstantCharge.cpp"
-	"${SOURCE_DIR}/InstantCharge.h"
-	"${SOURCE_DIR}/PCH.h"
+	"${SOURCE_DIR}/InputInterceptor.cpp"
+	"${SOURCE_DIR}/InputInterceptor.h"
 	"${SOURCE_DIR}/util.cpp"
 	"${SOURCE_DIR}/util.h"
+	"${SOURCE_DIR}/sksevr_api.h"
+	#"${SOURCE_DIR}/haptics.cpp"
+	#"${SOURCE_DIR}/haptics.h"
+
 )
+
 
 source_group(TREE "${ROOT_DIR}" FILES ${SOURCE_FILES})
 
@@ -77,12 +82,13 @@ target_include_directories(
 		"${SOURCE_DIR}"
 )
 
+
 add_subdirectory("${ROOT_DIR}/external/CommonLibVR" CommonLibVR EXCLUDE_FROM_ALL)
 
 target_link_libraries(
 	"${PROJECT_NAME}"
 	PRIVATE
-		CommonLibVR::CommonLibVR
+		CommonLibVR	^wewqa::CommonLibVR
 		"${ROOT_DIR}/external/CommonLibVR/extern/openvr/lib/win64/openvr_api.lib"
 )
 

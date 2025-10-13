@@ -9,9 +9,9 @@
 #include "SKSE/Interfaces.h"
 #include "RE/Skyrim.h"
 #include "SKSE/SKSE.h"
-#include "SKSE/API.h"
 #include "SKSE/Trampoline.h"
 #include "AttackTicker.h"
+#include "InputInterceptor.h"
 #include "openvr.h"
 #include "util.h"
 //#include "InstantCharge.h"
@@ -22,8 +22,8 @@ using namespace SKSE;
 
 namespace
 {
-	std::atomic_bool g_palmLoggerRunning{ false };
-	std::thread g_palmLoggerThread;
+	std::atomic_bool g_updateThreadRunning{ false };
+	std::thread g_updateThread;
 
 	std::string_view RoleToString(vr::ETrackedControllerRole role)
 	{
@@ -38,86 +38,84 @@ namespace
 		}
 	}
 
-	void PalmButtonLoggerLoop()
+	void UpdateLoop()
 	{
 		using namespace std::chrono_literals;
 
-		bool reportedMissingSystem = false;
-		bool leftTouched = false;
-		bool rightTouched = false;
+		short duration = 0;
 
-		while (g_palmLoggerRunning.load(std::memory_order_acquire)) {
+		while (g_updateThreadRunning.load(std::memory_order_acquire)) {
 			auto* system = vr::VRSystem();
-			if (!system) {
-				if (!reportedMissingSystem) {
-					logger::warn("OpenVR system not ready; waiting before polling palm button events."sv);
-					reportedMissingSystem = true;
+			if (system) {
+				/* const auto pollGripTouch = [&](vr::ETrackedControllerRole role, bool& wasTouched) {
+					const vr::TrackedDeviceIndex_t index = system->GetTrackedDeviceIndexForControllerRole(role);
+					if (index == vr::k_unTrackedDeviceIndexInvalid) {
+						wasTouched = false;
+						return;
+					}
+
+					if (system->GetTrackedDeviceClass(index) != vr::TrackedDeviceClass_Controller) {
+						wasTouched = false;
+						return;
+					}
+
+					vr::VRControllerState_t controllerState{};
+					if (!system->GetControllerState(index, &controllerState, sizeof(controllerState))) {
+						return;
+					}
+
+					const bool isTouched = (controllerState.ulButtonTouched & vr::ButtonMaskFromId(vr::k_EButton_Grip)) != 0;
+					if (isTouched && !wasTouched) {
+						logger::info("Palm button touched on {} controller (device {})", RoleToString(role), index);
+					}
+					wasTouched = isTouched;
+				};
+
+				pollGripTouch(vr::ETrackedControllerRole::TrackedControllerRole_LeftHand, leftTouched);
+				pollGripTouch(vr::ETrackedControllerRole::TrackedControllerRole_RightHand, rightTouched);
+				*/
+				
+
+
+				/*system->TriggerHapticPulse(
+					system->GetTrackedDeviceIndexForControllerRole(vr::ETrackedControllerRole::TrackedControllerRole_LeftHand),
+					0,
+					duration);*/
+				std::this_thread::sleep_for(10ms * ((2000-duration)/400));  // Roughly 100 Hz polling to mirror VR framerate.
+				duration += 10;
+				if (duration > 2000) {
+					duration = 0;
 				}
-				leftTouched = false;
-				rightTouched = false;
-				std::this_thread::sleep_for(500ms);
-				continue;
 			}
-
-			reportedMissingSystem = false;
-
-			const auto pollGripTouch = [&](vr::ETrackedControllerRole role, bool& wasTouched) {
-				const vr::TrackedDeviceIndex_t index = system->GetTrackedDeviceIndexForControllerRole(role);
-				if (index == vr::k_unTrackedDeviceIndexInvalid) {
-					wasTouched = false;
-					return;
-				}
-
-				if (system->GetTrackedDeviceClass(index) != vr::TrackedDeviceClass_Controller) {
-					wasTouched = false;
-					return;
-				}
-
-				vr::VRControllerState_t controllerState{};
-				if (!system->GetControllerState(index, &controllerState, sizeof(controllerState))) {
-					return;
-				}
-
-				const bool isTouched = (controllerState.ulButtonTouched & vr::ButtonMaskFromId(vr::k_EButton_Grip)) != 0;
-				if (isTouched && !wasTouched) {
-					logger::info("Palm button touched on {} controller (device {})", RoleToString(role), index);
-				}
-				wasTouched = isTouched;
-			};
-
-			pollGripTouch(vr::ETrackedControllerRole::TrackedControllerRole_LeftHand, leftTouched);
-			pollGripTouch(vr::ETrackedControllerRole::TrackedControllerRole_RightHand, rightTouched);
-
-			std::this_thread::sleep_for(10ms);  // Roughly 100 Hz polling to mirror VR framerate.
 		}
 	}
 
-	void StartPalmButtonLogger()
+	void StartUpdateThread()
 	{
-		if (g_palmLoggerRunning.exchange(true)) {
+		if (g_updateThreadRunning.exchange(true)) {
 			return;
 		}
 
-		g_palmLoggerThread = std::thread(PalmButtonLoggerLoop);
-		logger::info("Palm button logger started."sv);
+		g_updateThread = std::thread(UpdateLoop);
+		logger::info("Update thread started."sv);
 	}
 
-	void StopPalmButtonLogger()
+	void StopUpdateThread()
 	{
-		if (!g_palmLoggerRunning.exchange(false)) {
+		if (!g_updateThreadRunning.exchange(false)) {
 			return;
 		}
 
-		if (g_palmLoggerThread.joinable()) {
-			g_palmLoggerThread.join();
+		if (g_updateThread.joinable()) {
+			g_updateThread.join();
 		}
 
-		logger::info("Palm button logger stopped."sv);
+		logger::info("Update thread stopped."sv);
 	}
 
 	struct PalmButtonLoggerGuard
 	{
-		~PalmButtonLoggerGuard() { StopPalmButtonLogger(); }
+		~PalmButtonLoggerGuard() { StopUpdateThread(); }
 	} g_palmButtonLoggerGuard;
 }
 
@@ -125,16 +123,18 @@ namespace
 void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 {
 	switch (msg->type) {
-	case SKSE::MessagingInterface::kInputLoaded:
+		case SKSE::MessagingInterface::kInputLoaded:
 			{
 				logger::info(FMT_STRING("kInputLoaded"), Plugin::NAME, Plugin::VERSION);
-				StartPalmButtonLogger();
+				StartUpdateThread();
 				break;
 			}
-		case SKSE::MessagingInterface::kPostLoadGame:
+		case SKSE::MessagingInterface::kDataLoaded:
 			{
-				logger::info(FMT_STRING("kPostLoadGame"), Plugin::NAME, Plugin::VERSION);
-				log_utils::LogEquippedItems();
+				logger::info(FMT_STRING("kDataLoaded"), Plugin::NAME, Plugin::VERSION);
+				//log_utils::LogEquippedItems();
+				//InputInterceptorHook::Install();
+				
 				break;
 			}
 	}
@@ -188,18 +188,22 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a
 	return true;
 }
 
+
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
 {
 
-	#ifdef _DEBUGG
+	#ifdef _DEBUG
 		while (!::IsDebuggerPresent()) {
 		}
 	#endif
 
 	SKSE::Init(a_skse);
 
-    //AttackToggle::Start();
+    AttackToggle::Start();
     //InstantCharge::Install();
+
+
+	SKSE::AllocTrampoline(1 << 10, false);
 
 	auto messaging = SKSE::GetMessagingInterface();
 
@@ -213,6 +217,9 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 		sourceHolder->AddEventSink(log_utils::EquipEventHandler::GetSingleton());
 		logger::info("Event handlers registered successfully.");
 	}
+
+	InputInterceptor::Install(a_skse);
+
 
 	logger::info("{} v{} loaded"sv, Plugin::NAME, Plugin::VERSION.string());
 
