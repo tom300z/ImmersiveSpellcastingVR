@@ -10,7 +10,9 @@ namespace InputInterceptor
 		std::atomic_bool g_installed{ false };
 	}
 
-	static vr::EVRButtonId g_castingButtonId = vr::EVRButtonId::k_EButton_Axis2;
+	static vr::EVRButtonId g_castingButtonId = vr::EVRButtonId::k_EButton_Grip;
+	bool g_lastLeftcastingButtonState = false;
+	bool g_lastRightcastingButtonState = false;
 
 	// Returns a canonical string name for a given OpenVR controller key code
 	inline const char* GetOpenVRButtonName(std::uint32_t keyCode)
@@ -42,12 +44,24 @@ namespace InputInterceptor
 
 	void ControllerCallback(uint32_t unControllerDeviceIndex, vr::VRControllerState001_t* pControllerState, uint32_t unControllerStateSize, bool& state)
 	{
+
 		// Skip if this is not for a hand
 		auto role = vr::VRSystem()->GetControllerRoleForTrackedDeviceIndex(unControllerDeviceIndex);
 		if (!(role == vr::TrackedControllerRole_LeftHand || role == vr::TrackedControllerRole_RightHand)) {
 			return;
 		}
 		const bool isLeftHand = role == vr::TrackedControllerRole_LeftHand;
+
+		// Check if the casting button is pressed
+		const bool castingButtonPressed = (pControllerState->ulButtonPressed & vr::ButtonMaskFromId(g_castingButtonId));
+
+		// Skip if input did not change
+		auto lastCastingButtonState = isLeftHand ? &g_lastLeftcastingButtonState : &g_lastRightcastingButtonState;
+		if (*lastCastingButtonState == castingButtonPressed) {
+			return;
+		}
+		*lastCastingButtonState = castingButtonPressed;
+
 
 		// Skip if player is not ready, in game and has weapons drawn
 		auto player = RE::PlayerCharacter::GetSingleton();
@@ -62,28 +76,29 @@ namespace InputInterceptor
 		}
 		auto spell = (RE::SpellItem*)equippedObj;
 
-		// Get spell type	
+		// Get spell type
 		bool isConcentrationSpell = spell->GetCastingType() == RE::MagicSystem::CastingType::kConcentration;
 
-		// Check if the casting button is pressed
-		const bool castingButtonPressed = (pControllerState->ulButtonPressed & vr::ButtonMaskFromId(g_castingButtonId));
-
-		// Hide the pressed casting button from the game to avoid unwanted input
-		pControllerState->ulButtonPressed &= ~vr::ButtonMaskFromId(g_castingButtonId);
+		// Dont hid a that causes the game to detect input after entering a menu if the cast button is currently held. Which sucks if the casting button is also the menu close button
+		//// Hide the pressed casting button from the game to avoid unwanted input
+		//pControllerState->ulButtonPressed &= ~vr::ButtonMaskFromId(g_castingButtonId);
 
 		if (isConcentrationSpell) {
 			// For concentration spells, the input is inverted, so that the spell is fired while the hand is open
-			AttackState::SetDesiredAttackingState(isLeftHand, !castingButtonPressed);
+			//AttackState::SetDesiredAttackingState(isLeftHand, !castingButtonPressed);
+			AttackState::AddAttackButtonEvent(isLeftHand, !castingButtonPressed);
 		} else {
 			// For Fire&Forget spells & scrolls, pass the trigger state normally
-			AttackState::SetDesiredAttackingState(isLeftHand, castingButtonPressed);
+			//AttackState::SetDesiredAttackingState(isLeftHand, castingButtonPressed);
+			AttackState::AddAttackButtonEvent(isLeftHand, castingButtonPressed);
 		}
 	}
 
-	bool Install(const SKSE::LoadInterface* a_skse)
+	void Install(const SKSE::LoadInterface* a_skse)
 	{
+		// Skip if already installed
 		if (g_installed.exchange(true)) {
-			return true;
+			return;
 		}
 
 		auto g_vrinterface = (SKSEVRInterface*)a_skse->QueryInterface(kInterface_VR);

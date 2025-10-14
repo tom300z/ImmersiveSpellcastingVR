@@ -2,5 +2,5 @@
 
 namespace InputInterceptor
 {
-	bool Install(const SKSE::LoadInterface* a_skse);
+	void Install(const SKSE::LoadInterface* a_skse);
 }
