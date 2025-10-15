@@ -7,6 +7,49 @@ namespace utils
 {
 	bool InGame();
 	void ExecuteConsoleCommand(std::string_view command);
+	void ShowMessageBox(const std::string& bodyText, const std::vector<std::string>& buttonTextValues = { "Ok" }, std::function<void(unsigned int)> callback = [](std::uint32_t) {});
+
+	template <class T>
+	class EventHandler : public RE::BSTEventSink<T>
+	{
+	public:
+		using Callback = std::function<void(const T&)>;
+
+		/// Construct a temporary event handler with a callback.
+		explicit EventHandler(Callback a_callback) :
+			callback(std::move(a_callback))
+		{
+			// Allocate a unique instance and store it in static storage
+			instance = std::make_shared<EventHandler<T>>(*this);
+		}
+
+		/// Converts temporary object to a pointer usable by AddEventSink().
+		operator RE::BSTEventSink<T>*()
+		{
+			return instance.get();
+		}
+
+		virtual RE::BSEventNotifyControl ProcessEvent(
+			const T* a_event,
+			RE::BSTEventSource<T>* a_eventSource) override
+		{
+			(void)a_eventSource;
+			if (a_event && callback) {
+				callback(*a_event);
+			}
+			return RE::BSEventNotifyControl::kContinue;
+		}
+
+	private:
+		Callback callback;
+		inline static std::shared_ptr<EventHandler<T>> instance{ nullptr };
+	};
+
+	namespace input
+	{
+		const char* GetOpenVRButtonName(std::uint32_t keyCode, vr::ETrackedControllerRole side = vr::ETrackedControllerRole::TrackedControllerRole_Invalid);
+		RE::BSTArray<RE::ControlMap::UserEventMapping> GetActiveVRUserEventMapping(RE::UserEvents::INPUT_CONTEXT_ID context, bool leftHand);
+	}
 }
 
 namespace log_utils
@@ -36,4 +79,3 @@ namespace log_utils
 		}
 	};
 }
-

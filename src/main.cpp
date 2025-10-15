@@ -14,6 +14,7 @@
 #include "InputInterceptor.h"
 #include "openvr.h"
 #include "utils.h"
+#include <windows.h>
 
 using namespace RE;
 using namespace SKSE;
@@ -75,12 +76,56 @@ void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 			logger::info(FMT_STRING("kInputLoaded"), Plugin::NAME, Plugin::VERSION);
 			break;
 		}
-	case SKSE::MessagingInterface::kDataLoaded:
+	case SKSE::MessagingInterface::kPostLoadGame:
 		{
-			logger::info(FMT_STRING("kDataLoaded"), Plugin::NAME, Plugin::VERSION);
+			logger::info(FMT_STRING("kPostLoadGame"), Plugin::NAME, Plugin::VERSION);
 			break;
 		}
 	}
+}
+
+void OnSaveLoadEvent(RE::TESLoadGameEvent event)
+{
+	// Get userEventMappings for current left controller gameplay
+	// Left grip key (can be changed at runtime)
+	// RE::ControlMap::GetSingleton()->controlMap[RE::UserEvents::INPUT_CONTEXT_ID::kGameplay]->deviceMappings[6]
+
+	auto unwantedMappings = ""s;
+	for (bool leftHand : { true, false }) {
+		auto userEventMappings = utils::input::GetActiveVRUserEventMapping(RE::UserEvents::INPUT_CONTEXT_ID::kGameplay, leftHand);
+		auto sideName = leftHand ? "Left" : "Right";
+		auto sideRole = leftHand ? vr::ETrackedControllerRole::TrackedControllerRole_LeftHand : vr::ETrackedControllerRole::TrackedControllerRole_RightHand;
+		//logger::info("VR Gameplay controls ({}):", sideName);
+
+
+		for (RE::ControlMap::UserEventMapping mapping : userEventMappings) {
+			auto inputKeyName = utils::input::GetOpenVRButtonName(mapping.inputKey, sideRole);
+			//logger::info("{} -> {} ({})", mapping.eventID.c_str(), inputKeyName, mapping.inputKey);
+
+			// Show warning if grip is used in Gameplay
+			if (mapping.inputKey == vr::EVRButtonId::k_EButton_Grip) {
+				unwantedMappings += std::format("\n {} {} -> {}", sideName, inputKeyName, mapping.eventID.c_str());
+			}
+		}
+	}
+
+	auto message = std::format(
+		R"(Warning, the following buttons used by {} are alrady bound in the gameplay context!
+{}
+
+Please unmap the key using the "Skyrim VR Change Your Bindings - Key Remapping Tool" from NexusMods)",
+		Plugin::NAME,
+		unwantedMappings);
+	utils::ShowMessageBox(
+		message,
+		{ "Open NexusMods Page", "Ok" },
+		[message](int index) {
+			if (index == 0) {
+				ShellExecuteW(nullptr, L"open", L"https://www.nexusmods.com/skyrimspecialedition/mods/68164", nullptr, nullptr, SW_SHOWNORMAL);
+				utils::ShowMessageBox(message);
+			}
+		}
+	);
 }
 
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
@@ -94,6 +139,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 
 	SKSE::Init(a_skse);
 
+
 	// SKSE::AllocTrampoline(1 << 10, false); // Unused for now, might come in handy later when i use write_call/write_branch
 
 	auto messaging = SKSE::GetMessagingInterface();
@@ -102,9 +148,12 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 		return false;
 	}
 
-	auto* sourceHolder = ScriptEventSourceHolder::GetSingleton();
-	if (sourceHolder) {
-		//sourceHolder->AddEventSink(log_utils::EquipEventHandler::GetSingleton());
+	static auto handler = utils::EventHandler<RE::TESLoadGameEvent>(OnSaveLoadEvent);
+	auto* scriptEventSource = RE::ScriptEventSourceHolder::GetSingleton();
+	if (scriptEventSource) {
+		scriptEventSource->AddEventSink(
+			&handler
+		);
 	}
 
 	InputInterceptor::Install(a_skse);
