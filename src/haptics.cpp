@@ -58,7 +58,7 @@ namespace Haptics
 				auto time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 
 				// Trigger haptic pulse
-				if (currentPulseStrength > 0 && currentPulseStrength < 1) {
+				if (currentPulseStrength > 0 && currentPulseStrength <= 1) {
 					logger::info("{} {} Pulse at {}ms", currentPulseStrength, handName, time);
 					g_vrsystem->TriggerHapticPulse(
 						!isLeftHand,

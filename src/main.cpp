@@ -19,6 +19,7 @@
 #include "utils.h"
 #include <windows.h>
 #include <haptics.h>
+#include "SpellChargeTracker.h"
 
 using namespace RE;
 using namespace SKSE;
@@ -90,6 +91,7 @@ void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 
 void OnSaveLoadEvent([[maybe_unused]] RE::TESLoadGameEvent event)
 {
+	SpellChargeTracker::Install();
 	Config::Checks::PostLoadCheck();
 }
 

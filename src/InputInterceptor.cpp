@@ -125,10 +125,10 @@ namespace InputInterceptor
 			// For Fire&Forget spells & scrolls, pass the trigger state normally
 			//AttackState::SetDesiredAttackingState(isLeftHand, castingButtonPressed);
 			if (castingButtonActivated) {
-				auto t = std::thread(Haptics::PlayHapticChargeEvent, Haptics::GetHandHaptics(isLeftHand), spell->GetChargeTime());
-				t.detach();
+				//auto t = std::thread(Haptics::PlayHapticChargeEvent, Haptics::GetHandHaptics(isLeftHand), spell->GetChargeTime());
+				//t.detach();
 			} else {
-				Haptics::GetHandHaptics(isLeftHand)->UpdateHapticState(0, 0, false);
+				//Haptics::GetHandHaptics(isLeftHand)->UpdateHapticState(0, 0, false);
 			}
 			AttackState::AddAttackButtonEvent(isLeftHand, castingButtonActivated);
 		}

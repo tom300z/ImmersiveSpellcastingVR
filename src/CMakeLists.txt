@@ -16,6 +16,8 @@ set(SOURCE_FILES
 	"${SOURCE_DIR}/sksevr_api.h"
 	"${SOURCE_DIR}/haptics.cpp"
 	"${SOURCE_DIR}/haptics.h"
+	"${SOURCE_DIR}/SpellChargeTracker.cpp"
+	"${SOURCE_DIR}/SpellChargeTracker.h"
 
 )
 
