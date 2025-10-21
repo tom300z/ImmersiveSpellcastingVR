@@ -6,13 +6,16 @@ set(SOURCE_FILES
 	"${SOURCE_DIR}/main.cpp"
 	"${SOURCE_DIR}/AttackState.cpp"
 	"${SOURCE_DIR}/AttackState.h"
+	"${SOURCE_DIR}/ConfigManager.cpp"
+	"${SOURCE_DIR}/ConfigManager.h"
+	"${SOURCE_DIR}/Settings.h"
 	"${SOURCE_DIR}/InputInterceptor.cpp"
 	"${SOURCE_DIR}/InputInterceptor.h"
 	"${SOURCE_DIR}/utils.cpp"
 	"${SOURCE_DIR}/utils.h"
 	"${SOURCE_DIR}/sksevr_api.h"
-	#"${SOURCE_DIR}/haptics.cpp"
-	#"${SOURCE_DIR}/haptics.h"
+	"${SOURCE_DIR}/haptics.cpp"
+	"${SOURCE_DIR}/haptics.h"
 
 )
 
@@ -117,6 +120,7 @@ add_custom_command(
 	TARGET "${PROJECT_NAME}"
 	POST_BUILD
 	COMMAND "${PROJECT_SOURCE_DIR}/scripts/kill_skyrimvr.bat"
+	#COMMAND "${PROJECT_SOURCE_DIR}/scripts/compile_papyrus_mo2.bat"
 	COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_FILE:${PROJECT_NAME}>" "${MO2Path}/overwrite/SKSE/Plugins/"
 	COMMAND "${CMAKE_COMMAND}" -E copy_if_different "$<TARGET_PDB_FILE:${PROJECT_NAME}>" "${MO2Path}/overwrite/SKSE/Plugins/"
 	COMMAND "${PROJECT_SOURCE_DIR}/scripts/start_skyrimvr.bat"

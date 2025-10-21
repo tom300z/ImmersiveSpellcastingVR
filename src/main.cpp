@@ -2,19 +2,23 @@
 
 #include <atomic>
 #include <chrono>
+#include <format>
+#include <string>
 #include <string_view>
 #include <thread>
 
 #include "SKSE/API.h"
 #include "SKSE/Interfaces.h"
 #include "RE/Skyrim.h"
-#include "SKSE/SKSE.h"
 #include "SKSE/Trampoline.h"
 #include "AttackState.h"
+#include "ConfigManager.h"
 #include "InputInterceptor.h"
+#include "Settings.h"
 #include "openvr.h"
 #include "utils.h"
 #include <windows.h>
+#include <haptics.h>
 
 using namespace RE;
 using namespace SKSE;
@@ -76,69 +80,35 @@ void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 			logger::info(FMT_STRING("kInputLoaded"), Plugin::NAME, Plugin::VERSION);
 			break;
 		}
-	case SKSE::MessagingInterface::kPostLoadGame:
+	case SKSE::MessagingInterface::kDataLoaded:
 		{
-			logger::info(FMT_STRING("kPostLoadGame"), Plugin::NAME, Plugin::VERSION);
+			logger::info(FMT_STRING("kDataLoaded"), Plugin::NAME, Plugin::VERSION);
 			break;
 		}
 	}
 }
 
-void OnSaveLoadEvent(RE::TESLoadGameEvent event)
+void OnSaveLoadEvent([[maybe_unused]] RE::TESLoadGameEvent event)
 {
-	// Get userEventMappings for current left controller gameplay
-	// Left grip key (can be changed at runtime)
-	// RE::ControlMap::GetSingleton()->controlMap[RE::UserEvents::INPUT_CONTEXT_ID::kGameplay]->deviceMappings[6]
-
-	auto unwantedMappings = ""s;
-	for (bool leftHand : { true, false }) {
-		auto userEventMappings = utils::input::GetActiveVRUserEventMapping(RE::UserEvents::INPUT_CONTEXT_ID::kGameplay, leftHand);
-		auto sideName = leftHand ? "Left" : "Right";
-		auto sideRole = leftHand ? vr::ETrackedControllerRole::TrackedControllerRole_LeftHand : vr::ETrackedControllerRole::TrackedControllerRole_RightHand;
-		//logger::info("VR Gameplay controls ({}):", sideName);
-
-
-		for (RE::ControlMap::UserEventMapping mapping : userEventMappings) {
-			auto inputKeyName = utils::input::GetOpenVRButtonName(mapping.inputKey, sideRole);
-			//logger::info("{} -> {} ({})", mapping.eventID.c_str(), inputKeyName, mapping.inputKey);
-
-			// Show warning if grip is used in Gameplay
-			if (mapping.inputKey == vr::EVRButtonId::k_EButton_Grip) {
-				unwantedMappings += std::format("\n {} {} -> {}", sideName, inputKeyName, mapping.eventID.c_str());
-			}
-		}
-	}
-
-	auto message = std::format(
-		R"(Warning, the following buttons used by {} are alrady bound in the gameplay context!
-{}
-
-Please unmap the key using the "Skyrim VR Change Your Bindings - Key Remapping Tool" from NexusMods)",
-		Plugin::NAME,
-		unwantedMappings);
-	utils::ShowMessageBox(
-		message,
-		{ "Open NexusMods Page", "Ok" },
-		[message](int index) {
-			if (index == 0) {
-				ShellExecuteW(nullptr, L"open", L"https://www.nexusmods.com/skyrimspecialedition/mods/68164", nullptr, nullptr, SW_SHOWNORMAL);
-				utils::ShowMessageBox(message);
-			}
-		}
-	);
+	Config::Checks::PostLoadCheck();
 }
+
 
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
 {
 
 	#ifdef _DEBUG
 		// Wait for debugger
-		while (!::IsDebuggerPresent()) {
-		}
+		while (!::IsDebuggerPresent());
 	#endif
 
 	SKSE::Init(a_skse);
 
+	auto& config = Config::Manager::GetSingleton();
+	config.RegisterSetting(std::string(Settings::kCastingInputMethod), Config::Type::kString, Config::Value{ std::string("grip") }, "OpenVR button name that should be treated as the casting button.");
+	config.RegisterSetting(std::string(Settings::kShowBindingWarning), Config::Type::kBool, Config::Value{ true }, "Show a warning when the grip button is bound in the gameplay context.");
+	config.LoadFromDisk();
+	config.SaveToDisk();
 
 	// SKSE::AllocTrampoline(1 << 10, false); // Unused for now, might come in handy later when i use write_call/write_branch
 
@@ -154,6 +124,12 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 		scriptEventSource->AddEventSink(
 			&handler
 		);
+	}
+
+	auto* papyrus = SKSE::GetPapyrusInterface();
+	if (!papyrus->Register(Config::RegisterPapyrusFunctions)) {
+		logger::error("Failed to register Papyrus interface for configuration");
+		return false;
 	}
 
 	InputInterceptor::Install(a_skse);

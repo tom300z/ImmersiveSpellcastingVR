@@ -7,7 +7,8 @@ namespace utils
 {
 	bool InGame();
 	void ExecuteConsoleCommand(std::string_view command);
-	void ShowMessageBox(const std::string& bodyText, const std::vector<std::string>& buttonTextValues = { "Ok" }, std::function<void(unsigned int)> callback = [](std::uint32_t) {});
+	using MessageBoxResultCallbackFunc = std::function<void(unsigned int)>;
+	void ShowMessageBox(const std::string& bodyText, const std::vector<std::string>& buttonTextValues = { "Ok" }, MessageBoxResultCallbackFunc callback = [](std::uint32_t) {});
 
 	template <class T>
 	class EventHandler : public RE::BSTEventSink<T>

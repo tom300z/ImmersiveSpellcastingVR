@@ -3,76 +3,120 @@
 #include <chrono>
 #include <thread>
 #include <algorithm>
+#include <cmath>
+#include <sksevr_api.h>
 
 using namespace std::chrono;
-using namespace haptics;
 
-void Manager::Initialize()
+namespace Haptics
 {
-    if (initialized)
-        return;
+	HandHaptics::HandHaptics(bool isLeftHand) :
+		isLeftHand(isLeftHand) {
 
-    vr::EVRInitError error = vr::VRInitError_None;
-    vr::IVRSystem* vr_system = vr::VR_Init(&error, vr::VRApplication_Scene);
-    if (error != vr::VRInitError_None) {
-        _MESSAGE("haptics: Failed to initialize OpenVR: %s", vr::VR_GetVRInitErrorAsEnglishDescription(error));
-        return;
-    }
+		g_vrsystem = RE::BSOpenVR::GetSingleton();
+		handName = isLeftHand ? "Left" : "Right";
+		worker = std::thread(&HandHaptics::HapticThread, this);
+		logger::info("{} Hand Haptics: Initialized successfully.", handName);
+	}
 
-    // Set manifest (OpenVR 1.0.10 still uses the same call)
-    const char* manifestPath = "Data\\SKSE\\Plugins\\actions.json";
-    vr::VRInput()->SetActionManifestPath(manifestPath);
+	void HandHaptics::UpdateHapticState(int newPulseInterval, float newPulseStrength, bool interruptCurrentPulse)
+	{
+		/* newPulseInterval: 5 - 200 ms, Interval between haptic pulses, 0 = off,
+		newPulseStrength: 0.0f - 0.4f, 0.4f - 1.0f are supported but feel the same on index controllers.
+		interruptCurrentPulse: if true, the current pulse will be interrupted and next pulse will happen immediately. Otherwise the next pulse will happen after the current one is finished
+		*/
+		if (newPulseInterval >= 0) {
+			pulseInterval.store(newPulseInterval, std::memory_order_relaxed);
+		}
+		if (newPulseStrength >= 0 && newPulseStrength <= 1) {
+			pulseStrength.store(newPulseStrength, std::memory_order_relaxed);
+		}
+		if (interruptCurrentPulse) {
+			logger::info("{} Hand Haptic Pulse interrupted.", handName);
+			cv.notify_one();
+		}
+	}
 
-    // Get handles
-    vr::VRInput()->GetActionHandle("/actions/main/out/haptic", &hapticAction);
-    vr::VRInput()->GetInputSourceHandle("/user/hand/left", &leftHand);
-    vr::VRInput()->GetInputSourceHandle("/user/hand/right", &rightHand);
+	HandHaptics::~HandHaptics()
+	{
+		workerRunning = false;
+		cv.notify_one();
+		worker.join();
+	}
 
-    initialized = true;
-    _MESSAGE("haptics: Initialized successfully.");
-}
+	void HandHaptics::HapticThread()
+	{
+		workerRunning = true;
+		auto nextPulse = std::chrono::steady_clock::now();
 
-void Manager::Update(float leftCharge, float rightCharge)
-{
-    if (!initialized)
-        return;
+		while (workerRunning.load(std::memory_order::relaxed)) {
+			auto now = std::chrono::steady_clock::now();
+			auto currentPulseInterval = pulseInterval.load(std::memory_order::relaxed);
+			auto currentPulseStrength = pulseStrength.load(std::memory_order::relaxed);
 
-    static auto lastTime = steady_clock::now();
-    auto now = steady_clock::now();
-    float delta = duration<float>(now - lastTime).count();
-    if (delta < 0.05f)  // 50 ms between pulses
-        return;
-    lastTime = now;
+			if (now >= nextPulse) {
+				auto time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 
-    auto triggerHaptic = [](vr::VRInputValueHandle_t hand, float charge) {
-        if (charge <= 0.0f)
-            return;
+				// Trigger haptic pulse
+				if (currentPulseStrength > 0 && currentPulseStrength < 1) {
+					logger::info("{} {} Pulse at {}ms", currentPulseStrength, handName, time);
+					g_vrsystem->TriggerHapticPulse(
+						!isLeftHand,
+						currentPulseStrength
+					);
+				} else {
+					logger::info("IGNORED {} {} Pulse at {}ms", currentPulseStrength, handName, time);
+				}
 
-        float amplitude = std::clamp(charge, 0.0f, 1.0f);
-        float frequency = 100.0f + 50.0f * amplitude;
-        float duration = 0.05f;
+				// Schedule next pulse
+				nextPulse = now + std::chrono::milliseconds(currentPulseInterval);
+			}
 
-        // OpenVR 1.0.10 uses the same call signature
-        vr::VRInput()->TriggerHapticVibrationAction(
-            hapticAction,
-            0.0f,
-            duration,
-            frequency,
-            amplitude,
-            hand
-        );
-    };
+			// Wait until next pulse or HapticState update or stop
+			std::unique_lock lock(cv_mtx);
+			if (currentPulseInterval <= 0) {
+				// If currentPulseInterval <= 0, wait indefinetly until notified
+				cv.wait(lock);
+			} else {
+				cv.wait_until(lock, nextPulse);
+			}
+		}
+	};
 
-    triggerHaptic(leftHand, leftCharge);
-    triggerHaptic(rightHand, rightCharge);
-}
 
-void Manager::Shutdown()
-{
-    if (!initialized)
-        return;
 
-    vr::VR_Shutdown();
-    initialized = false;
-    _MESSAGE("haptics: Shutdown complete.");
+	// Run this in a detached thread to play a simple haptic charge event for this hand (this isn't synced to the game obviously)
+	void PlayHapticChargeEvent(HandHaptics* hand, float duration)
+	{
+		auto charge_start = std::chrono::steady_clock::now();
+		auto charge_end = charge_start + std::chrono::duration<float>(duration);
+
+		float new_charge = 0;
+		int updateNumber = 0;
+
+		while (new_charge < 1) {
+			new_charge = std::clamp(
+				std::chrono::duration<float>(std::chrono::steady_clock::now() - charge_start).count() /
+					std::chrono::duration<float>(charge_end - charge_start).count(),
+				0.0f, 1.0f);
+
+			hand->UpdateHapticState(
+				std::lerp(100, 20, new_charge),                   // Fixed to 20ms for now
+				std::pow(new_charge, 6),  // Using pow makes the interpolation exponential instead of linear
+				(updateNumber == 0)                              // Interrupt current pulse on first update
+			);
+			logger::info("New Charge: {}, Duration: {}", std::pow(new_charge, 6), std::lerp(0.0f, 0.5f, std::pow(new_charge, 6)));
+			updateNumber++;
+			std::this_thread::sleep_for(std::chrono::milliseconds(5));
+		}
+		hand->UpdateHapticState(20, 0.005, true); // Stop haptics
+
+	}
+	static HandHaptics leftHH(true);
+	static HandHaptics rightHH(false);
+
+	HandHaptics* GetHandHaptics(bool getLeftHand)
+	{
+		return &(getLeftHand ? leftHH : rightHH);
+	}
 }

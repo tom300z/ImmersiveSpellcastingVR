@@ -18,7 +18,6 @@ namespace utils
         SKSE::log::info("Executed script command: {}", command);
     }
 
-	
 	bool InGame()
 	{
 		auto* ui = RE::UI::GetSingleton();
@@ -91,7 +90,7 @@ namespace utils
 				switch (side) {
 				case vr::ETrackedControllerRole::TrackedControllerRole_LeftHand:
 					return "A";
-				default: 
+				default:
 					return "A/X";
 				}
 			}
@@ -106,11 +105,11 @@ namespace utils
 			}
 			// Add any other explicit codes here if needed
 			default:
-				std::to_string(keyCode);
+				return std::to_string(keyCode).c_str();
 			}
 		}
 
-		RE::BSTArray<RE::ControlMap::UserEventMapping> GetActiveVRUserEventMapping(RE::UserEvents::INPUT_CONTEXT_ID context, bool leftHand)
+		RE::BSTArray<RE::ControlMap::UserEventMapping> GetActiveVRUserEventMapping([[maybe_unused]] RE::UserEvents::INPUT_CONTEXT_ID context, bool leftHand)
 		{
 			//Get BSOpenVR
 			auto bsOvr = RE::BSOpenVR::GetSingleton();
