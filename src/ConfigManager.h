@@ -94,6 +94,8 @@ namespace Config
 	{
 		void PostLoadCheck();
 	}
+
+	void Init();
 }
 
 template <class T>

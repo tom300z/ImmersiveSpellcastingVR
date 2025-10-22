@@ -16,6 +16,8 @@ namespace Haptics
 		*/
 		void UpdateHapticState(int newPulseInterval = -1, float newPulseStrength = -1, bool interruptCurrentPulse = false);
 
+		void Pause(bool paused);
+
 		~HandHaptics();
 
 	private:
@@ -28,6 +30,7 @@ namespace Haptics
 		std::condition_variable cv;
 		std::thread worker;
 		std::atomic<bool> workerRunning = false;
+		std::atomic<bool> workerPaused = false;
 
 		void HapticThread();
 	};
@@ -39,4 +42,5 @@ namespace Haptics
 
 	// Run this in a detached thread to play a simple haptic charge event for this hand (this isn't synced to the game obviously)
 	void PlayHapticChargeEvent(HandHaptics* hand, float duration);
+	void Pause(bool paused);
 }

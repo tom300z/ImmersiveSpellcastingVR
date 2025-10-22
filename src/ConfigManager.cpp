@@ -136,6 +136,7 @@ namespace Config
 			}
 		}
 
+
 		std::vector<std::pair<std::string, Value>> changedSettings;
 
 		{
@@ -626,8 +627,9 @@ namespace Config
 					auto inputKeyName = utils::input::GetOpenVRButtonName(mapping.inputKey, sideRole);
 					//logger::info("{} -> {} ({})", mapping.eventID.c_str(), inputKeyName, mapping.inputKey);
 
-					// Show warning if grip is used in Gameplay
-					if (mapping.inputKey == vr::EVRButtonId::k_EButton_Grip) {
+					// Show warning if grip is used in Gameplay and grip press is configured as input
+					auto inputType = Config::Manager::GetSingleton().Get<std::string>(Settings::kCastingInputMethod, "grip");
+					if (inputType == "grip" && mapping.inputKey == vr::EVRButtonId::k_EButton_Grip) {
 						unwantedMappings += std::format("\n {} {} Press -> {}", sideName, inputKeyName, mapping.eventID.c_str());
 					}
 				}
@@ -638,13 +640,13 @@ namespace Config
 			}
 
 			auto message = std::format(
-				R"(WARNING: the following buttons used by {} are alrady mapped in the gameplay context!
+				R"(WARNING: {} buttons alrady mapped in the gameplay context!
 {}
 
 You have two options to mitigate this:
 
-a. Use the "Grip Touch" input instead of "Grip Press" (See MCM)
-b. Unmap the buttons using the Key Remapping Tool from NexusMods)",
+a. Use the "Grip Touch" input instead of "Grip Press" (See MCM). See also HIGGS's "useTouchForGrip" setting.
+b. Unmap the buttons using the "VR Key Remapping Tool" from NexusMods)",
 				Plugin::NAME,
 				unwantedMappings);
 			std::vector<std::string> options = { "Show Remapping Tool on Nexus", "Ignore once" };
@@ -656,11 +658,29 @@ b. Unmap the buttons using the Key Remapping Tool from NexusMods)",
 				}
 			};
 
+
 			utils::ShowMessageBox(
 				message,
 				options,
 				handler);
 		}
+	}
+
+	bool initialized = false;
+	void Init() {
+		if (initialized) {
+			return;
+		}
+
+		auto& config = Manager::GetSingleton();
+
+		std::string defaultInputMethod = utils::IsUsingIndexControllers() ? std::string("grip_touch") : std::string("grip");  // Use grip touch for index controllers, grip press for oculus, etc.
+		config.RegisterSetting(std::string(Settings::kCastingInputMethod), Config::Type::kString, Config::Value{ defaultInputMethod }, "OpenVR button name that should be treated as the casting button.");
+		config.RegisterSetting(std::string(Settings::kShowBindingWarning), Config::Type::kBool, Config::Value{ true }, "Show a warning when the grip button is bound in the gameplay context.");
+		config.LoadFromDisk();
+		config.SaveToDisk();
+
+		initialized = true;
 	}
 }
 

@@ -1,5 +1,6 @@
 #include "RE/Skyrim.h"
 #include "SKSE/SKSE.h"
+#include "utils.h"
 
 namespace utils
 {
@@ -51,7 +52,7 @@ namespace utils
 		}
 	};
 
-	void ShowMessageBox(const std::string& bodyText, const std::vector<std::string>& buttonTextValues = { "Ok" }, MessageBoxResultCallbackFunc callback = [](std::uint32_t) {})
+	void ShowMessageBox(const std::string& bodyText, const std::vector<std::string>& buttonTextValues, MessageBoxResultCallbackFunc callback)
 	{
 		const auto* factoryManager = RE::MessageDataFactoryManager::GetSingleton();
 		const auto* uiStringHolder = RE::InterfaceStrings::GetSingleton();
@@ -68,7 +69,7 @@ namespace utils
 	namespace input
 	{
 		// Returns a canonical string name for a given OpenVR controller key code
-		const char* GetOpenVRButtonName(std::uint32_t keyCode, vr::ETrackedControllerRole side = vr::ETrackedControllerRole::TrackedControllerRole_Invalid)
+		const char* GetOpenVRButtonName(std::uint32_t keyCode, vr::ETrackedControllerRole side)
 		{
 			// see also RE::BSOpenVRControllerDevice::
 			using Keys = RE::BSOpenVRControllerDevice::Keys;
@@ -127,6 +128,19 @@ namespace utils
 
 			return inputContext->deviceMappings[leftHand ? currentLeftdeviceMappingID : currentRightdeviceMappingID];
 		}
+	}
+
+	bool IsUsingIndexControllers() {
+		auto leftHandIndex = vr::VRSystem()->GetTrackedDeviceIndexForControllerRole(vr::TrackedControllerRole_LeftHand);
+
+		char buffer[vr::k_unMaxPropertyStringSize];
+		vr::ETrackedPropertyError error = vr::TrackedProp_Success;
+		const auto needed = vr::VRSystem()->GetStringTrackedDeviceProperty(
+			leftHandIndex, vr::Prop_RenderModelName_String, buffer, sizeof(buffer), &error);
+		logger::info("Left Hand Render model: {}", buffer);
+		std::string renderModelName(buffer);
+
+		return renderModelName.find("indexcontroller") != std::string::npos;
 	}
 }
 

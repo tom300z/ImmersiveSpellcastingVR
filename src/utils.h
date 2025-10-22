@@ -10,6 +10,8 @@ namespace utils
 	using MessageBoxResultCallbackFunc = std::function<void(unsigned int)>;
 	void ShowMessageBox(const std::string& bodyText, const std::vector<std::string>& buttonTextValues = { "Ok" }, MessageBoxResultCallbackFunc callback = [](std::uint32_t) {});
 
+	bool IsUsingIndexControllers();
+
 	template <class T>
 	class EventHandler : public RE::BSTEventSink<T>
 	{

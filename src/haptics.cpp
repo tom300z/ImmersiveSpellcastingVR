@@ -80,10 +80,22 @@ namespace Haptics
 			} else {
 				cv.wait_until(lock, nextPulse);
 			}
+
+			// Wait while the worker is paused
+			while (workerPaused.load(std::memory_order::relaxed)) {
+				cv.wait(lock);
+			}
 		}
 	};
 
+	void HandHaptics::Pause(bool paused) {
+		workerPaused.store(paused);
 
+		// Wake up thread on unpause
+		if (!paused) {
+			cv.notify_one();
+		}
+	}
 
 	// Run this in a detached thread to play a simple haptic charge event for this hand (this isn't synced to the game obviously)
 	void PlayHapticChargeEvent(HandHaptics* hand, float duration)
@@ -118,5 +130,10 @@ namespace Haptics
 	HandHaptics* GetHandHaptics(bool getLeftHand)
 	{
 		return &(getLeftHand ? leftHH : rightHH);
+	}
+
+	void Pause(bool paused) {
+		leftHH.Pause(paused);
+		rightHH.Pause(paused);
 	}
 }

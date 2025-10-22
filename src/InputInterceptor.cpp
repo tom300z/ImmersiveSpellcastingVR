@@ -105,7 +105,7 @@ namespace InputInterceptor
 
 		// Get equipped object, proceed if spell
 		auto equippedObj = player->GetEquippedObject(isLeftHand);
-		if (!(equippedObj->GetFormType() == RE::FormType::Spell)) {
+		if (!equippedObj || !(equippedObj->GetFormType() == RE::FormType::Spell)) {
 			return;
 		}
 		auto spell = (RE::SpellItem*)equippedObj;
@@ -134,13 +134,8 @@ namespace InputInterceptor
 		}
 	}
 
-	void Install(const SKSE::LoadInterface* a_skse)
-	{
-		// Skip if already installed
-		if (g_installed.exchange(true)) {
-			return;
-		}
-
+	// This needs to be called manually after the config was loaded
+	void ConnectToConfig() {
 		ApplyCastingInputMethod(Config::Manager::GetSingleton().GetValue(Settings::kCastingInputMethod));
 		if (g_castingButtonListenerId == 0) {
 			g_castingButtonListenerId = Config::Manager::GetSingleton().AddListener(
@@ -148,8 +143,15 @@ namespace InputInterceptor
 					if (key == Settings::kCastingInputMethod) {
 						ApplyCastingInputMethod(value);
 					}
-				}
-			);
+				});
+		}
+	}
+
+	void Install(const SKSE::LoadInterface* a_skse)
+	{
+		// Skip if already installed
+		if (g_installed.exchange(true)) {
+			return;
 		}
 
 		auto g_vrinterface = (SKSEVRInterface*)a_skse->QueryInterface(kInterface_VR);

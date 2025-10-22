@@ -72,27 +72,41 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a
 	return true;
 }
 
-
-void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
-{
-	switch (msg->type) {
-	case SKSE::MessagingInterface::kInputLoaded:
-		{
-			logger::info(FMT_STRING("kInputLoaded"), Plugin::NAME, Plugin::VERSION);
-			break;
-		}
-	case SKSE::MessagingInterface::kDataLoaded:
-		{
-			logger::info(FMT_STRING("kDataLoaded"), Plugin::NAME, Plugin::VERSION);
-			break;
-		}
-	}
-}
-
 void OnSaveLoadEvent([[maybe_unused]] RE::TESLoadGameEvent event)
 {
 	SpellChargeTracker::Install();
 	Config::Checks::PostLoadCheck();
+}
+
+void OnMenuOpenCloseEvent([[maybe_unused]] RE::MenuOpenCloseEvent event)
+{
+	// Pause haptics while in menus
+	Haptics::Pause(!utils::InGame());
+}
+
+void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
+{
+	switch (msg->type) {
+	case SKSE::MessagingInterface::kPostPostLoad:
+		{
+			logger::info(FMT_STRING("kPostPostLoad"), Plugin::NAME, Plugin::VERSION);
+
+			static auto menuHandler = utils::EventHandler<RE::MenuOpenCloseEvent>(OnMenuOpenCloseEvent);
+			if (auto* ui = RE::UI::GetSingleton()) {
+				ui->AddEventSink(&menuHandler);
+			}
+		}
+		break;
+	case SKSE::MessagingInterface::kDataLoaded:
+		{
+			logger::info(FMT_STRING("kDataLoaded"), Plugin::NAME, Plugin::VERSION);
+			Config::Init();
+
+			InputInterceptor::ConnectToConfig();
+		}
+
+		break;
+	}
 }
 
 
@@ -106,12 +120,6 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 
 	SKSE::Init(a_skse);
 
-	auto& config = Config::Manager::GetSingleton();
-	config.RegisterSetting(std::string(Settings::kCastingInputMethod), Config::Type::kString, Config::Value{ std::string("grip") }, "OpenVR button name that should be treated as the casting button.");
-	config.RegisterSetting(std::string(Settings::kShowBindingWarning), Config::Type::kBool, Config::Value{ true }, "Show a warning when the grip button is bound in the gameplay context.");
-	config.LoadFromDisk();
-	config.SaveToDisk();
-
 	// SKSE::AllocTrampoline(1 << 10, false); // Unused for now, might come in handy later when i use write_call/write_branch
 
 	auto messaging = SKSE::GetMessagingInterface();
@@ -120,11 +128,11 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 		return false;
 	}
 
-	static auto handler = utils::EventHandler<RE::TESLoadGameEvent>(OnSaveLoadEvent);
+	static auto loadGameHandler = utils::EventHandler<RE::TESLoadGameEvent>(OnSaveLoadEvent);
 	auto* scriptEventSource = RE::ScriptEventSourceHolder::GetSingleton();
 	if (scriptEventSource) {
 		scriptEventSource->AddEventSink(
-			&handler
+			&loadGameHandler
 		);
 	}
 
