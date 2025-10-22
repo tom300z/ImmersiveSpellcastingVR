@@ -78,10 +78,15 @@ void OnSaveLoadEvent([[maybe_unused]] RE::TESLoadGameEvent event)
 	Config::Checks::PostLoadCheck();
 }
 
-void OnMenuOpenCloseEvent([[maybe_unused]] RE::MenuOpenCloseEvent event)
+void OnMenuOpenCloseEvent(const RE::MenuOpenCloseEvent& event)
 {
 	// Pause haptics while in menus
-	Haptics::Pause(!utils::InGame());
+	const bool inGame = utils::InGame();
+	Haptics::Pause(!inGame);
+
+	if (!event.opening && inGame) {
+		InputInterceptor::RefreshCastingState();
+	}
 }
 
 void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)

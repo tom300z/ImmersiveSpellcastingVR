@@ -68,6 +68,36 @@ namespace InputInterceptor
 				logger::info("Casting input method updated to {} {}", name ? name : "unknown", newButtonTouch ? "Touch" : "Grip");
 			}
 		}
+
+		void ProcessCastingButtonState(bool isLeftHand, bool castingButtonActivated, bool forceDispatch)
+		{
+			const ButtonState newState = castingButtonActivated ? ButtonState::pressed : ButtonState::unpressed;
+			ButtonState* lastCastingButtonState = isLeftHand ? &g_lastLeftcastingButtonState : &g_lastRightcastingButtonState;
+
+			if (!forceDispatch) {
+				if ((*lastCastingButtonState != ButtonState::unknown) && (*lastCastingButtonState == newState)) {
+					return;
+				}
+			}
+
+			*lastCastingButtonState = newState;
+
+			auto player = RE::PlayerCharacter::GetSingleton();
+			if (!(player && utils::InGame() && player->actorState2.weaponState == RE::WEAPON_STATE::kDrawn)) {
+				return;
+			}
+
+			auto equippedObj = player->GetEquippedObject(isLeftHand);
+			if (!equippedObj || !(equippedObj->GetFormType() == RE::FormType::Spell)) {
+				return;
+			}
+			auto spell = static_cast<RE::SpellItem*>(equippedObj);
+
+			const bool isConcentrationSpell = spell->GetCastingType() == RE::MagicSystem::CastingType::kConcentration;
+			const bool desiredAttackPressed = isConcentrationSpell ? !castingButtonActivated : castingButtonActivated;
+
+			AttackState::AddAttackButtonEvent(isLeftHand, desiredAttackPressed);
+		}
 	}
 
 	void ControllerCallback(uint32_t unControllerDeviceIndex, vr::VRControllerState001_t* pControllerState, [[maybe_unused]] uint32_t unControllerStateSize, [[maybe_unused]] bool& state)
@@ -86,52 +116,11 @@ namespace InputInterceptor
 		// Check if the casting button is pressed/touched
 		const bool castingButtonActivated = (buttonActivationMask & vr::ButtonMaskFromId(g_castingButtonId));
 
-		// Skip if input did not change
-		ButtonState* lastCastingButtonState = isLeftHand ? &g_lastLeftcastingButtonState : &g_lastRightcastingButtonState;
-		if (
-			(*lastCastingButtonState != ButtonState::unknown) &&
-			((*lastCastingButtonState == ButtonState::pressed) == castingButtonActivated)
-			) {
-			return;
-		}
-		*lastCastingButtonState = castingButtonActivated? ButtonState::pressed : ButtonState::unpressed;
-
-
-		// Skip if player is not ready, in game and has weapons drawn
-		auto player = RE::PlayerCharacter::GetSingleton();
-		if (!(player && utils::InGame() && player->actorState2.weaponState == RE::WEAPON_STATE::kDrawn)) {
-			return;
-		}
-
-		// Get equipped object, proceed if spell
-		auto equippedObj = player->GetEquippedObject(isLeftHand);
-		if (!equippedObj || !(equippedObj->GetFormType() == RE::FormType::Spell)) {
-			return;
-		}
-		auto spell = (RE::SpellItem*)equippedObj;
-
-		// Get spell type
-		bool isConcentrationSpell = spell->GetCastingType() == RE::MagicSystem::CastingType::kConcentration;
+		ProcessCastingButtonState(isLeftHand, castingButtonActivated, false);
 
 		// Dont hide a that causes the game to detect input after entering a menu if the cast button is currently held. Which sucks if the casting button is also the menu close button
 		//// Hide the pressed casting button from the game to avoid unwanted input
 		//pControllerState->ulButtonPressed &= ~vr::ButtonMaskFromId(g_castingButtonId);
-
-		if (isConcentrationSpell) {
-			// For concentration spells, the input is inverted, so that the spell is fired while the hand is open
-			//AttackState::SetDesiredAttackingState(isLeftHand, !castingButtonPressed);
-			AttackState::AddAttackButtonEvent(isLeftHand, !castingButtonActivated);
-		} else {
-			// For Fire&Forget spells & scrolls, pass the trigger state normally
-			//AttackState::SetDesiredAttackingState(isLeftHand, castingButtonPressed);
-			if (castingButtonActivated) {
-				//auto t = std::thread(Haptics::PlayHapticChargeEvent, Haptics::GetHandHaptics(isLeftHand), spell->GetChargeTime());
-				//t.detach();
-			} else {
-				//Haptics::GetHandHaptics(isLeftHand)->UpdateHapticState(0, 0, false);
-			}
-			AttackState::AddAttackButtonEvent(isLeftHand, castingButtonActivated);
-		}
 	}
 
 	// This needs to be called manually after the config was loaded
@@ -144,6 +133,23 @@ namespace InputInterceptor
 						ApplyCastingInputMethod(value);
 					}
 				});
+		}
+	}
+
+	void RefreshCastingState()
+	{
+		if (!utils::InGame()) {
+			return;
+		}
+
+		if (g_lastLeftcastingButtonState != ButtonState::unknown) {
+			const bool castingButtonActivated = g_lastLeftcastingButtonState == ButtonState::pressed;
+			ProcessCastingButtonState(true, castingButtonActivated, true);
+		}
+
+		if (g_lastRightcastingButtonState != ButtonState::unknown) {
+			const bool castingButtonActivated = g_lastRightcastingButtonState == ButtonState::pressed;
+			ProcessCastingButtonState(false, castingButtonActivated, true);
 		}
 	}
 
