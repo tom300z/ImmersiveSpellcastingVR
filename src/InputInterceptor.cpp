@@ -15,32 +15,15 @@
 #include "utils.h"
 #include "haptics.h"
 #include "math.h"
+#include "InputInterceptor.h"
 
 namespace InputInterceptor
 {
-	struct HandState
-	{
-		// The last known state of the casting button
-		ButtonState lastCastingButtonState = ButtonState::kUnknown;
-
-		// While enabled, the casting button input is hidden from the game
-		bool hideCastingButtonFromGame = false;
-	};
-
-	enum ButtonState
-	{
-		kUnknown,
-		kUnpressed,
-		kPressed
-	};
-
 	vr::EVRButtonId g_castingButtonId = vr::EVRButtonId::k_EButton_Grip;
 	bool g_castingButtonTouch = false;
 
 	HandState g_leftHandState = HandState();
 	HandState g_rightHandState = HandState();
-	
-
 
 	namespace
 	{

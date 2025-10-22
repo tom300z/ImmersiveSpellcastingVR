@@ -611,11 +611,10 @@ namespace Config
 		if (initialized) {
 			return;
 		}
-		RE::DebugMessageBox()
 
 		auto& config = Manager::GetSingleton();
 
-		std::string defaultInputMethod = Utils::IsUsingIndexControllers() ? std::string("grip_touch") : std::string("grip");  // Use grip touch for index controllers, grip press for oculus, etc.
+		std::string defaultInputMethod = Utils::Input::IsUsingIndexControllers() ? std::string("grip_touch") : std::string("grip");  // Use grip touch for index controllers, grip press for oculus, etc.
 		config.RegisterSetting(std::string(Settings::kCastingInputMethod), Config::Type::kString, Config::Value{ defaultInputMethod }, "OpenVR button name that should be treated as the casting button.");
 		config.RegisterSetting(std::string(Settings::kShowBindingWarning), Config::Type::kBool, Config::Value{ true }, "Show a warning when the grip button is bound in the gameplay context.");
 		config.LoadFromDisk();
