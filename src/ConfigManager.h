@@ -90,11 +90,6 @@ namespace Config
 
 	bool RegisterPapyrusFunctions(RE::BSScript::IVirtualMachine* a_vm);
 
-	namespace Checks
-	{
-		void PostLoadCheck();
-	}
-
 	void Init();
 }
 

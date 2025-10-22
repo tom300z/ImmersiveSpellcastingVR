@@ -606,75 +606,16 @@ namespace Config
 		return true;
 	}
 
-	namespace Checks {
-		void PostLoadCheck() {
-			if (!Config::Manager::GetSingleton().Get<bool>(Settings::kShowBindingWarning, true)) {
-				return;
-			}
-
-			// Get userEventMappings for current left controller gameplay
-			// Left grip key (can be changed at runtime)
-			// RE::ControlMap::GetSingleton()->controlMap[RE::UserEvents::INPUT_CONTEXT_ID::kGameplay]->deviceMappings[6]
-
-			auto unwantedMappings = ""s;
-			for (bool leftHand : { true, false }) {
-				auto userEventMappings = utils::input::GetActiveVRUserEventMapping(RE::UserEvents::INPUT_CONTEXT_ID::kGameplay, leftHand);
-				auto sideName = leftHand ? "Left" : "Right";
-				auto sideRole = leftHand ? vr::ETrackedControllerRole::TrackedControllerRole_LeftHand : vr::ETrackedControllerRole::TrackedControllerRole_RightHand;
-				//logger::info("VR Gameplay controls ({}):", sideName);
-
-				for (RE::ControlMap::UserEventMapping mapping : userEventMappings) {
-					auto inputKeyName = utils::input::GetOpenVRButtonName(mapping.inputKey, sideRole);
-					//logger::info("{} -> {} ({})", mapping.eventID.c_str(), inputKeyName, mapping.inputKey);
-
-					// Show warning if grip is used in Gameplay and grip press is configured as input
-					auto inputType = Config::Manager::GetSingleton().Get<std::string>(Settings::kCastingInputMethod, "grip");
-					if (inputType == "grip" && mapping.inputKey == vr::EVRButtonId::k_EButton_Grip) {
-						unwantedMappings += std::format("\n {} {} Press -> {}", sideName, inputKeyName, mapping.eventID.c_str());
-					}
-				}
-			}
-
-			if (unwantedMappings.empty()) {
-				return;
-			}
-
-			auto message = std::format(
-				R"(WARNING: {} buttons alrady mapped in the gameplay context!
-{}
-
-You have two options to mitigate this:
-
-a. Use the "Grip Touch" input instead of "Grip Press" (See MCM). See also HIGGS's "useTouchForGrip" setting.
-b. Unmap the buttons using the "VR Key Remapping Tool" from NexusMods)",
-				Plugin::NAME,
-				unwantedMappings);
-			std::vector<std::string> options = { "Show Remapping Tool on Nexus", "Ignore once" };
-			utils::MessageBoxResultCallbackFunc handler;
-			handler = [message, options](int index) {
-				if (options[index] == "Show Remapping Tool on Nexus") {
-					ShellExecuteW(nullptr, L"open", L"https://www.nexusmods.com/skyrimspecialedition/mods/68164", nullptr, nullptr, SW_SHOWNORMAL);
-					utils::ShowMessageBox(message, { "Ignore once" });
-				}
-			};
-
-
-			utils::ShowMessageBox(
-				message,
-				options,
-				handler);
-		}
-	}
-
 	bool initialized = false;
 	void Init() {
 		if (initialized) {
 			return;
 		}
+		RE::DebugMessageBox()
 
 		auto& config = Manager::GetSingleton();
 
-		std::string defaultInputMethod = utils::IsUsingIndexControllers() ? std::string("grip_touch") : std::string("grip");  // Use grip touch for index controllers, grip press for oculus, etc.
+		std::string defaultInputMethod = Utils::IsUsingIndexControllers() ? std::string("grip_touch") : std::string("grip");  // Use grip touch for index controllers, grip press for oculus, etc.
 		config.RegisterSetting(std::string(Settings::kCastingInputMethod), Config::Type::kString, Config::Value{ defaultInputMethod }, "OpenVR button name that should be treated as the casting button.");
 		config.RegisterSetting(std::string(Settings::kShowBindingWarning), Config::Type::kBool, Config::Value{ true }, "Show a warning when the grip button is bound in the gameplay context.");
 		config.LoadFromDisk();

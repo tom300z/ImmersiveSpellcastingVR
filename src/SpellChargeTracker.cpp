@@ -40,7 +40,7 @@ namespace SpellChargeTracker
 		ActualState lastLeftHandState = ActualState::kUnknown;
 		ActualState lastRightHandState = ActualState::kUnknown;
 
-		void RefreshState(RE::ActorMagicCaster* caster)
+		void SetHapticState(RE::ActorMagicCaster* caster)
 		{
 			// Return if this is not the player 
 			if (!caster || caster->actor != RE::PlayerCharacter::GetSingleton()) {
@@ -54,11 +54,15 @@ namespace SpellChargeTracker
 			const bool isLeftHand = caster->castingSource == RE::MagicSystem::CastingSource::kLeftHand;
 			ActualState newState = (ActualState)caster->state.get();
 
-			// Return if the state is unchanged and current state is not charging
+			// Return if the state is unchanged and current state is idle/hold/release
 			ActualState* lastStatePtr = (isLeftHand ? &lastLeftHandState : &lastRightHandState);
-			if (newState != ActualState::kCharging && (newState == *lastStatePtr)) {
+			if (
+				(newState == *lastStatePtr) && 
+				(newState == ActualState::kIdle || newState == ActualState::kHolding || newState == ActualState::kReleasing)
+			) {
 				return;
 			}
+			// Update last state
 			*lastStatePtr = newState;
 
 			// Update haptics
@@ -92,7 +96,7 @@ namespace SpellChargeTracker
 			}
 
 			g_originalUpdate(caster, delta);
-			RefreshState(caster);
+			SetHapticState(caster);
 		}
 	}  // namespace
 
@@ -115,8 +119,6 @@ namespace SpellChargeTracker
 				logger::warn("SpellChargeTracker: player has no ActorMagicCaster instances yet");
 				return;
 			}
-
-			logger::info("Left caster RTTI: {}", typeid(*sample).name());
 
 			auto** vtblPtr = reinterpret_cast<std::uintptr_t**>(sample);
 			if (!vtblPtr || !*vtblPtr) {

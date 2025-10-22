@@ -18,17 +18,29 @@
 
 namespace InputInterceptor
 {
+	struct HandState
+	{
+		// The last known state of the casting button
+		ButtonState lastCastingButtonState = ButtonState::kUnknown;
+
+		// While enabled, the casting button input is hidden from the game
+		bool hideCastingButtonFromGame = false;
+	};
+
 	enum ButtonState
 	{
-		unknown,
-		unpressed,
-		pressed
+		kUnknown,
+		kUnpressed,
+		kPressed
 	};
 
 	vr::EVRButtonId g_castingButtonId = vr::EVRButtonId::k_EButton_Grip;
 	bool g_castingButtonTouch = false;
-	ButtonState g_lastLeftcastingButtonState = ButtonState::unknown;
-	ButtonState g_lastRightcastingButtonState = ButtonState::unknown;
+
+	HandState g_leftHandState = HandState();
+	HandState g_rightHandState = HandState();
+	
+
 
 	namespace
 	{
@@ -61,29 +73,31 @@ namespace InputInterceptor
 				g_castingButtonId = newButton;
 				g_castingButtonTouch = newButtonTouch;
 
-				g_lastLeftcastingButtonState = ButtonState::unknown;
-				g_lastRightcastingButtonState = ButtonState::unknown;
+				g_leftHandState.lastCastingButtonState = ButtonState::kUnknown;
+				g_rightHandState.lastCastingButtonState = ButtonState::kUnknown;
 
-				const auto name = utils::input::GetOpenVRButtonName(static_cast<std::uint32_t>(newButton));
+				const auto name = Utils::Input::GetOpenVRButtonName(static_cast<std::uint32_t>(newButton));
 				logger::info("Casting input method updated to {} {}", name ? name : "unknown", newButtonTouch ? "Touch" : "Grip");
 			}
 		}
 
 		void ProcessCastingButtonState(bool isLeftHand, bool castingButtonActivated, bool forceDispatch)
 		{
-			const ButtonState newState = castingButtonActivated ? ButtonState::pressed : ButtonState::unpressed;
-			ButtonState* lastCastingButtonState = isLeftHand ? &g_lastLeftcastingButtonState : &g_lastRightcastingButtonState;
+			const ButtonState newState = castingButtonActivated ? ButtonState::kPressed : ButtonState::kUnpressed;
+			HandState* handState = isLeftHand ? &g_leftHandState : &g_rightHandState;
 
 			if (!forceDispatch) {
-				if ((*lastCastingButtonState != ButtonState::unknown) && (*lastCastingButtonState == newState)) {
+				if (
+					(handState->lastCastingButtonState != ButtonState::kUnknown)
+					&& (handState->lastCastingButtonState == newState)
+				) {
 					return;
 				}
 			}
-
-			*lastCastingButtonState = newState;
+			handState->lastCastingButtonState = newState;
 
 			auto player = RE::PlayerCharacter::GetSingleton();
-			if (!(player && utils::InGame() && player->actorState2.weaponState == RE::WEAPON_STATE::kDrawn)) {
+			if (!(player && Utils::InGame() && player->actorState2.weaponState == RE::WEAPON_STATE::kDrawn)) {
 				return;
 			}
 
@@ -118,7 +132,7 @@ namespace InputInterceptor
 
 		ProcessCastingButtonState(isLeftHand, castingButtonActivated, false);
 
-		// Dont hide a that causes the game to detect input after entering a menu if the cast button is currently held. Which sucks if the casting button is also the menu close button
+		// Dont hide as that causes the game to detect input after entering a menu if the cast button is currently held. Which sucks if the casting button is also the menu close button
 		//// Hide the pressed casting button from the game to avoid unwanted input
 		//pControllerState->ulButtonPressed &= ~vr::ButtonMaskFromId(g_castingButtonId);
 	}
@@ -138,17 +152,17 @@ namespace InputInterceptor
 
 	void RefreshCastingState()
 	{
-		if (!utils::InGame()) {
+		if (!Utils::InGame()) {
 			return;
 		}
 
-		if (g_lastLeftcastingButtonState != ButtonState::unknown) {
-			const bool castingButtonActivated = g_lastLeftcastingButtonState == ButtonState::pressed;
+		if (g_leftHandState.lastCastingButtonState != ButtonState::kUnknown) {
+			const bool castingButtonActivated = g_leftHandState.lastCastingButtonState == ButtonState::kPressed;
 			ProcessCastingButtonState(true, castingButtonActivated, true);
 		}
 
-		if (g_lastRightcastingButtonState != ButtonState::unknown) {
-			const bool castingButtonActivated = g_lastRightcastingButtonState == ButtonState::pressed;
+		if (g_rightHandState.lastCastingButtonState != ButtonState::kUnknown) {
+			const bool castingButtonActivated = g_rightHandState.lastCastingButtonState == ButtonState::kPressed;
 			ProcessCastingButtonState(false, castingButtonActivated, true);
 		}
 	}

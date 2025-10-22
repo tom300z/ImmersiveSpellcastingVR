@@ -1,8 +1,12 @@
 #include "RE/Skyrim.h"
 #include "SKSE/SKSE.h"
 #include "utils.h"
+#include <ConfigManager.h>
+#include <Settings.h>
+#include <windows.h>
+#include <Settings.h>
 
-namespace utils
+namespace Utils
 {
     void ExecuteConsoleCommand(std::string_view command)
     {
@@ -66,7 +70,7 @@ namespace utils
 		messagebox->QueueMessage();
 	}
 
-	namespace input
+	namespace Input
 	{
 		// Returns a canonical string name for a given OpenVR controller key code
 		const char* GetOpenVRButtonName(std::uint32_t keyCode, vr::ETrackedControllerRole side)
@@ -128,19 +132,20 @@ namespace utils
 
 			return inputContext->deviceMappings[leftHand ? currentLeftdeviceMappingID : currentRightdeviceMappingID];
 		}
-	}
 
-	bool IsUsingIndexControllers() {
-		auto leftHandIndex = vr::VRSystem()->GetTrackedDeviceIndexForControllerRole(vr::TrackedControllerRole_LeftHand);
+		bool IsUsingIndexControllers()
+		{
+			auto leftHandIndex = vr::VRSystem()->GetTrackedDeviceIndexForControllerRole(vr::TrackedControllerRole_LeftHand);
 
-		char buffer[vr::k_unMaxPropertyStringSize];
-		vr::ETrackedPropertyError error = vr::TrackedProp_Success;
-		const auto needed = vr::VRSystem()->GetStringTrackedDeviceProperty(
-			leftHandIndex, vr::Prop_RenderModelName_String, buffer, sizeof(buffer), &error);
-		logger::info("Left Hand Render model: {}", buffer);
-		std::string renderModelName(buffer);
+			char buffer[200];
+			vr::ETrackedPropertyError error = vr::TrackedProp_Success;
+			const auto needed = vr::VRSystem()->GetStringTrackedDeviceProperty(
+				leftHandIndex, vr::Prop_RenderModelName_String, buffer, sizeof(buffer), &error);
+			logger::info("Left Hand Render model: {}", buffer);
+			std::string renderModelName(buffer);
 
-		return renderModelName.find("indexcontroller") != std::string::npos;
+			return renderModelName.find("indexcontroller") != std::string::npos;
+		}
 	}
 }
 
@@ -196,5 +201,65 @@ namespace log_utils
 		return;
 	}
 
+	namespace Setup
+	{
+		// Checks for unwanted Keybindings and displays a warning message
+		void CheckForUnwantedBindings() {
+			if (!Config::Manager::GetSingleton().Get<bool>(Settings::kShowBindingWarning, true)) {
+				return;
+			}
+
+			// Get userEventMappings for current left controller gameplay
+			// Left grip key (can be changed at runtime)
+			// RE::ControlMap::GetSingleton()->controlMap[RE::UserEvents::INPUT_CONTEXT_ID::kGameplay]->deviceMappings[6]
+
+			auto unwantedMappings = ""s;
+			for (bool leftHand : { true, false }) {
+				auto userEventMappings = Utils::Input::GetActiveVRUserEventMapping(RE::UserEvents::INPUT_CONTEXT_ID::kGameplay, leftHand);
+				auto sideName = leftHand ? "Left" : "Right";
+				auto sideRole = leftHand ? vr::ETrackedControllerRole::TrackedControllerRole_LeftHand : vr::ETrackedControllerRole::TrackedControllerRole_RightHand;
+				//logger::info("VR Gameplay controls ({}):", sideName);
+
+				for (RE::ControlMap::UserEventMapping mapping : userEventMappings) {
+					auto inputKeyName = Utils::Input::GetOpenVRButtonName(mapping.inputKey, sideRole);
+					//logger::info("{} -> {} ({})", mapping.eventID.c_str(), inputKeyName, mapping.inputKey);
+
+					// Show warning if grip is used in Gameplay and grip press is configured as input
+					auto inputType = Config::Manager::GetSingleton().Get<std::string>(Settings::kCastingInputMethod, "grip");
+					if (inputType == "grip" && mapping.inputKey == vr::EVRButtonId::k_EButton_Grip) {
+						unwantedMappings += std::format("\n {} {} Press -> {}", sideName, inputKeyName, mapping.eventID.c_str());
+					}
+				}
+			}
+
+			if (unwantedMappings.empty()) {
+				return;
+			}
+
+			auto message = std::format(
+				R"({} WARNING: buttons alrady mapped in the gameplay context!
+{}
+
+You have two options to mitigate this:
+
+a. Use the "Grip Touch" input instead of "Grip Press" (See MCM). See also HIGGS's "useTouchForGrip" setting.
+b. Unmap the buttons using the "VR Key Remapping Tool" from NexusMods)",
+				Plugin::NAME,
+				unwantedMappings);
+			std::vector<std::string> options = { "Show Remapping Tool on Nexus", "Ignore once" };
+			Utils::MessageBoxResultCallbackFunc handler;
+			handler = [message, options](int index) {
+				if (options[index] == "Show Remapping Tool on Nexus") {
+					ShellExecuteW(nullptr, L"open", L"https://www.nexusmods.com/skyrimspecialedition/mods/68164", nullptr, nullptr, SW_SHOWNORMAL);
+					Utils::ShowMessageBox(message, { "Ignore once" });
+				}
+			};
+
+			Utils::ShowMessageBox(
+				message,
+				options,
+				handler);
+		}
+	}
 }
 

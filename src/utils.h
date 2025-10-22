@@ -3,14 +3,13 @@
 #include "RE/Skyrim.h"
 #include "SKSE/SKSE.h"
 
-namespace utils
+namespace Utils
 {
 	bool InGame();
 	void ExecuteConsoleCommand(std::string_view command);
 	using MessageBoxResultCallbackFunc = std::function<void(unsigned int)>;
 	void ShowMessageBox(const std::string& bodyText, const std::vector<std::string>& buttonTextValues = { "Ok" }, MessageBoxResultCallbackFunc callback = [](std::uint32_t) {});
 
-	bool IsUsingIndexControllers();
 
 	template <class T>
 	class EventHandler : public RE::BSTEventSink<T>
@@ -48,10 +47,17 @@ namespace utils
 		inline static std::shared_ptr<EventHandler<T>> instance{ nullptr };
 	};
 
-	namespace input
+	namespace Input
 	{
 		const char* GetOpenVRButtonName(std::uint32_t keyCode, vr::ETrackedControllerRole side = vr::ETrackedControllerRole::TrackedControllerRole_Invalid);
 		RE::BSTArray<RE::ControlMap::UserEventMapping> GetActiveVRUserEventMapping(RE::UserEvents::INPUT_CONTEXT_ID context, bool leftHand);
+
+		bool IsUsingIndexControllers();
+	}
+
+	namespace Setup
+	{
+		void CheckForUnwantedBindings();
 	}
 }
 

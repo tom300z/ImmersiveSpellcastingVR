@@ -25,7 +25,8 @@ using namespace RE;
 using namespace SKSE;
 
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
-{
+{	
+	// Set up logger
 #ifndef NDEBUG
 	auto sink = std::make_shared<spdlog::sinks::msvc_sink_mt>();
 #else
@@ -41,7 +42,6 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a
 
 	auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
 
-
 #ifndef NDEBUG
 	log->set_level(spdlog::level::trace);
 #else
@@ -54,15 +54,16 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a
 
 	logger::info(FMT_STRING("{} v{} queried"), Plugin::NAME, Plugin::VERSION);
 
+	// Initialize Plugin Info
 	a_info->infoVersion = SKSE::PluginInfo::kVersion;
 	a_info->name = Plugin::NAME.data();
 	a_info->version = Plugin::VERSION.major();
 
+	// Check runtime compatibility
 	if (a_skse->IsEditor()) {
 		logger::critical("Loaded in editor, marking as incompatible"sv);
 		return false;
 	}
-
 	const auto ver = a_skse->RuntimeVersion();
 	if (ver < SKSE::RUNTIME_VR_1_4_15) {
 		logger::critical(FMT_STRING("Unsupported runtime version {}"), ver.string());
@@ -72,16 +73,17 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a
 	return true;
 }
 
+// Event Callbacks
 void OnSaveLoadEvent([[maybe_unused]] RE::TESLoadGameEvent event)
 {
 	SpellChargeTracker::Install();
-	Config::Checks::PostLoadCheck();
+	Utils::Setup::CheckForUnwantedBindings();
 }
 
 void OnMenuOpenCloseEvent(const RE::MenuOpenCloseEvent& event)
 {
 	// Pause haptics while in menus
-	const bool inGame = utils::InGame();
+	const bool inGame = Utils::InGame();
 	Haptics::Pause(!inGame);
 
 	if (!event.opening && inGame) {
@@ -96,7 +98,7 @@ void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 		{
 			logger::info(FMT_STRING("kPostPostLoad"), Plugin::NAME, Plugin::VERSION);
 
-			static auto menuHandler = utils::EventHandler<RE::MenuOpenCloseEvent>(OnMenuOpenCloseEvent);
+			static auto menuHandler = Utils::EventHandler<RE::MenuOpenCloseEvent>(OnMenuOpenCloseEvent);
 			if (auto* ui = RE::UI::GetSingleton()) {
 				ui->AddEventSink(&menuHandler);
 			}
@@ -118,7 +120,7 @@ void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
 {
 
-	#ifdef _DEBUG
+	#ifndef NDEBUG
 		// Wait for debugger
 		while (!::IsDebuggerPresent());
 	#endif
@@ -133,7 +135,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 		return false;
 	}
 
-	static auto loadGameHandler = utils::EventHandler<RE::TESLoadGameEvent>(OnSaveLoadEvent);
+	static auto loadGameHandler = Utils::EventHandler<RE::TESLoadGameEvent>(OnSaveLoadEvent);
 	auto* scriptEventSource = RE::ScriptEventSourceHolder::GetSingleton();
 	if (scriptEventSource) {
 		scriptEventSource->AddEventSink(
