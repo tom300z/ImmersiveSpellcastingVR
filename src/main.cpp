@@ -74,10 +74,30 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a
 }
 
 // Event Callbacks
+void OnPlayerAnimationGraphEvent(const RE::BSAnimationGraphEvent& event)
+{
+	// Only run for player
+	const auto* player = RE::PlayerCharacter::GetSingleton();
+	if (event.holder != player) {
+		return;
+	}
+
+	// Refresh casting state after spell was equipped so it is immediately fired after draw. TODO: Make this toggleable via config option?
+	if (event.tag == "Magic_Equip_Out") {
+		InputInterceptor::RefreshCastingState();
+	}
+}
+
 void OnSaveLoadEvent([[maybe_unused]] RE::TESLoadGameEvent event)
 {
 	SpellChargeTracker::Install();
 	Utils::Setup::CheckForUnwantedBindings();
+
+	// Add a listener to player animations. This needs to be done once per save load
+	static auto playerAnimationGraphHandler = Utils::EventHandler<RE::BSAnimationGraphEvent>(OnPlayerAnimationGraphEvent);
+	if (auto* player = RE::PlayerCharacter::GetSingleton()) {
+		player->AddAnimationGraphEventSink(playerAnimationGraphHandler);
+	}
 }
 
 void OnMenuOpenCloseEvent(const RE::MenuOpenCloseEvent& event)

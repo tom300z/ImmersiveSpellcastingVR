@@ -77,23 +77,35 @@ namespace InputInterceptor
 					return;
 				}
 			}
-			handState->lastCastingButtonState = newState;
 
 			auto player = RE::PlayerCharacter::GetSingleton();
-			if (!(player && Utils::InGame() && player->actorState2.weaponState == RE::WEAPON_STATE::kDrawn)) {
-				return;
+			if ((
+				player                                                                          // Player exists
+				&& Utils::InGame()                                                              // player is in Game
+				&& player->actorState2.weaponState == RE::WEAPON_STATE::kDrawn                  // has the weapons drawn
+				&& player->GetEquippedObject(isLeftHand)                                        // Hand has object equipped
+				&& player->GetEquippedObject(isLeftHand)->GetFormType() == RE::FormType::Spell  // Equipped Object is Spell
+			)) {
+				auto spell = static_cast<RE::SpellItem*>(player->GetEquippedObject(isLeftHand));
+
+				// Simulate attack button based on spell type
+				const bool isConcentrationSpell = spell->GetCastingType() == RE::MagicSystem::CastingType::kConcentration;
+				const bool desiredAttackPressed = isConcentrationSpell ? !castingButtonActivated : castingButtonActivated;
+				AttackState::AddAttackButtonEvent(isLeftHand, desiredAttackPressed);
+
+				// Hide original input from game, if it is currently pressed
+				if (newState == ButtonState::kPressed) {
+					handState->hideCastingButtonFromGame = true;
+				}
+			} else {
+				// Unhide original input from game if the casting button is not pressed (to avoid unwanted inputs when opening menus)
+				if (newState == ButtonState::kUnpressed || handState->lastCastingButtonState == ButtonState::kUnpressed) {
+					handState->hideCastingButtonFromGame = false;
+				}
 			}
 
-			auto equippedObj = player->GetEquippedObject(isLeftHand);
-			if (!equippedObj || !(equippedObj->GetFormType() == RE::FormType::Spell)) {
-				return;
-			}
-			auto spell = static_cast<RE::SpellItem*>(equippedObj);
-
-			const bool isConcentrationSpell = spell->GetCastingType() == RE::MagicSystem::CastingType::kConcentration;
-			const bool desiredAttackPressed = isConcentrationSpell ? !castingButtonActivated : castingButtonActivated;
-
-			AttackState::AddAttackButtonEvent(isLeftHand, desiredAttackPressed);
+			// Update last casting button state
+			handState->lastCastingButtonState = newState;
 		}
 	}
 
@@ -108,16 +120,18 @@ namespace InputInterceptor
 		const bool isLeftHand = role == vr::TrackedControllerRole_LeftHand;
 
 		// Get the right mask for press or touch
-		const uint64_t buttonActivationMask = g_castingButtonTouch ? pControllerState->ulButtonTouched : pControllerState->ulButtonPressed;
+		uint64_t* buttonActivationMask = g_castingButtonTouch ? &pControllerState->ulButtonTouched : &pControllerState->ulButtonPressed;
 
 		// Check if the casting button is pressed/touched
-		const bool castingButtonActivated = (buttonActivationMask & vr::ButtonMaskFromId(g_castingButtonId));
+		const bool castingButtonActivated = (*buttonActivationMask & vr::ButtonMaskFromId(g_castingButtonId));
 
 		ProcessCastingButtonState(isLeftHand, castingButtonActivated, false);
 
-		// Dont hide as that causes the game to detect input after entering a menu if the cast button is currently held. Which sucks if the casting button is also the menu close button
-		//// Hide the pressed casting button from the game to avoid unwanted input
-		//pControllerState->ulButtonPressed &= ~vr::ButtonMaskFromId(g_castingButtonId);
+		// Hide the casting button press from the game if it is supposed to be hidden
+		HandState* handState = isLeftHand ? &g_leftHandState : &g_rightHandState;
+		if (handState->hideCastingButtonFromGame) {
+			*buttonActivationMask &= ~vr::ButtonMaskFromId(g_castingButtonId);
+		}
 	}
 
 	// This needs to be called manually after the config was loaded
