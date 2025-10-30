@@ -89,7 +89,14 @@ namespace InputInterceptor
 				auto spell = static_cast<RE::SpellItem*>(player->GetEquippedObject(isLeftHand));
 
 				// Simulate attack button based on spell type
-				const bool isConcentrationSpell = spell->GetCastingType() == RE::MagicSystem::CastingType::kConcentration;
+				bool isConcentrationSpell = spell->GetCastingType() == RE::MagicSystem::CastingType::kConcentration;
+
+				if (isConcentrationSpell && (std::strcmp(spell->GetName(), "Telekinesis") == 0)) {
+					// Treat telekinesis like a non-concentration spell input-wise
+					isConcentrationSpell = false;
+				}
+
+
 				const bool desiredAttackPressed = isConcentrationSpell ? !castingButtonActivated : castingButtonActivated;
 				AttackState::AddAttackButtonEvent(isLeftHand, desiredAttackPressed);
 
