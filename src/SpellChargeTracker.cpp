@@ -1,4 +1,4 @@
-	#include "SpellChargeTracker.h"
+#include "SpellChargeTracker.h"
 
 #include "REL/Relocation.h"
 #include "SKSE/Logger.h"
@@ -15,21 +15,6 @@
 namespace SpellChargeTracker
 {
 	bool installed = false;
-
-	enum class ActualState // RE::MagicCaster::State seems to be annotated incorrectly 
-	{
-		kUnknown = -1,
-		kIdle = 0,
-		kStart,  // Start?
-		kCharging,  // StartCharge?
-		kHolding,
-		kReleasing,  // PreStart?
-		kChargingUnk,
-		kCastingUnk,
-		kUnk07,  // Unknown
-		kUnk08,  // Interrupt
-		kUnk09,  // Interrupt/Deselect
-	};
 
 	namespace
 	{
@@ -70,21 +55,21 @@ namespace SpellChargeTracker
 
 			if (newState == ActualState::kIdle) {
 				handHaptics->UpdateHapticState(0, 0, true);
-				logger::info("Setting haptics for idle...");
+				//logger::info("Setting haptics for idle...");
 			} else if (newState == ActualState::kStart || newState == ActualState::kCharging) {
-				float chargeProgress = 1 - (caster->castingTimer * 2);  // castingTimer goes down from 0.5 to 0 (No idea why...)
+				float chargeProgress = (newState == ActualState::kCharging) ? (1 - (caster->castingTimer * 2)) : 0;  // castingTimer goes down from 0.5 to 0 (No idea why...)
 
 				handHaptics->UpdateHapticState(
 					std::lerp(100, 20, chargeProgress),
 					std::pow(chargeProgress, 6),     // Using pow makes the interpolation exponential instead of linear
 					newState == ActualState::kStart  // Interrupt current pulse on first update
 				);
-				logger::info("Setting haptics for Progress: {}", chargeProgress);
+				//logger::info("Setting haptics for Progress: {}", chargeProgress);
 			} else if (newState == ActualState::kHolding) {
 				handHaptics->UpdateHapticState(50, 0.01, true);  // Stop haptics
 			} else if (newState == ActualState::kReleasing) {
 				handHaptics->UpdateHapticState(30, 1, true);
-				logger::info("Setting haptics for release!");
+				//logger::info("Setting haptics for release!");
 			}
 
 		}
