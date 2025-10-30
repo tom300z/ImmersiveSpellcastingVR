@@ -15,6 +15,7 @@
 #include "ConfigManager.h"
 #include "InputInterceptor.h"
 #include "Settings.h"
+#include "ActionAllowedHook.h"
 #include "openvr.h"
 #include "utils.h"
 #include <windows.h>
@@ -25,7 +26,7 @@ using namespace RE;
 using namespace SKSE;
 
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
-{	
+{
 	// Set up logger
 #ifndef NDEBUG
 	auto sink = std::make_shared<spdlog::sinks::msvc_sink_mt>();
@@ -91,6 +92,7 @@ void OnPlayerAnimationGraphEvent(const RE::BSAnimationGraphEvent& event)
 void OnSaveLoadEvent([[maybe_unused]] RE::TESLoadGameEvent event)
 {
 	SpellChargeTracker::Install();
+	ActionAllowedHook::Install();
 	Utils::Setup::CheckForUnwantedBindings();
 
 	// Add a listener to player animations. This needs to be done once per save load
@@ -98,6 +100,11 @@ void OnSaveLoadEvent([[maybe_unused]] RE::TESLoadGameEvent event)
 	if (auto* player = RE::PlayerCharacter::GetSingleton()) {
 		player->AddAnimationGraphEventSink(playerAnimationGraphHandler);
 	}
+
+	#ifndef NDEBUG
+		// Wait for debugger
+		while (!::IsDebuggerPresent());
+	#endif
 }
 
 void OnMenuOpenCloseEvent(const RE::MenuOpenCloseEvent& event)
@@ -140,14 +147,9 @@ void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
 {
 
-	#ifndef NDEBUG
-		// Wait for debugger
-		while (!::IsDebuggerPresent());
-	#endif
-
 	SKSE::Init(a_skse);
 
-	// SKSE::AllocTrampoline(1 << 10, false); // Unused for now, might come in handy later when i use write_call/write_branch
+	SKSE::AllocTrampoline(1 << 10, false); // Unused for now, might come in handy later when i use write_call/write_branch
 
 	auto messaging = SKSE::GetMessagingInterface();
 	if (!messaging->RegisterListener("SKSE", OnSKSEMessage)) {
