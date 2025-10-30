@@ -16,7 +16,7 @@ namespace Haptics
 		g_vrsystem = RE::BSOpenVR::GetSingleton();
 		handName = isLeftHand ? "Left" : "Right";
 		worker = std::thread(&HandHaptics::HapticThread, this);
-		logger::info("{} Hand Haptics: Initialized successfully.", handName);
+		//logger::info("{} Hand Haptics: Initialized successfully.", handName);
 	}
 
 	void HandHaptics::UpdateHapticState(int newPulseInterval, float newPulseStrength, bool interruptCurrentPulse)
@@ -32,7 +32,7 @@ namespace Haptics
 			pulseStrength.store(newPulseStrength, std::memory_order_relaxed);
 		}
 		if (interruptCurrentPulse) {
-			logger::info("{} Hand Haptic Pulse interrupted.", handName);
+			//logger::info("{} Hand Haptic Pulse interrupted.", handName);
 			cv.notify_one();
 		}
 	}
@@ -59,13 +59,13 @@ namespace Haptics
 
 				// Trigger haptic pulse
 				if (currentPulseStrength > 0 && currentPulseStrength <= 1) {
-					logger::info("{} {} Pulse at {}ms", currentPulseStrength, handName, time);
+					//logger::info("{} {} Pulse at {}ms", currentPulseStrength, handName, time);
 					g_vrsystem->TriggerHapticPulse(
 						!isLeftHand,
 						currentPulseStrength
 					);
 				} else {
-					logger::info("IGNORED {} {} Pulse at {}ms", currentPulseStrength, handName, time);
+					//logger::info("IGNORED {} {} Pulse at {}ms", currentPulseStrength, handName, time);
 				}
 
 				// Schedule next pulse
