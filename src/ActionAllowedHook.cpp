@@ -32,8 +32,8 @@ namespace ActionAllowedHook
 			if (!result && actionID == "ActionJump") {
 				auto* player = RE::PlayerCharacter::GetSingleton();
 				if (
-					((SpellState)player->magicCasters[RE::Actor::SlotTypes::kLeftHand]->state.get() == SpellState::kIdle)
-					|| ((SpellState)player->magicCasters[RE::Actor::SlotTypes::kRightHand]->state.get() == SpellState::kIdle)) {
+					((SpellState)player->magicCasters[RE::Actor::SlotTypes::kLeftHand]->state.get() != SpellState::kIdle)
+					|| ((SpellState)player->magicCasters[RE::Actor::SlotTypes::kRightHand]->state.get() != SpellState::kIdle)) {
 					// If the player is trying to jump and one of the hands is currently charging/holding/casting a spell, allow the jump.
 					// Hopefully this doesn't allow jumps in unwanted situations.
 					result = true;
