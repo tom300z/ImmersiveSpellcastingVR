@@ -147,7 +147,7 @@ namespace Utils
 			return renderModelName.find("indexcontroller") != std::string::npos;
 		}
 	}
-	
+
 	namespace Setup
 	{
 		// Checks for unwanted Keybindings and displays a warning message
@@ -211,7 +211,7 @@ b. Unmap the buttons using the "VR Key Remapping Tool" from NexusMods)",
 	}
 }
 
-namespace log_utils
+namespace LogUtils
 {
 	constexpr std::string_view ToString(RE::MagicSystem::CastingType a_type)
 	{
@@ -261,6 +261,18 @@ namespace log_utils
 		LogHandItem("Left", true, player);
 		LogHandItem("Right", false, player);
 		return;
+	}
+
+	void LogBytes(const void* ptr, int number)
+	{
+		const uint8_t* p = static_cast<const uint8_t*>(ptr);
+		std::string out;
+		out.reserve(3 * number);  // "XX " × 8
+
+		for (int i = 0; i < number; ++i)
+			out += fmt::format("{:02X} ", p[i]);
+
+		spdlog::info("Next {} bytes: {}", number, out);
 	}
 }
 

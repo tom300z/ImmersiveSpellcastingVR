@@ -61,7 +61,7 @@ namespace Utils
 	}
 }
 
-namespace log_utils
+namespace LogUtils
 {
 	void LogEquippedItems();
 
@@ -79,7 +79,7 @@ namespace log_utils
 			const RE::TESEquipEvent* a_event,
 			RE::BSTEventSource<RE::TESEquipEvent>* a_eventSource) override
 		{
-			(void)a_eventSource; 
+			(void)a_eventSource;
 			if (a_event && a_event->actor.get() == RE::PlayerCharacter::GetSingleton()) {
 				logger::info("EquipEvent fired → logging equipped items");
 				LogEquippedItems();
@@ -87,4 +87,6 @@ namespace log_utils
 			return RE::BSEventNotifyControl::kContinue;
 		}
 	};
+
+	void LogBytes(const void* ptr, int number = 5);
 }
