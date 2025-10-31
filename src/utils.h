@@ -6,6 +6,7 @@
 namespace Utils
 {
 	bool InGame();
+	bool InvertVRInputForSpell(RE::SpellItem* spell);
 	void ExecuteConsoleCommand(std::string_view command);
 	using MessageBoxResultCallbackFunc = std::function<void(unsigned int)>;
 	void ShowMessageBox(const std::string& bodyText, const std::vector<std::string>& buttonTextValues = { "Ok" }, MessageBoxResultCallbackFunc callback = [](std::uint32_t) {});
@@ -46,6 +47,11 @@ namespace Utils
 		Callback callback;
 		inline static std::shared_ptr<EventHandler<T>> instance{ nullptr };
 	};
+
+	namespace Animation
+	{
+		void DumpPlayerGraphVariables();
+	}
 
 	namespace Input
 	{

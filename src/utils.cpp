@@ -40,6 +40,16 @@ namespace Utils
 		return true;
 	}
 
+	bool InvertVRInputForSpell(RE::SpellItem *spell) {
+		bool invertInput = spell->GetCastingType() == RE::MagicSystem::CastingType::kConcentration;
+
+		if (invertInput && (std::strcmp(spell->GetName(), "Telekinesis") == 0)) {
+			// Treat telekinesis like a non-concentration spell input-wise
+			invertInput = false;
+		}
+		return invertInput;
+	}
+
 	using MessageBoxResultCallbackFunc = std::function<void(unsigned int)>;
 
     class MessageBoxResultCallback final : public RE::IMessageBoxCallback
@@ -207,6 +217,59 @@ b. Unmap the buttons using the "VR Key Remapping Tool" from NexusMods)",
 				message,
 				options,
 				handler);
+		}
+	}
+
+	namespace Animation
+	{
+
+		void DumpPlayerGraphVariables()
+		{
+			auto* player = RE::PlayerCharacter::GetSingleton();
+			if (!player) {
+				return;
+			}
+
+			RE::BSTSmartPointer<RE::BSAnimationGraphManager> manager;
+			if (!player->GetAnimationGraphManager(manager) || !manager) {
+				logger::warn("No animation graph manager yet");
+				return;
+			}
+
+			//RE::BSSpinLockGuard lock(manager->variableCache.updateLock);
+			const auto& cache = manager->variableCache.variableCache;
+			logger::info("Graph cache has {} entries", cache.size());
+
+			std::uint32_t index = 0;
+			for (auto& graphPtr : manager->graphs) {
+				auto* graph = graphPtr.get();
+				if (!graph) {
+					continue;
+				}
+
+				auto* behavior = graph->behaviorGraph;
+				auto* data = behavior ? behavior->data.get() : nullptr;
+				auto* strings = data ? data->stringData.get() : nullptr;
+				logger::info("Graph[{}]: {} has {} variables", index++, graph->projectName.c_str(), strings->variableNames.size());
+				if (!strings) {
+					continue;
+				}
+
+				for (const auto& hkName : strings->variableNames) {
+					const auto name = hkName.c_str();
+					float f;
+					std::int32_t i;
+					bool b;
+
+					if (graph->GetGraphVariableFloat(name, f)) {
+						logger::info("  {} = {} (float)", name, f);
+					} else if (graph->GetGraphVariableInt(name, i)) {
+						logger::info("  {} = {} (int)", name, i);
+					} else if (graph->GetGraphVariableBool(name, b)) {
+						logger::info("  {} = {} (bool)", name, b);
+					}
+				}
+			}
 		}
 	}
 }

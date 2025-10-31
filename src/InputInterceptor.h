@@ -20,5 +20,5 @@ namespace InputInterceptor
 
 	void ConnectToConfig();
 	void Install(const SKSE::LoadInterface* a_skse);
-	void RefreshCastingState();
+	void RefreshCastingState(bool forceRepressLeft = false, bool forceRepressRight = false);
 }

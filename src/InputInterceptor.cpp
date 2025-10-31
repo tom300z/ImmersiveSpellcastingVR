@@ -64,7 +64,7 @@ namespace InputInterceptor
 			}
 		}
 
-		void ProcessCastingButtonState(bool isLeftHand, bool castingButtonActivated, bool forceDispatch)
+		void ProcessCastingButtonState(bool isLeftHand, bool castingButtonActivated, bool forceDispatch = false, bool forceRepress = false)
 		{
 			const ButtonState newState = castingButtonActivated ? ButtonState::kPressed : ButtonState::kUnpressed;
 			HandState* handState = isLeftHand ? &g_leftHandState : &g_rightHandState;
@@ -87,18 +87,17 @@ namespace InputInterceptor
 				&& player->GetEquippedObject(isLeftHand)->GetFormType() == RE::FormType::Spell  // Equipped Object is Spell
 			)) {
 				auto spell = static_cast<RE::SpellItem*>(player->GetEquippedObject(isLeftHand));
+				bool invertInput = Utils::InvertVRInputForSpell(spell);
 
-				// Simulate attack button based on spell type
-				bool isConcentrationSpell = spell->GetCastingType() == RE::MagicSystem::CastingType::kConcentration;
+				const bool desiredAttackPressed = invertInput ? !castingButtonActivated : castingButtonActivated;
 
-				if (isConcentrationSpell && (std::strcmp(spell->GetName(), "Telekinesis") == 0)) {
-					// Treat telekinesis like a non-concentration spell input-wise
-					isConcentrationSpell = false;
+				// Fire&Forget spells sometimes need the trigger to be released for a few ms before they can be recast. This can be emulated via the forceRepress option
+				// I wish there was a cleaner way to do this but i don't know any.
+				if (!invertInput && desiredAttackPressed && forceRepress) {
+					AttackState::RepressAttackButton(isLeftHand);
+				} else {
+					AttackState::AddAttackButtonEvent(isLeftHand, desiredAttackPressed);
 				}
-
-
-				const bool desiredAttackPressed = isConcentrationSpell ? !castingButtonActivated : castingButtonActivated;
-				AttackState::AddAttackButtonEvent(isLeftHand, desiredAttackPressed);
 
 				// Hide original input from game, if it is currently pressed
 				if (newState == ButtonState::kPressed) {
@@ -154,7 +153,7 @@ namespace InputInterceptor
 		}
 	}
 
-	void RefreshCastingState()
+	void RefreshCastingState(bool forceRepressLeft, bool forceRepressRight)
 	{
 		if (!Utils::InGame()) {
 			return;
@@ -162,12 +161,12 @@ namespace InputInterceptor
 
 		if (g_leftHandState.lastCastingButtonState != ButtonState::kUnknown) {
 			const bool castingButtonActivated = g_leftHandState.lastCastingButtonState == ButtonState::kPressed;
-			ProcessCastingButtonState(true, castingButtonActivated, true);
+			ProcessCastingButtonState(true, castingButtonActivated, true, forceRepressLeft);
 		}
 
 		if (g_rightHandState.lastCastingButtonState != ButtonState::kUnknown) {
 			const bool castingButtonActivated = g_rightHandState.lastCastingButtonState == ButtonState::kPressed;
-			ProcessCastingButtonState(false, castingButtonActivated, true);
+			ProcessCastingButtonState(false, castingButtonActivated, true, forceRepressRight);
 		}
 	}
 
