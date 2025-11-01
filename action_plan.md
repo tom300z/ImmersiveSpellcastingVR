@@ -1,7 +1,12 @@
 # Issues
 
 - Make config system easier to use (auto generate papyrus side?)
+- Make more stuff configurable (cast on menu exit/equip, haptics, input)
 - Spawn less threads
+- Move custom animations into project and integrate into build steps
+- Remove static paths from build steps (use env vars)
+- Make release build
+- ???
 
 ## Bugs
 
