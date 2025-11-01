@@ -31,9 +31,8 @@ namespace ActionAllowedHook
 
 			if (!result && actionID == "ActionJump") {
 				auto* player = RE::PlayerCharacter::GetSingleton();
-				if (
-					((SpellState)player->magicCasters[RE::Actor::SlotTypes::kLeftHand]->state.get() != SpellState::kIdle)
-					|| ((SpellState)player->magicCasters[RE::Actor::SlotTypes::kRightHand]->state.get() != SpellState::kIdle)) {
+				if (player
+					&& (((SpellState)player->magicCasters[RE::Actor::SlotTypes::kLeftHand]->state.get() != SpellState::kIdle) || ((SpellState)player->magicCasters[RE::Actor::SlotTypes::kRightHand]->state.get() != SpellState::kIdle))) {
 					// If the player is trying to jump and one of the hands is currently charging/holding/casting a spell, allow the jump.
 					// Hopefully this doesn't allow jumps in unwanted situations.
 					result = true;
@@ -42,7 +41,6 @@ namespace ActionAllowedHook
 				// Force the input interceptor to reread the controller state so that spells are charged if hand was closed during jump
 				InputInterceptor::RefreshCastingState();
 			} else if (result && (actionID == "ActionLeftInterrupt" || actionID == "ActionRightInterrupt")) {
-				int var = 1 + 1;
 				// Force the input interceptor to reread the controller state so that spells are charged again after interrupting them
 				InputInterceptor::RefreshCastingState(actionID == "ActionLeftInterrupt", actionID == "ActionRightInterrupt");
 			}

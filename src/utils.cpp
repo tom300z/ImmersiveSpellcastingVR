@@ -120,7 +120,7 @@ namespace Utils
 			}
 			// Add any other explicit codes here if needed
 			default:
-				return std::to_string(keyCode).c_str();
+				return "unknown";
 			}
 		}
 

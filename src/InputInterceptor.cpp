@@ -179,7 +179,6 @@ namespace InputInterceptor
 
 		auto g_vrinterface = (SKSEVRInterface*)a_skse->QueryInterface(kInterface_VR);
 		g_vrinterface->RegisterForControllerState(a_skse->GetPluginHandle(), std::numeric_limits<std::int32_t>::max(), ControllerCallback);
-		g_installed.store(false);
 	}
 
 }
