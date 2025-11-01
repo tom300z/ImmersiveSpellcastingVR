@@ -100,11 +100,6 @@ void OnSaveLoadEvent([[maybe_unused]] RE::TESLoadGameEvent event)
 	if (auto* player = RE::PlayerCharacter::GetSingleton()) {
 		player->AddAnimationGraphEventSink(playerAnimationGraphHandler);
 	}
-
-	#ifndef NDEBUG
-		// Wait for debugger
-		while (!::IsDebuggerPresent());
-	#endif
 }
 
 void OnMenuOpenCloseEvent(const RE::MenuOpenCloseEvent& event)
@@ -114,6 +109,7 @@ void OnMenuOpenCloseEvent(const RE::MenuOpenCloseEvent& event)
 	Haptics::Pause(!inGame);
 
 	if (!event.opening && inGame) {
+		// Immediately start firing/charging spell after leaving menu. TODO: make this toggleable via config option.
 		InputInterceptor::RefreshCastingState();
 	}
 }
@@ -138,7 +134,6 @@ void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 
 			InputInterceptor::ConnectToConfig();
 		}
-
 		break;
 	}
 }
@@ -146,7 +141,10 @@ void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
 {
-
+	#ifndef NDEBUG
+		// Wait for debugger
+		while (!::IsDebuggerPresent());
+	#endif
 	SKSE::Init(a_skse);
 
 	SKSE::AllocTrampoline(1 << 10, false); // Unused for now, might come in handy later when i use write_call/write_branch

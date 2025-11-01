@@ -19,20 +19,15 @@ namespace Haptics
 		//logger::info("{} Hand Haptics: Initialized successfully.", handName);
 	}
 
-	void HandHaptics::UpdateHapticState(int newPulseInterval, float newPulseStrength, bool interruptCurrentPulse)
-	{
-		/* newPulseInterval: 5 - 200 ms, Interval between haptic pulses, 0 = off,
-		newPulseStrength: 0.0f - 0.4f, 0.4f - 1.0f are supported but feel the same on index controllers.
-		interruptCurrentPulse: if true, the current pulse will be interrupted and next pulse will happen immediately. Otherwise the next pulse will happen after the current one is finished
-		*/
-		if (newPulseInterval >= 0) {
-			pulseInterval.store(newPulseInterval, std::memory_order_relaxed);
+	void HandHaptics::ScheduleEvent(HapticEvent event) {
+		{
+			std::lock_guard lock(eventsMutex);
+			if (event.interruptPulse || event.replaceScheduledEvents)
+				events.clear();
+			events.push_back(event);
 		}
-		if (newPulseStrength >= 0 && newPulseStrength <= 1) {
-			pulseStrength.store(newPulseStrength, std::memory_order_relaxed);
-		}
-		if (interruptCurrentPulse) {
-			//logger::info("{} Hand Haptic Pulse interrupted.", handName);
+		if (event.interruptPulse) {
+			// Immediately wake thread
 			cv.notify_one();
 		}
 	}
@@ -50,31 +45,49 @@ namespace Haptics
 		auto nextPulse = std::chrono::steady_clock::now();
 
 		while (workerRunning.load(std::memory_order::relaxed)) {
-			auto now = std::chrono::steady_clock::now();
-			auto currentPulseInterval = pulseInterval.load(std::memory_order::relaxed);
-			auto currentPulseStrength = pulseStrength.load(std::memory_order::relaxed);
+			// Compute active event
+			{
+				std::lock_guard lock(eventsMutex);
 
-			if (now >= nextPulse) {
-				auto time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+				if (events.size() > 0) {
+					const HapticEvent nextEvent = events.front();
+
+					// Get next event on interrupt or if active event has no more pulses
+					if (nextEvent.interruptPulse || activeEvent.pulses <= 0) {
+						activeEvent = nextEvent;
+						events.pop_front();
+					}
+				}
+			}
+
+			auto now = std::chrono::steady_clock::now();
+
+			if (now >= nextPulse && (activeEvent.pulses > 0 || activeEvent.remainAfterCompletion )) {
+				//auto time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 
 				// Trigger haptic pulse
-				if (currentPulseStrength > 0 && currentPulseStrength <= 1) {
+				if (activeEvent.pulseStrength > 0 && activeEvent.pulseStrength <= 1 && activeEvent.pulseInterval >= 5) {
 					//logger::info("{} {} Pulse at {}ms", currentPulseStrength, handName, time);
 					g_vrsystem->TriggerHapticPulse(
 						!isLeftHand,
-						currentPulseStrength
+						activeEvent.pulseStrength
 					);
+
 				} else {
 					//logger::info("IGNORED {} {} Pulse at {}ms", currentPulseStrength, handName, time);
 				}
 
+				if (activeEvent.pulses > 0) {
+					activeEvent.pulses--;
+				}
+
 				// Schedule next pulse
-				nextPulse = now + std::chrono::milliseconds(currentPulseInterval);
+				nextPulse = now + std::chrono::milliseconds(activeEvent.pulseInterval);
 			}
 
 			// Wait until next pulse or HapticState update or stop
 			std::unique_lock lock(cv_mtx);
-			if (currentPulseInterval <= 0) {
+			if (activeEvent.pulseInterval <= 0 || (activeEvent.pulses <= 0 && !activeEvent.remainAfterCompletion)) {
 				// If currentPulseInterval <= 0, wait indefinetly until notified
 				cv.wait(lock);
 			} else {
@@ -97,33 +110,6 @@ namespace Haptics
 		}
 	}
 
-	// Run this in a detached thread to play a simple haptic charge event for this hand (this isn't synced to the game obviously)
-	void PlayHapticChargeEvent(HandHaptics* hand, float duration)
-	{
-		auto charge_start = std::chrono::steady_clock::now();
-		auto charge_end = charge_start + std::chrono::duration<float>(duration);
-
-		float new_charge = 0;
-		int updateNumber = 0;
-
-		while (new_charge < 1) {
-			new_charge = std::clamp(
-				std::chrono::duration<float>(std::chrono::steady_clock::now() - charge_start).count() /
-					std::chrono::duration<float>(charge_end - charge_start).count(),
-				0.0f, 1.0f);
-
-			hand->UpdateHapticState(
-				std::lerp(100, 20, new_charge),                   // Fixed to 20ms for now
-				std::pow(new_charge, 6),  // Using pow makes the interpolation exponential instead of linear
-				(updateNumber == 0)                              // Interrupt current pulse on first update
-			);
-			logger::info("New Charge: {}, Duration: {}", std::pow(new_charge, 6), std::lerp(0.0f, 0.5f, std::pow(new_charge, 6)));
-			updateNumber++;
-			std::this_thread::sleep_for(std::chrono::milliseconds(5));
-		}
-		hand->UpdateHapticState(20, 0.005, true); // Stop haptics
-
-	}
 	static HandHaptics leftHH(true);
 	static HandHaptics rightHH(false);
 

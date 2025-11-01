@@ -2,6 +2,17 @@
 
 namespace Haptics
 {
+	struct HapticEvent
+	{
+		int pulseInterval = 0;
+		float pulseStrength = 0;
+		int pulses = 0;  // The (minimum) number of pulses to perform.
+		
+		bool interruptPulse = false;  // If true, all currently active/queued pulses will be skipped and this event will play immediately.
+		bool remainAfterCompletion = true;  // If enabled the pulse parameters will remain active after the event is completed, until a new event is scheduled.
+		bool replaceScheduledEvents = true;
+	};
+
 	class HandHaptics
 	{
 	public:
@@ -10,11 +21,7 @@ namespace Haptics
 
 		HandHaptics(bool isLeftHand);
 
-		/* newPulseInterval: 5 - 200 ms, Interval between haptic pulses, 0 = off,
-		newPulseStrength: 0.0f - 0.4f, 0.4f - 1.0f are supported but feel the same on index controllers.
-		interruptCurrentPulse: if true, the current pulse will be interrupted and next pulse will happen immediately. Otherwise the next pulse will happen after the current one is finished
-		*/
-		void UpdateHapticState(int newPulseInterval = -1, float newPulseStrength = -1, bool interruptCurrentPulse = false);
+		void ScheduleEvent(HapticEvent event);
 
 		void Pause(bool paused);
 
@@ -23,8 +30,9 @@ namespace Haptics
 	private:
 		RE::BSOpenVR* g_vrsystem;
 
-		std::atomic<int> pulseInterval{ 0 };   // 5 - 200 ms, Interval between haptic pulses, 0 = off,
-		std::atomic<float> pulseStrength{ 0 };  // 0.0f - 0.4f, 0.4f - 1.0f are supported but feel the same on index controllers.
+		std::mutex eventsMutex;
+		std::deque<HapticEvent> events;
+		HapticEvent activeEvent = HapticEvent{};
 
 		std::mutex cv_mtx;
 		std::condition_variable cv;
@@ -40,7 +48,5 @@ namespace Haptics
 
 	HandHaptics* GetHandHaptics(bool getLeftHand);
 
-	// Run this in a detached thread to play a simple haptic charge event for this hand (this isn't synced to the game obviously)
-	void PlayHapticChargeEvent(HandHaptics* hand, float duration);
 	void Pause(bool paused);
 }

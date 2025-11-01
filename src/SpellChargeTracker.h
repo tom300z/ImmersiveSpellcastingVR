@@ -13,7 +13,7 @@ namespace SpellChargeTracker
 		kHolding,
 		kReleasing,  // PreStart?
 		kChargingUnk,
-		kCastingUnk,
+		kCasting,
 		kUnk07,  // Unknown
 		kUnk08,  // Interrupt
 		kUnk09,  // Interrupt/Deselect
