@@ -160,6 +160,42 @@ namespace Utils
 
 	namespace Setup
 	{
+
+		static void ShowBindingMessage(std::string unwantedMappings)
+		{
+			auto message = std::format(
+				R"(WARNING: {} buttons used by Skyrim! Actions will be unavailable while spells are equipped:{}
+
+You have 3 options to mitigate this:
+a) Unmap the buttons in gameplay using the "VR Key Remapping Tool" from NexusMods.
+b) Use the "Grip Touch" input instead of "Grip Press". See also HIGGS's "useTouchForGrip" (Index Controllers).
+c) Ignore this warning and do without the actions. )",
+				Plugin::NAME,
+				unwantedMappings);
+			std::vector<std::string> options = { "a) Show Remapping Tool on Nexus", "b) Use Touch input", "c) Ignore disabled actions", "Ignore once" };
+			Utils::MessageBoxResultCallbackFunc handler;
+			handler = [unwantedMappings](int index) {
+				bool showAgain = false;
+				if (index == 0) {
+					ShellExecuteW(nullptr, L"open", L"https://www.nexusmods.com/skyrimspecialedition/mods/68164", nullptr, nullptr, SW_SHOWNORMAL);
+					showAgain = true;
+				} else if (index == 1) {
+					Config::Manager::GetSingleton().SetValue("CastingInputMethod", "grip_touch");
+				} else if (index == 2) {
+					Config::Manager::GetSingleton().SetValue("ShowBindingWarning", false);
+				}
+
+				if (showAgain) {
+					ShowBindingMessage(unwantedMappings);
+				}
+			};
+			
+			Utils::ShowMessageBox(
+				message,
+				options,
+				handler);
+		}
+
 		// Checks for unwanted Keybindings and displays a warning message
 		void CheckForUnwantedBindings()
 		{
@@ -194,29 +230,7 @@ namespace Utils
 				return;
 			}
 
-			auto message = std::format(
-				R"({} WARNING: buttons alrady mapped in the gameplay context!
-{}
-
-You have two options to mitigate this:
-
-a. Use the "Grip Touch" input instead of "Grip Press" (See MCM). See also HIGGS's "useTouchForGrip" setting.
-b. Unmap the buttons using the "VR Key Remapping Tool" from NexusMods)",
-				Plugin::NAME,
-				unwantedMappings);
-			std::vector<std::string> options = { "Show Remapping Tool on Nexus", "Ignore once" };
-			Utils::MessageBoxResultCallbackFunc handler;
-			handler = [message, options](int index) {
-				if (options[index] == "Show Remapping Tool on Nexus") {
-					ShellExecuteW(nullptr, L"open", L"https://www.nexusmods.com/skyrimspecialedition/mods/68164", nullptr, nullptr, SW_SHOWNORMAL);
-					Utils::ShowMessageBox(message, { "Ignore once" });
-				}
-			};
-
-			Utils::ShowMessageBox(
-				message,
-				options,
-				handler);
+			ShowBindingMessage(unwantedMappings);
 		}
 	}
 
