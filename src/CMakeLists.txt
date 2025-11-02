@@ -16,6 +16,8 @@ set(SOURCE_FILES
 	"${SOURCE_DIR}/ActionAllowedHook.cpp"
 	"${SOURCE_DIR}/ActionAllowedHook.h"
 	"${SOURCE_DIR}/sksevr_api.h"
+	"${SOURCE_DIR}/compat/HapticSkyrimVR.h"
+	"${SOURCE_DIR}/compat/HapticSkyrimVR.cpp"
 	"${SOURCE_DIR}/haptics.cpp"
 	"${SOURCE_DIR}/haptics.h"
 	"${SOURCE_DIR}/SpellChargeTracker.cpp"

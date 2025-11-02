@@ -21,6 +21,7 @@
 #include <windows.h>
 #include <haptics.h>
 #include "SpellChargeTracker.h"
+#include "compat/HapticSkyrimVR.h"
 
 using namespace RE;
 using namespace SKSE;
@@ -133,6 +134,7 @@ void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 			Config::Init();
 
 			InputInterceptor::ConnectToConfig();
+			Compat::HapticSkyrimVR::DisableMagicHaptics(true);
 		}
 		break;
 	}
