@@ -42,7 +42,13 @@ namespace ActionAllowedHook
 				InputInterceptor::RefreshCastingState();
 			} else if (result && (actionID == "ActionLeftInterrupt" || actionID == "ActionRightInterrupt")) {	
 				// Force the input interceptor to reread the controller state so that spells are charged again after interrupting them
-				InputInterceptor::RefreshCastingState(actionID == "ActionLeftInterrupt", actionID == "ActionRightInterrupt");
+				auto* player = RE::PlayerCharacter::GetSingleton();
+				if (player && player->isLeftHandMainHand) {
+					// swap
+					InputInterceptor::RefreshCastingState(actionID == "ActionRightInterrupt", actionID == "ActionLeftInterrupt");
+				} else {
+					InputInterceptor::RefreshCastingState(actionID == "ActionLeftInterrupt", actionID == "ActionRightInterrupt");
+				}
 			}
 
 			//logger::info("{} -> {}", actionID.c_str(), result);

@@ -37,9 +37,13 @@ namespace SpellChargeTracker
 			if (!(caster->castingSource == RE::MagicSystem::CastingSource::kLeftHand || caster->castingSource == RE::MagicSystem::CastingSource::kRightHand)) {
 				return;
 			}
-			const bool isLeftHand = caster->castingSource == RE::MagicSystem::CastingSource::kLeftHand;
+			bool gameIsLeftHand = caster->castingSource == RE::MagicSystem::CastingSource::kLeftHand;
+			bool isLeftHand = gameIsLeftHand; 
+			if (reinterpret_cast<RE::PlayerCharacter*>(caster->actor)->isLeftHandMainHand) {
+				isLeftHand = !gameIsLeftHand;
+			}
 
-			if (!isLeftHand && caster->actor->IsDualCasting()) {
+			if (!gameIsLeftHand && caster->actor->IsDualCasting()) {
 				// Use left hand caster for both hands if dual casting
 				caster = reinterpret_cast<RE::ActorMagicCaster*>(RE::PlayerCharacter::GetSingleton()->GetMagicCaster(RE::MagicSystem::CastingSource::kLeftHand));
 			}
@@ -72,7 +76,7 @@ namespace SpellChargeTracker
 			} else if (newState == ActualState::kHolding) {
 				handHaptics->ScheduleEvent({ 50, 0.01f, 0, true });
 			} else if (newState == ActualState::kReleasing) {
-				auto spell = static_cast<RE::SpellItem*>(caster->actor->GetEquippedObject(isLeftHand));
+				auto spell = static_cast<RE::SpellItem*>(caster->actor->GetEquippedObject(gameIsLeftHand));
 				bool interrupt = !(*lastStatePtr == ActualState::kReleasing);
 				if (Utils::InvertVRInputForSpell(spell)) {
 					// "Concentration" spells get a medium interval pulses as long as they are released

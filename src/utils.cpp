@@ -295,11 +295,15 @@ namespace LogUtils
 
 	void LogHandItem(const std::string_view a_handLabel, bool a_isLeftHand, RE::PlayerCharacter* a_player)
 	{
-		if (auto* form = a_player->GetEquippedObject(a_isLeftHand)) {
+		bool gameIsLeftHand = a_isLeftHand;
+		if (a_player && a_player->isLeftHandMainHand) {
+			gameIsLeftHand = !a_isLeftHand;
+		}
+		if (auto* form = a_player->GetEquippedObject(gameIsLeftHand)) {
 			logger::info("{} Hand: {} ({:08X})", a_handLabel, form->GetName(), form->GetFormID());
 
 			if (auto* spell = form->As<RE::SpellItem>()) {
-				//auto caster = a_player->GetMagicCaster(a_isLeftHand ? MagicSystem::CastingSource::kLeftHand : MagicSystem::CastingSource::kRightHand);
+				//auto caster = a_player->GetMagicCaster(gameIsLeftHand ? MagicSystem::CastingSource::kLeftHand : MagicSystem::CastingSource::kRightHand);
 				logger::info("  Spell Casting Type: {}", ToString(spell->GetCastingType()));
 				logger::info("  Spell Charge Time: {:.2f}s", spell->GetChargeTime());
 				/* DMMF::SetChargeTime(

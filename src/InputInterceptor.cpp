@@ -78,25 +78,29 @@ namespace InputInterceptor
 				}
 			}
 
+
 			auto player = RE::PlayerCharacter::GetSingleton();
+			bool gameIsLeftHand = isLeftHand;
+			if (player && player->isLeftHandMainHand) {
+				gameIsLeftHand = !isLeftHand;
+			}
 			if ((
 				player                                                                          // Player exists
 				&& Utils::InGame()                                                              // player is in Game
 				&& player->actorState2.weaponState == RE::WEAPON_STATE::kDrawn                  // has the weapons drawn
-				&& player->GetEquippedObject(isLeftHand)                                        // Hand has object equipped
-				&& player->GetEquippedObject(isLeftHand)->GetFormType() == RE::FormType::Spell  // Equipped Object is Spell
+				&& player->GetEquippedObject(gameIsLeftHand)                                    // Hand has object equipped
+				&& player->GetEquippedObject(gameIsLeftHand)->GetFormType() == RE::FormType::Spell  // Equipped Object is Spell
 			)) {
-				auto spell = static_cast<RE::SpellItem*>(player->GetEquippedObject(isLeftHand));
+				auto spell = static_cast<RE::SpellItem*>(player->GetEquippedObject(gameIsLeftHand));
 				bool invertInput = Utils::InvertVRInputForSpell(spell);
-
 				const bool desiredAttackPressed = invertInput ? !castingButtonActivated : castingButtonActivated;
 
 				// Fire&Forget spells sometimes need the trigger to be released for a few ms before they can be recast. This can be emulated via the forceRepress option
 				// I wish there was a cleaner way to do this but i don't know any.
 				if (!invertInput && desiredAttackPressed && forceRepress) {
-					AttackState::RepressAttackButton(isLeftHand);
+					AttackState::RepressAttackButton(gameIsLeftHand);
 				} else {
-					AttackState::AddAttackButtonEvent(isLeftHand, desiredAttackPressed);
+					AttackState::AddAttackButtonEvent(gameIsLeftHand, desiredAttackPressed);
 				}
 
 				// Hide original input from game, if it is currently pressed
