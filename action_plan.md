@@ -1,11 +1,14 @@
 # Issues
 
 - Make config system easier to use (auto generate papyrus side?)
-- Make more stuff configurable (cast on menu exit/equip, haptics, input)
-- Spawn less threads
+- Make more stuff configurable (cast on menu exit/equip, toggle haptics, input)
+- Reenable HapticSkyrimVR haptics if toggle Haptics is disabled. Add info msg about HapticSkyrimVR.
+- Make sure MCM shows up in existing savegames
+- Spawn fewer threads
 - Move custom animations into project and integrate into build steps
 - Remove static paths from build steps (use env vars)
 - Make release build
+- Balancing: Compensate reduced spell animation time by increasing charge time
 - ???
 
 ## Bugs
