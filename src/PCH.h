@@ -18,3 +18,4 @@ namespace logger = SKSE::log;
 #define DLLEXPORT __declspec(dllexport)
 
 #include "Plugin.h"
+#include "utils.h"

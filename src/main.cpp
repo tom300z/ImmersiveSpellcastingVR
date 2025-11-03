@@ -22,38 +22,16 @@
 #include <haptics.h>
 #include "SpellChargeTracker.h"
 #include "compat/HapticSkyrimVR.h"
+#include "compat/HapticSkyrimVRinterface001.h"
 
 using namespace RE;
 using namespace SKSE;
 
+SKSE::PluginHandle g_pluginHandle;
+
 extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
 {
-	// Set up logger
-#ifndef NDEBUG
-	auto sink = std::make_shared<spdlog::sinks::msvc_sink_mt>();
-#else
-	auto path = logger::log_directory();
-	if (!path) {
-		return false;
-	}
-
-	*path /= Plugin::NAME;
-	*path += ".log"sv;
-	auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true);
-#endif
-
-	auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
-
-#ifndef NDEBUG
-	log->set_level(spdlog::level::trace);
-#else
-	log->set_level(spdlog::level::info);
-	log->flush_on(spdlog::level::warn);
-#endif
-
-	spdlog::set_default_logger(std::move(log));
-	spdlog::set_pattern("%s(%#): [%^%l%$] %v"s);
-
+	Utils::Setup::SetupLogger();
 	logger::info(FMT_STRING("{} v{} queried"), Plugin::NAME, Plugin::VERSION);
 
 	// Initialize Plugin Info
@@ -94,7 +72,7 @@ void OnSaveLoadEvent([[maybe_unused]] RE::TESLoadGameEvent event)
 {
 	SpellChargeTracker::Install();
 	ActionAllowedHook::Install();
-	Utils::Setup::CheckForUnwantedBindings();
+	Utils::Setup::PerformInteractiveSetup();
 
 	// Add a listener to player animations. This needs to be done once per save load
 	static auto playerAnimationGraphHandler = Utils::EventHandler<RE::BSAnimationGraphEvent>(OnPlayerAnimationGraphEvent);
@@ -118,10 +96,18 @@ void OnMenuOpenCloseEvent(const RE::MenuOpenCloseEvent& event)
 void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 {
 	switch (msg->type) {
+	case SKSE::MessagingInterface::kPostLoad:
+		{
+			
+			HapticSkyrimVRPluginApi::getHapticSkyrimVRInterface001(
+				g_pluginHandle,
+				SKSE::GetMessagingInterface()
+			);
+			Compat::HapticSkyrimVR::DisableMagicHaptics(true);
+		}
+		break;
 	case SKSE::MessagingInterface::kPostPostLoad:
 		{
-			logger::info(FMT_STRING("kPostPostLoad"), Plugin::NAME, Plugin::VERSION);
-
 			static auto menuHandler = Utils::EventHandler<RE::MenuOpenCloseEvent>(OnMenuOpenCloseEvent);
 			if (auto* ui = RE::UI::GetSingleton()) {
 				ui->AddEventSink(&menuHandler);
@@ -130,11 +116,10 @@ void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 		break;
 	case SKSE::MessagingInterface::kDataLoaded:
 		{
-			logger::info(FMT_STRING("kDataLoaded"), Plugin::NAME, Plugin::VERSION);
+			//logger::info(FMT_STRING("kDataLoaded"), Plugin::NAME, Plugin::VERSION);
 			Config::Init();
 
 			InputInterceptor::ConnectToConfig();
-			Compat::HapticSkyrimVR::DisableMagicHaptics(true);
 		}
 		break;
 	}
@@ -148,6 +133,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 		while (!::IsDebuggerPresent());
 	#endif
 	SKSE::Init(a_skse);
+	g_pluginHandle = a_skse->GetPluginHandle();
 
 	SKSE::AllocTrampoline(1 << 10, false); // Unused for now, might come in handy later when i use write_call/write_branch
 

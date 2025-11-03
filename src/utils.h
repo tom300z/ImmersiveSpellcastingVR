@@ -63,7 +63,15 @@ namespace Utils
 
 	namespace Setup
 	{
-		void CheckForUnwantedBindings();
+		/// <summary>
+		/// Performs the interactive setup & compatibility checks of the mod on game load. Can be called any number of times.
+		/// </summary>
+		void PerformInteractiveSetup();
+
+		/// <summary>
+		/// Sets up the mods logger. SHould be called once during SKSE query.
+		/// </summary>
+		void SetupLogger();
 	}
 }
 

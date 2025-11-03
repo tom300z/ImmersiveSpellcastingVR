@@ -5,6 +5,8 @@
 #include <Settings.h>
 #include <windows.h>
 #include <Settings.h>
+#include "compat/HapticSkyrimVR.h"
+
 
 namespace Utils
 {
@@ -172,7 +174,7 @@ b) Use the "Grip Touch" input instead of "Grip Press". See also HIGGS's "useTouc
 c) Ignore this warning and do without the actions. )",
 				Plugin::NAME,
 				unwantedMappings);
-			std::vector<std::string> options = { "a) Show Remapping Tool on Nexus", "b) Use Touch input", "c) Ignore disabled actions", "Ignore once" };
+			std::vector<std::string> options = { "a) Show Remapping Tool on Nexusmods", "b) Use Touch input", "c) Ignore disabled actions", "Ignore once" };
 			Utils::MessageBoxResultCallbackFunc handler;
 			handler = [unwantedMappings](int index) {
 				bool showAgain = false;
@@ -231,6 +233,57 @@ c) Ignore this warning and do without the actions. )",
 			}
 
 			ShowBindingMessage(unwantedMappings);
+		}
+
+		void ShowOutdatedHSVRMsg() {
+			Utils::ShowMessageBox(
+				std::format(R"(WARNING: {} has detected that it is installed along an outdated version of Shizof's "Haptic Skyrim VR". This will lead to broken Spellcasting Haptics.
+
+Please update Haptic Skyrim VR to version 1.8.0 or higher! )",
+					Plugin::NAME),
+				{ "Show Haptic Skyrim VR on Nexusmods", "Ignore once" },
+				[](int index) {
+					if (index == 0) {
+						ShellExecuteW(nullptr, L"open", L"https://www.nexusmods.com/skyrimspecialedition/mods/20364", nullptr, nullptr, SW_SHOWNORMAL);
+						ShowOutdatedHSVRMsg();
+					}
+				}
+			);
+		}
+
+		void PerformInteractiveSetup() {
+			CheckForUnwantedBindings();
+			if (Compat::HapticSkyrimVR::hapticskyrimvrOutdated) {
+				ShowOutdatedHSVRMsg();
+			}
+		}
+
+		void SetupLogger() {
+			// Set up logger
+#ifndef NDEBUG
+			auto sink = std::make_shared<spdlog::sinks::msvc_sink_mt>();
+#else
+			auto path = logger::log_directory();
+			if (!path) {
+				return false;
+			}
+
+			*path /= Plugin::NAME;
+			*path += ".log"sv;
+			auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true);
+#endif
+
+			auto log = std::make_shared<spdlog::logger>("global log"s, std::move(sink));
+
+#ifndef NDEBUG
+			log->set_level(spdlog::level::trace);
+#else
+			log->set_level(spdlog::level::info);
+			log->flush_on(spdlog::level::warn);
+#endif
+
+			spdlog::set_default_logger(std::move(log));
+			spdlog::set_pattern("%s(%#): [%^%l%$] %v"s);
 		}
 	}
 
