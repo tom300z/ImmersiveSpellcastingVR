@@ -1,4 +1,5 @@
 #include "HapticSkyrimVR.h"
+#include "HapticSkyrimVRinterface001.h"
 
 #include "REL/Relocation.h"
 #include "REX/W32/KERNEL32.h"
@@ -9,39 +10,67 @@
 
 namespace Compat::HapticSkyrimVR
 {
+	constexpr auto* kModuleName = "hapticskyrimvr_plugin.dll";
+	bool hapticskyrimvrOutdated = false;
+
+	bool DisableMagicHaptics(bool disabled)
+	{
+		if (g_hapticSkyrimVRInterface != nullptr) {
+			hapticskyrimvrOutdated = false;
+			g_hapticSkyrimVRInterface->SpellcastingHapticsToggle(!disabled);
+			return 0;
+		}
+
+		if (REX::W32::GetModuleHandleA(kModuleName)) {
+			hapticskyrimvrOutdated = true;
+		}
+	}
+}
+
+/* namespace Compat::HapticSkyrimVR::LegacyPatcher
+{
+	// Patcher for 1.7.0
+	struct PatchTarget
+	{
+		const char* name;
+		std::uintptr_t offset;
+		std::span<const std::uint8_t> prologue;
+		std::array<std::uint8_t, 5> original{};
+		std::uintptr_t address{ 0 };
+		bool saved{ false };
+	};
+
 	namespace
 	{
-		constexpr auto* kModuleName = "hapticskyrimvr_plugin.dll";
-
 		constexpr std::array<std::uint8_t, 29> kSpellCastingPrologue{
 			0x48, 0x89, 0x5C, 0x24, 0x10, 0x48, 0x89, 0x74, 0x24, 0x18,
 			0x48, 0x89, 0x7C, 0x24, 0x20, 0x55, 0x41, 0x54, 0x41, 0x55,
 			0x41, 0x56, 0x41, 0x57, 0x48, 0x8D, 0x6C, 0x24, 0xC9
 		};
 
-        constexpr std::array<std::uint8_t, 29> kReleaseBurstPrologue{
+		constexpr std::array<std::uint8_t, 29> kReleaseBurstPrologue{
 			0x48, 0x89, 0x5c, 0x24, 0x08, 0x48, 0x89, 0x74, 0x24, 0x18,
-            0x48, 0x89, 0x7c, 0x24, 0x20, 0x55, 0x41, 0x54, 0x41, 0x55,
-            0x41, 0x56, 0x41, 0x57, 0x48, 0x8d, 0x6c, 0x24, 0xc9
+			0x48, 0x89, 0x7c, 0x24, 0x20, 0x55, 0x41, 0x54, 0x41, 0x55,
+			0x41, 0x56, 0x41, 0x57, 0x48, 0x8d, 0x6c, 0x24, 0xc9
 		};
 
 		constexpr std::array<PatchTarget, 2> kTargetsTemplate{
-            PatchTarget{
-                .name = "SpellCastingEventDecider",
-                .offset = 0x59B0,
-                .prologue = kSpellCastingPrologue,
-            },
-            PatchTarget{
-                .name = "ReleaseBurst",
-                .offset = 0x7510,
-                .prologue = kReleaseBurstPrologue,
-            }
-        };
+			PatchTarget{
+				.name = "SpellCastingEventDecider",
+				.offset = 0x59B0,
+				.prologue = kSpellCastingPrologue,
+			},
+			PatchTarget{
+				.name = "ReleaseBurst",
+				.offset = 0x7510,
+				.prologue = kReleaseBurstPrologue,
+			}
+		};
 
 		constexpr std::array<std::uint8_t, 5> kRetPatch{ 0xC3, 0x90, 0x90, 0x90, 0x90 };
 
 		std::array<PatchTarget, kTargetsTemplate.size()> g_targets{ kTargetsTemplate };
-		std::uintptr_t                                   g_moduleBase{ 0 };
+		std::uintptr_t g_moduleBase{ 0 };
 
 		short resolve_targets()
 		{
@@ -79,6 +108,13 @@ namespace Compat::HapticSkyrimVR
 
 	short DisableMagicHaptics(bool disabled)
 	{
+		if (g_hapticSkyrimVRInterface != nullptr) {
+			g_hapticSkyrimVRInterface->SpellcastingHapticsToggle(!disabled);
+			return 0;
+		}
+
+		// only for legacy 1.7.0
+
 		const auto mismatches = resolve_targets();
 
 		for (auto& target : g_targets) {
@@ -111,3 +147,4 @@ namespace Compat::HapticSkyrimVR
 		return mismatches;
 	}
 }
+*/

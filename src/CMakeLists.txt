@@ -18,6 +18,8 @@ set(SOURCE_FILES
 	"${SOURCE_DIR}/sksevr_api.h"
 	"${SOURCE_DIR}/compat/HapticSkyrimVR.h"
 	"${SOURCE_DIR}/compat/HapticSkyrimVR.cpp"
+	"${SOURCE_DIR}/compat/HapticSkyrimVRinterface001.cpp"
+	"${SOURCE_DIR}/compat/HapticSkyrimVRinterface001.h"
 	"${SOURCE_DIR}/haptics.cpp"
 	"${SOURCE_DIR}/haptics.h"
 	"${SOURCE_DIR}/SpellChargeTracker.cpp"
