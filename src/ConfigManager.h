@@ -60,7 +60,7 @@ namespace Config
 		template <class T>
 		[[nodiscard]] T Get(std::string_view key, T fallback) const;
 
-		void SetValue(std::string_view key, Value value, ChangeSource source = ChangeSource::kFromCode);
+		void SetValue(std::string_view key, Value value, ChangeSource source = ChangeSource::kFromCode, bool saveFile = true);
 
 		std::uint64_t AddListener(Listener listener);
 		void RemoveListener(std::uint64_t id);

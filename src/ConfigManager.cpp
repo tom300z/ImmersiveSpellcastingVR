@@ -277,7 +277,7 @@ namespace Config
 		return Value{ false };
 	}
 
-	void Manager::SetValue(std::string_view key, Value value, ChangeSource source)
+	void Manager::SetValue(std::string_view key, Value value, ChangeSource source, bool saveFile)
 	{
 		const std::string keyStr(key);
 
@@ -312,6 +312,9 @@ namespace Config
 		}
 
 		DispatchChangeEvent(keyStr, storedValue, source);
+		if (saveFile) {
+			Manager::GetSingleton().SaveToDisk();
+		}
 	}
 
 	std::uint64_t Manager::AddListener(Listener listener)
@@ -544,25 +547,21 @@ namespace Config
 		void SetBool(RE::StaticFunctionTag*, RE::BSFixedString key, bool value)
 		{
 			Manager::GetSingleton().SetValue(key.c_str(), Value{ value }, ChangeSource::kFromMCM);
-			Manager::GetSingleton().SaveToDisk();
 		}
 
 		void SetInt(RE::StaticFunctionTag*, RE::BSFixedString key, std::int32_t value)
 		{
 			Manager::GetSingleton().SetValue(key.c_str(), Value{ static_cast<std::int64_t>(value) }, ChangeSource::kFromMCM);
-			Manager::GetSingleton().SaveToDisk();
 		}
 
 		void SetFloat(RE::StaticFunctionTag*, RE::BSFixedString key, float value)
 		{
 			Manager::GetSingleton().SetValue(key.c_str(), Value{ static_cast<double>(value) }, ChangeSource::kFromMCM);
-			Manager::GetSingleton().SaveToDisk();
 		}
 
 		void SetString(RE::StaticFunctionTag*, RE::BSFixedString key, RE::BSFixedString value)
 		{
 			Manager::GetSingleton().SetValue(key.c_str(), Value{ std::string(value.c_str()) }, ChangeSource::kFromMCM);
-			Manager::GetSingleton().SaveToDisk();
 		}
 
 		void Reload(RE::StaticFunctionTag*)
