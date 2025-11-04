@@ -113,7 +113,7 @@ namespace SpellChargeTracker
 				handHaptics->ScheduleEvent({});
 				//logger::info("Setting haptics for idle...");
 			} else if (newState == ActualState::kStart || newState == ActualState::kCharging) {
-				float chargeProgress = (newState == ActualState::kCharging) ? (1 - (caster->castingTimer * 2)) : 0;  // castingTimer goes down from 0.5 to 0 (No idea why...)
+				float chargeProgress = (newState == ActualState::kCharging) ? (1 - (caster->castingTimer * 2)) : (caster->castingTimer > 0)? 0: 1;  // castingTimer goes down from 0.5 to 0 (No idea why...)
 
 				handHaptics->ScheduleEvent({
 					.pulseInterval = static_cast<int>(std::lerp(100, 20, chargeProgress)),
