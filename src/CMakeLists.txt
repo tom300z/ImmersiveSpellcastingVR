@@ -13,6 +13,8 @@ set(SOURCE_FILES
 	"${SOURCE_DIR}/InputInterceptor.h"
 	"${SOURCE_DIR}/utils.cpp"
 	"${SOURCE_DIR}/utils.h"
+	"${SOURCE_DIR}/utils/TimedWorker.cpp"
+	"${SOURCE_DIR}/utils/TimedWorker.h"
 	"${SOURCE_DIR}/ActionAllowedHook.cpp"
 	"${SOURCE_DIR}/ActionAllowedHook.h"
 	"${SOURCE_DIR}/sksevr_api.h"
