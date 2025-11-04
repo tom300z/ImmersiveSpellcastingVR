@@ -38,6 +38,7 @@ namespace Config
 		Value value;
 		Value defaultValue;
 		std::string description;
+		std::string section;
 	};
 
 	class Manager
@@ -47,7 +48,7 @@ namespace Config
 
 		[[nodiscard]] static Manager& GetSingleton();
 
-		void RegisterSetting(std::string key, Type type, Value defaultValue, std::string description = {});
+		void RegisterSetting(std::string key, Type type, Value defaultValue, std::string description = {}, std::string section = {});
 
 		void LoadFromDisk();
 		void SaveToDisk();

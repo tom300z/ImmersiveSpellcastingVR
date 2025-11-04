@@ -6,7 +6,9 @@ namespace Settings
 {
 	using namespace std::string_view_literals;
 
-	inline constexpr auto kCastingInputMethod = "CastingInputMethod"sv;
-	inline constexpr auto kShowBindingWarning = "ShowBindingWarning"sv;
+	inline constexpr auto kInputMethod = "CastingInputMethod"sv;
+	inline constexpr auto kInputShowBindingWarning = "ShowBindingWarning"sv;
+	inline constexpr auto kInputEnable = "InputEnable"sv;
+	inline constexpr auto kInputCastAfterMenuExit = "InputCastAfterMenuExit"sv;
+	inline constexpr auto kHapticsEnable = "HapticsEnable"sv;
 }
-

@@ -88,8 +88,12 @@ void OnMenuOpenCloseEvent(const RE::MenuOpenCloseEvent& event)
 	Haptics::Pause(!inGame);
 
 	if (!event.opening && inGame) {
-		// Immediately start firing/charging spell after leaving menu. TODO: make this toggleable via config option.
-		InputInterceptor::RefreshCastingState();
+		if (Config::Manager::GetSingleton().Get<bool>(Settings::kInputCastAfterMenuExit, false)) {
+			InputInterceptor::RefreshCastingState();
+		} else {
+			// Unpress buttons and disable input for a few ms
+			AttackState::SuppressInput(100);
+		}
 	}
 }
 
@@ -98,7 +102,7 @@ void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 	switch (msg->type) {
 	case SKSE::MessagingInterface::kPostLoad:
 		{
-			
+
 			HapticSkyrimVRPluginApi::getHapticSkyrimVRInterface001(
 				g_pluginHandle,
 				SKSE::GetMessagingInterface()

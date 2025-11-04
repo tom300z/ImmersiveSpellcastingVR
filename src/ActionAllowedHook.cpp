@@ -40,7 +40,7 @@ namespace ActionAllowedHook
 			} else if (result && actionID == "ActionLand") {
 				// Force the input interceptor to reread the controller state so that spells are charged if hand was closed during jump
 				InputInterceptor::RefreshCastingState();
-			} else if (result && (actionID == "ActionLeftInterrupt" || actionID == "ActionRightInterrupt")) {	
+			} else if (result && (actionID == "ActionLeftInterrupt" || actionID == "ActionRightInterrupt")) {
 				// Force the input interceptor to reread the controller state so that spells are charged again after interrupting them
 				auto* player = RE::PlayerCharacter::GetSingleton();
 				if (player && player->isLeftHandMainHand) {

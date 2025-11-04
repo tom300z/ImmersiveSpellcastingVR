@@ -1,6 +1,7 @@
 #include "InputInterceptor.h"
 
 #include <array>
+#include <atomic>
 #include <cctype>
 #include <cstdint>
 #include <limits>
@@ -28,7 +29,8 @@ namespace InputInterceptor
 	namespace
 	{
 		std::atomic_bool g_installed{ false };
-		std::uint64_t g_castingButtonListenerId{ 0 };
+		std::atomic_bool g_inputEnabled{ true };
+		std::uint64_t g_configListenerId{ 0 };
 
 		struct ButtonMapping
 		{
@@ -64,8 +66,29 @@ namespace InputInterceptor
 			}
 		}
 
+		void ApplyInputEnabled(const Config::Value& value)
+		{
+			if (const auto* enabled = std::get_if<bool>(&value)) {
+				const bool previous = g_inputEnabled.exchange(*enabled);
+				if (!*enabled) {
+					g_leftHandState.lastCastingButtonState = ButtonState::kUnknown;
+					g_leftHandState.hideCastingButtonFromGame = false;
+					g_rightHandState.lastCastingButtonState = ButtonState::kUnknown;
+					g_rightHandState.hideCastingButtonFromGame = false;
+				} else if (!previous && *enabled) {
+					RefreshCastingState();
+				}
+			} else {
+				logger::warn("Unsupported value type supplied for input enable configuration");
+			}
+		}
+
 		void ProcessCastingButtonState(bool isLeftHand, bool castingButtonActivated, bool forceDispatch = false, bool forceRepress = false)
 		{
+			if (!g_inputEnabled.load(std::memory_order::relaxed)) {
+				return;
+			}
+
 			const ButtonState newState = castingButtonActivated ? ButtonState::kPressed : ButtonState::kUnpressed;
 			HandState* handState = isLeftHand ? &g_leftHandState : &g_rightHandState;
 
@@ -121,6 +144,9 @@ namespace InputInterceptor
 
 	void ControllerCallback(uint32_t unControllerDeviceIndex, vr::VRControllerState001_t* pControllerState, [[maybe_unused]] uint32_t unControllerStateSize, [[maybe_unused]] bool& state)
 	{
+		if (!g_inputEnabled.load(std::memory_order::relaxed)) {
+			return;
+		}
 
 		// Skip if this is not for a hand
 		auto role = vr::VRSystem()->GetControllerRoleForTrackedDeviceIndex(unControllerDeviceIndex);
@@ -146,12 +172,15 @@ namespace InputInterceptor
 
 	// This needs to be called manually after the config was loaded
 	void ConnectToConfig() {
-		ApplyCastingInputMethod(Config::Manager::GetSingleton().GetValue(Settings::kCastingInputMethod));
-		if (g_castingButtonListenerId == 0) {
-			g_castingButtonListenerId = Config::Manager::GetSingleton().AddListener(
+		ApplyCastingInputMethod(Config::Manager::GetSingleton().GetValue(Settings::kInputMethod));
+		ApplyInputEnabled(Config::Manager::GetSingleton().GetValue(Settings::kInputEnable));
+		if (g_configListenerId == 0) {
+			g_configListenerId = Config::Manager::GetSingleton().AddListener(
 				[](std::string_view key, const Config::Value& value, [[maybe_unused]] Config::ChangeSource source) {
-					if (key == Settings::kCastingInputMethod) {
+					if (key == Settings::kInputMethod) {
 						ApplyCastingInputMethod(value);
+					} else if (key == Settings::kInputEnable) {
+						ApplyInputEnabled(value);
 					}
 				});
 		}
@@ -160,6 +189,10 @@ namespace InputInterceptor
 	void RefreshCastingState(bool forceRepressLeft, bool forceRepressRight)
 	{
 		if (!Utils::InGame()) {
+			return;
+		}
+
+		if (!g_inputEnabled.load(std::memory_order::relaxed)) {
 			return;
 		}
 

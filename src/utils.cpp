@@ -201,7 +201,7 @@ c) Ignore this warning and do without the actions. )",
 		// Checks for unwanted Keybindings and displays a warning message
 		void CheckForUnwantedBindings()
 		{
-			if (!Config::Manager::GetSingleton().Get<bool>(Settings::kShowBindingWarning, true)) {
+			if (!Config::Manager::GetSingleton().Get<bool>(Settings::kInputShowBindingWarning, true)) {
 				return;
 			}
 
@@ -221,7 +221,7 @@ c) Ignore this warning and do without the actions. )",
 					//logger::info("{} -> {} ({})", mapping.eventID.c_str(), inputKeyName, mapping.inputKey);
 
 					// Show warning if grip is used in Gameplay and grip press is configured as input
-					auto inputType = Config::Manager::GetSingleton().Get<std::string>(Settings::kCastingInputMethod, "grip");
+					auto inputType = Config::Manager::GetSingleton().Get<std::string>(Settings::kInputMethod, "grip");
 					if (inputType == "grip" && mapping.inputKey == vr::EVRButtonId::k_EButton_Grip) {
 						unwantedMappings += std::format("\n {} {} Press -> {}", sideName, inputKeyName, mapping.eventID.c_str());
 					}

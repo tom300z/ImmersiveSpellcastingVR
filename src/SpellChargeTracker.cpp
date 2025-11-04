@@ -3,11 +3,15 @@
 #include "REL/Relocation.h"
 #include "SKSE/Logger.h"
 #include "SKSE/SKSE.h"
+#include "ConfigManager.h"
+#include "Settings.h"
+#include "compat/HapticSkyrimVR.h"
 #include "haptics.h"
 #include "utils.h"
 
 #include <algorithm>
 #include <array>
+#include <atomic>
 #include <cmath>
 #include <optional>
 #include <typeinfo>
@@ -21,15 +25,59 @@ namespace SpellChargeTracker
 		using HapticEvent = Haptics::HapticEvent;
 		using UpdateFunc = void (*)(RE::ActorMagicCaster*, float);
 
+		std::atomic_bool g_hapticsEnabled{ true };
+		std::uint64_t g_configListenerId{ 0 };
+
 		UpdateFunc g_originalUpdate{ nullptr };
 
 		ActualState lastLeftHandState = ActualState::kUnknown;
 		ActualState lastRightHandState = ActualState::kUnknown;
 
+		void ApplyHapticsEnabled(const Config::Value& value)
+		{
+			if (const auto* enabled = std::get_if<bool>(&value)) {
+				const bool isEnabled = *enabled;
+				g_hapticsEnabled.store(isEnabled, std::memory_order::relaxed);
+				lastLeftHandState = ActualState::kUnknown;
+				lastRightHandState = ActualState::kUnknown;
+				if (!isEnabled) {
+					if (auto* left = Haptics::GetHandHaptics(true)) {
+						left->ScheduleEvent({});
+					}
+					if (auto* right = Haptics::GetHandHaptics(false)) {
+						right->ScheduleEvent({});
+					}
+				}
+				Compat::HapticSkyrimVR::DisableMagicHaptics(isEnabled);
+			} else {
+				logger::warn("Unsupported value type supplied for haptics enable configuration");
+			}
+		}
+
+		void EnsureConfigListener()
+		{
+			if (g_configListenerId != 0) {
+				return;
+			}
+
+			auto& config = Config::Manager::GetSingleton();
+			ApplyHapticsEnabled(config.GetValue(Settings::kHapticsEnable));
+			g_configListenerId = config.AddListener(
+				[](std::string_view key, const Config::Value& value, [[maybe_unused]] Config::ChangeSource source) {
+					if (key == Settings::kHapticsEnable) {
+						ApplyHapticsEnabled(value);
+					}
+				});
+		}
+
 		void SetHapticState(RE::ActorMagicCaster* caster)
 		{
 			// Return if this is not the player
 			if (!caster || caster->actor != RE::PlayerCharacter::GetSingleton()) {
+				return;
+			}
+
+			if (!g_hapticsEnabled.load(std::memory_order::relaxed)) {
 				return;
 			}
 
@@ -110,6 +158,8 @@ namespace SpellChargeTracker
 		if (installed) {
 			return;
 		}
+
+		EnsureConfigListener();
 
 		if (auto* player = RE::PlayerCharacter::GetSingleton()) {
 			RE::ActorMagicCaster* sample = nullptr;

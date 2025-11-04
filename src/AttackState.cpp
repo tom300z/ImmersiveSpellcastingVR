@@ -2,6 +2,7 @@
 #include "RE/Skyrim.h"
 #include "SKSE/SKSE.h"
 #include "utils.h"
+#include "AttackState.h"
 
 #include <atomic>
 #include <chrono>
@@ -16,10 +17,15 @@ namespace AttackState
 	std::atomic_bool g_leftAttacking{ false };
 	std::atomic_bool g_rightAttacking{ false };
 	*/
+	std::atomic<bool> inputSuppressed{ false };
 
 	// Run on UI thread
 	void _AddAttackButtonEvent(bool left, bool pressed, float heldSecOverride = 0.0f)
 	{
+		if (inputSuppressed.load(std::memory_order_relaxed) && pressed) {
+			return;
+		}
+
 		auto* ue = RE::UserEvents::GetSingleton();
 		auto* q = RE::BSInputEventQueue::GetSingleton();
 		if (!ue || !q)
@@ -57,6 +63,16 @@ namespace AttackState
 			AddAttackButtonEvent(left, false);
 			std::this_thread::sleep_for(std::chrono::milliseconds(25));
 			AddAttackButtonEvent(left, true);
+		}).detach();
+	}
+
+	void SuppressInput(int ms) {
+		std::thread([ms] {
+			inputSuppressed = true;
+			SKSE::GetTaskInterface()->AddUITask([]() { _AddAttackButtonEvent(true, false); });
+			SKSE::GetTaskInterface()->AddUITask([ms]() { _AddAttackButtonEvent(false, false, ms); });
+			std::this_thread::sleep_for(std::chrono::milliseconds(ms));
+			inputSuppressed = false;
 		}).detach();
 	}
 }
