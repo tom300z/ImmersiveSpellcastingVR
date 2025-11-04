@@ -4,8 +4,8 @@ set(SOURCE_DIR "${ROOT_DIR}/src")
 set(SOURCE_FILES
 	"${SOURCE_DIR}/PCH.h"
 	"${SOURCE_DIR}/main.cpp"
-	"${SOURCE_DIR}/AttackState.cpp"
-	"${SOURCE_DIR}/AttackState.h"
+	"${SOURCE_DIR}/InputDispatcher.cpp"
+	"${SOURCE_DIR}/InputDispatcher.h"
 	"${SOURCE_DIR}/ConfigManager.cpp"
 	"${SOURCE_DIR}/ConfigManager.h"
 	"${SOURCE_DIR}/Settings.h"

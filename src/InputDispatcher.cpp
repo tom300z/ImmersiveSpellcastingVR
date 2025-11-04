@@ -2,21 +2,14 @@
 #include "RE/Skyrim.h"
 #include "SKSE/SKSE.h"
 #include "utils.h"
-#include "AttackState.h"
+#include "InputDispatcher.h"
 
 #include <atomic>
 #include <chrono>
 #include <thread>
 
-namespace AttackState
+namespace InputDispatcher
 {
-	/*
-	std::atomic_bool g_running{ false };
-	std::thread g_thread;
-
-	std::atomic_bool g_leftAttacking{ false };
-	std::atomic_bool g_rightAttacking{ false };
-	*/
 	std::atomic<bool> inputSuppressed{ false };
 
 	// Run on UI thread

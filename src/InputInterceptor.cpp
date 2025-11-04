@@ -9,7 +9,7 @@
 #include <string_view>
 #include <vector>
 
-#include "AttackState.h"
+#include "InputDispatcher.h"
 #include "ConfigManager.h"
 #include "Settings.h"
 #include "sksevr_api.h"
@@ -121,9 +121,9 @@ namespace InputInterceptor
 				// Fire&Forget spells sometimes need the trigger to be released for a few ms before they can be recast. This can be emulated via the forceRepress option
 				// I wish there was a cleaner way to do this but i don't know any.
 				if (!invertInput && desiredAttackPressed && forceRepress) {
-					AttackState::RepressAttackButton(gameIsLeftHand);
+					InputDispatcher::RepressAttackButton(gameIsLeftHand);
 				} else {
-					AttackState::AddAttackButtonEvent(gameIsLeftHand, desiredAttackPressed);
+					InputDispatcher::AddAttackButtonEvent(gameIsLeftHand, desiredAttackPressed);
 				}
 
 				// Hide original input from game, if it is currently pressed

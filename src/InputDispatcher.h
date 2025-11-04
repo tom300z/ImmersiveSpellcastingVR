@@ -1,7 +1,7 @@
 #pragma once
 #include <chrono>
 
-namespace AttackState
+namespace InputDispatcher
 {
 	void AddAttackButtonEvent(bool left, bool pressed);
 	void RepressAttackButton(bool left);

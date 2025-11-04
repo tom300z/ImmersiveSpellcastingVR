@@ -11,7 +11,7 @@
 #include "SKSE/Interfaces.h"
 #include "RE/Skyrim.h"
 #include "SKSE/Trampoline.h"
-#include "AttackState.h"
+#include "InputDispatcher.h"
 #include "ConfigManager.h"
 #include "InputInterceptor.h"
 #include "Settings.h"
@@ -92,7 +92,7 @@ void OnMenuOpenCloseEvent(const RE::MenuOpenCloseEvent& event)
 			InputInterceptor::RefreshCastingState();
 		} else {
 			// Unpress buttons and disable input for a few ms
-			AttackState::SuppressInput(100);
+			InputDispatcher::SuppressInput(100);
 		}
 	}
 }
