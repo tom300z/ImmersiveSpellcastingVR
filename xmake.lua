@@ -60,7 +60,7 @@ target("ImmersiveSpellcastingVR")
 
     -- papyrus
     add_rules("papyrus")
-    add_files("papyrus/**.psc")
+    add_files("mod_data/scripts/**.psc")
 
     -- custom
     add_ldflags("/INCREMENTAL:NO", {force = true})  -- Ensure the new dll is always copied so it matches the symbols
