@@ -23,16 +23,18 @@
 #include "SpellChargeTracker.h"
 #include "compat/HapticSkyrimVR.h"
 #include "compat/HapticSkyrimVRinterface001.h"
+#include "PCH.h"
 
 using namespace RE;
 using namespace SKSE;
 
 SKSE::PluginHandle g_pluginHandle;
+std::string g_pluginName = "Immersive Spellcasting VR";
 
-extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
+/*extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
 {
 	Utils::Setup::SetupLogger();
-	logger::info(FMT_STRING("{} v{} queried"), Plugin::NAME, Plugin::VERSION);
+	logger::info("{} v{} queried"s, Plugin::NAME, Plugin::VERSION);
 
 	// Initialize Plugin Info
 	a_info->infoVersion = SKSE::PluginInfo::kVersion;
@@ -51,7 +53,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a
 	}
 
 	return true;
-}
+}*/
 
 // Event Callbacks
 void OnPlayerAnimationGraphEvent(const RE::BSAnimationGraphEvent& event)
@@ -129,13 +131,14 @@ void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 	}
 }
 
-
-extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
+extern "C" [[maybe_unused]] __declspec(dllexport) bool SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
 {
-	#ifndef NDEBUG
+	while (!::IsDebuggerPresent());
+#ifndef NDEBUG
 		// Wait for debugger
 		while (!::IsDebuggerPresent());
-	#endif
+#endif
+
 	SKSE::Init(a_skse);
 	g_pluginHandle = a_skse->GetPluginHandle();
 
@@ -153,6 +156,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 		scriptEventSource->AddEventSink(
 			&loadGameHandler
 		);
+
 	}
 
 	auto* papyrus = SKSE::GetPapyrusInterface();
@@ -163,7 +167,7 @@ extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Load(const SKSE::LoadInterface* a_s
 
 	InputInterceptor::Install(a_skse);
 
-	logger::info("{} v{} loaded"sv, Plugin::NAME, Plugin::VERSION.string());
+	logger::info("{} loaded!"s, g_pluginName);
 
 	return true;
 }

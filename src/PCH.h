@@ -1,21 +1,16 @@
 #pragma once
 
 #include "RE/Skyrim.h"
+#undef max
+#undef min
 #include "SKSE/SKSE.h"
 
-#pragma warning(push)
-#ifdef NDEBUG
-#	include <spdlog/sinks/basic_file_sink.h>
-#else
-#	include <spdlog/sinks/msvc_sink.h>
-#endif
-#pragma warning(pop)
-
-using namespace std::literals;
 
 namespace logger = SKSE::log;
+using namespace std::literals;
 
-#define DLLEXPORT __declspec(dllexport)
-
-#include "Plugin.h"
 #include "utils.h"
+extern std::string g_pluginName;
+
+//#define DLLEXPORT __declspec(dllexport)
+

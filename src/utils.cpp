@@ -172,7 +172,7 @@ You have 3 options to mitigate this:
 a) Unmap the buttons in gameplay using the "VR Key Remapping Tool" from NexusMods.
 b) Use the "Grip Touch" input instead of "Grip Press". See also HIGGS's "useTouchForGrip" (Index Controllers).
 c) Ignore this warning and do without the actions. )",
-				Plugin::NAME,
+				g_pluginName,
 				unwantedMappings);
 			std::vector<std::string> options = { "a) Show Remapping Tool on Nexusmods", "b) Use Touch input", "c) Ignore disabled actions", "Ignore once" };
 			Utils::MessageBoxResultCallbackFunc handler;
@@ -191,7 +191,7 @@ c) Ignore this warning and do without the actions. )",
 					ShowBindingMessage(unwantedMappings);
 				}
 			};
-			
+
 			Utils::ShowMessageBox(
 				message,
 				options,
@@ -240,7 +240,7 @@ c) Ignore this warning and do without the actions. )",
 				std::format(R"(WARNING: {} has detected that it is installed along an outdated version of Shizof's "Haptic Skyrim VR". This will lead to broken Spellcasting Haptics.
 
 Please update Haptic Skyrim VR to version 1.8.0 or higher! )",
-					Plugin::NAME),
+					g_pluginName),
 				{ "Show Haptic Skyrim VR on Nexusmods", "Ignore once" },
 				[](int index) {
 					if (index == 0) {
@@ -260,8 +260,9 @@ Please update Haptic Skyrim VR to version 1.8.0 or higher! )",
 
 		void SetupLogger() {
 			// Set up logger
+			/*
 #ifndef NDEBUG
-			auto sink = std::make_shared<spdlog::sinks::msvc_sink_mt>();
+			auto sink = std::make_shared<spdlog::sinks::sink>();
 #else
 			auto path = logger::log_directory();
 			if (!path) {
@@ -284,6 +285,7 @@ Please update Haptic Skyrim VR to version 1.8.0 or higher! )",
 
 			spdlog::set_default_logger(std::move(log));
 			spdlog::set_pattern("%s(%#): [%^%l%$] %v"s);
+			*/
 		}
 	}
 
@@ -404,7 +406,7 @@ namespace LogUtils
 		out.reserve(3 * number);  // "XX " × 8
 
 		for (int i = 0; i < number; ++i)
-			out += fmt::format("{:02X} ", p[i]);
+			out += std::format("{:02X} ", p[i]);
 
 		spdlog::info("Next {} bytes: {}", number, out);
 	}

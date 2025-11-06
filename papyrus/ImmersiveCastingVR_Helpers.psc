@@ -1,5 +1,6 @@
 Scriptname ImmersiveCastingVR_Helpers
 
+
 Int Function IndexOfStr(String[] arr, String search) Global
     If !arr
         return -1

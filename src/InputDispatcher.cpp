@@ -30,11 +30,11 @@ namespace InputDispatcher
 
 		// Arg order per your ButtonEvent::Init signature: device, idCode, value, duration, userEvent
 		q->AddButtonEvent(
-			RE::INPUT_DEVICE::kGamepad,              // VR right-hand: kViveSecondary
-			0,                                       // idCode
-			value,                                   // 1.0=down, 0.0=up
-			heldSec,                                 // 0.0 new press; >0.0 signals release
-			left ? ue->leftAttack : ue->rightAttack  // BSFixedString user event
+			RE::INPUT_DEVICE::kGamepad,               // VR right-hand: kViveSecondary
+			0,                                        // idCode
+			left ? 0x40 : 0x48, //ue->leftAttack : ue->rightAttack,  // BSFixedString user event
+			value,                                    // 1.0=down, 0.0=up
+			heldSec                                  // 0.0 new press; >0.0 signals release
 		);
 	}
 	void AddAttackButtonEvent(bool left, bool pressed) {
