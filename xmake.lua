@@ -68,12 +68,11 @@ target("ImmersiveSpellcastingVR")
         description = "SKSEVR Plugin that makes VR Spellcasting more immersive."
     })
 
-    -- add src files
+    -- cpp
     add_files("src/**.cpp")
     add_headerfiles("src/**.h")
     add_includedirs("src")
     set_pcxxheader("src/pch.h")
-
     add_linkdirs("lib/commonlibsse-ng/extern/openvr/lib/win64")
     add_links("openvr_api")
 
@@ -87,8 +86,11 @@ target("ImmersiveSpellcastingVR")
 
     -- custom
     add_ldflags("/INCREMENTAL:NO", {force = true})  -- Ensure the new dll is always copied so it matches the symbols
-    --add_installfiles("$(buildir)/$(plat)/$(arch)/$(mode)/ImmersiveSpellcastingVR.pdb")
     after_build(function(target)
+        -- Copy static mod data (esp, assets, etc)
+        os.cp("mod_data_static/**", target:installdir())
+
+        -- (Re)start SkyrimVR if debugging
         if is_mode("debug") then
             os.exec("scripts\\kill_skyrimvr.bat")
             os.exec("scripts\\start_skyrimvr.bat")
