@@ -16,7 +16,7 @@ xcopy /y "%SCRIPT_DIR%..\mod_data_source\scripts\*.*" "%SkyrimVRPath%\data\scrip
 xcopy /y "%SCRIPT_DIR%..\mod_data_source\scripts\*.*" "%SkyrimVRPath%\data\scripts\source\" >nul
 
 rem Compile Papyrus scripts
-"%PapyrusCompilerPath%\PapyrusCompiler.exe" ^
+"%SkyrimVRPath%\Papyrus Compiler\PapyrusCompiler.exe" ^
   "%SkyrimVRPath%\data\scripts\source\ImmersiveCasting" ^
   -all ^
   -f=TESV_Papyrus_Flags.flg ^

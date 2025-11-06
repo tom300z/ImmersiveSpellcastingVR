@@ -2,7 +2,7 @@
 setlocal
 
 rem --- configuration ---
-set "MO2Path=C:\Modding\MO2"
+set "MO2Path=%XSE_TES5_MODS_PATH%\.."
 set "SCRIPT_DIR=%~dp0"
 rem ----------------------
 

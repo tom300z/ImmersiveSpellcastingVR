@@ -13,4 +13,3 @@ Function SetString(String key, String value) Global Native
 Function Reload() Global Native
 Function Save() Global Native
 Function ResetAll() Global Native
-
