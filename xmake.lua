@@ -37,6 +37,25 @@ rule("papyrus")
         end, {files = sourcebatch.sourcefiles})
     end)
 
+-- hkx animation rule
+rule("hkx-anim")
+    set_extensions(".xml")
+    on_build_file(function (target, sourcefile, opt)
+        if not sourcefile:match(".-[/\\]animations[/\\].+%.xml$") then
+            -- Not an animation, don't process
+            return
+        end
+        import("core.project.depend")
+
+        depend.on_changed(function ()
+            -- process the file
+            local animation_subfolder = path.relative(path.directory(sourcefile), path.join(os.projectdir(), "mod_data"))
+            local outdir = path.join(target:installdir(), animation_subfolder)
+            os.mkdir(outdir)
+            os.exec("hkxconv.exe convert -v hkx " .. sourcefile .. " " .. outdir)
+        end, {files = sourcefile})
+    end)
+
 -- targets
 target("ImmersiveSpellcastingVR")
     -- add dependencies to target
@@ -61,6 +80,10 @@ target("ImmersiveSpellcastingVR")
     -- papyrus
     add_rules("papyrus")
     add_files("mod_data/scripts/**.psc")
+
+    -- animations
+    add_rules("hkx-anim")
+    add_files("mod_data/**/animations/**.xml")
 
     -- custom
     add_ldflags("/INCREMENTAL:NO", {force = true})  -- Ensure the new dll is always copied so it matches the symbols

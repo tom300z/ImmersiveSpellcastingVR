@@ -1,3 +1,4 @@
 build/
 vsxmake2022/
 .xmake/
+*.hkx

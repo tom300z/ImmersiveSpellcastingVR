@@ -1,0 +1,456 @@
+<?xml version="1.0" encoding="us-ascii"?>
+<hkpackfile classversion="8" contentsversion="hk_2010.2.0-r1" toplevelobject="#0050">
+  <hksection name="__data__">
+    <hkobject name="#0050" class="hkRootLevelContainer" signature="0x2772c11e">
+      <hkparam name="namedVariants" numelements="2">
+        <hkobject>
+          <hkparam name="name">Merged Animation Container</hkparam>
+          <hkparam name="className">hkaAnimationContainer</hkparam>
+          <hkparam name="variant">#0051</hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="name">Resource Data</hkparam>
+          <hkparam name="className">hkMemoryResourceContainer</hkparam>
+          <hkparam name="variant">#0054</hkparam>
+        </hkobject>
+      </hkparam>
+    </hkobject>
+    <hkobject name="#0051" class="hkaAnimationContainer" signature="0x8dc20333">
+      <hkparam name="skeletons" numelements="0"></hkparam>
+      <hkparam name="animations" numelements="1">#0052</hkparam>
+      <hkparam name="bindings" numelements="1">#0053</hkparam>
+      <hkparam name="attachments" numelements="0"></hkparam>
+      <hkparam name="skins" numelements="0"></hkparam>
+    </hkobject>
+    <hkobject name="#0052" class="hkaSplineCompressedAnimation" signature="0x792ee0bb">
+      <hkparam name="type">HK_SPLINE_COMPRESSED_ANIMATION</hkparam>
+      <hkparam name="duration">0.0001</hkparam>
+      <hkparam name="numberOfTransformTracks">99</hkparam>
+      <hkparam name="numberOfFloatTracks">4</hkparam>
+      <hkparam name="extractedMotion">null</hkparam>
+      <hkparam name="annotationTracks" numelements="99">
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+        <hkobject>
+          <hkparam name="trackName"></hkparam>
+          <hkparam name="annotations" numelements="0"></hkparam>
+        </hkobject>
+      </hkparam>
+      <hkparam name="numFrames">15</hkparam>
+      <hkparam name="numBlocks">1</hkparam>
+      <hkparam name="maxFramesPerBlock">256</hkparam>
+      <hkparam name="maskAndQuantizationSize">400</hkparam>
+      <hkparam name="blockDuration">8.500000</hkparam>
+      <hkparam name="blockInverseDuration">0.117647</hkparam>
+      <hkparam name="frameDuration">0.033333</hkparam>
+      <hkparam name="blockOffsets" numelements="1">0</hkparam>
+      <hkparam name="floatBlockOffsets" numelements="1">2712</hkparam>
+      <hkparam name="transformOffsets" numelements="0"></hkparam>
+      <hkparam name="floatOffsets" numelements="0"></hkparam>
+      <hkparam name="data" numelements="2736">69 0 0 0 69 4 0 0 69 4 0 0 69 0 0 0 69 0 0 0 69 0 0 0 69 1 15 0 69 4 1 0 69 4 9 0 69 1 15 0 69 4 1 0 69 4 9 0 69 5 0 0 69 5 0 0 69 5 0 0 69 5 0 0 69 5 0 0 69 5 0 0 69 6 0 0 69 6 0 0 69 6 0 0 69 6 0 0 69 6 0 0 69 6 0 0 69 6 1 0 69 4 1 0 69 6 1 0 69 7 15 0 69 4 240 0 69 4 240 0 69 7 15 0 69 4 15 0 69 4 15 0 69 1 0 0 69 1 0 0 69 6 9 0 69 4 9 0 69 6 0 0 69 4 240 0 69 4 30 0 69 6 15 0 69 6 15 0 69 6 15 0 69 7 15 0 69 7 15 0 69 7 15 0 69 6 1 0 69 7 0 0 69 7 0 0 69 6 0 0 69 6 0 0 69 6 0 0 69 4 240 0 69 4 165 0 69 0 240 0 69 1 24 0 69 4 15 0 69 4 15 0 69 0 15 0 69 1 1 0 69 7 15 0 69 7 15 0 69 7 15 0 69 7 15 0 69 7 15 0 69 7 15 0 69 7 15 0 69 7 180 0 69 4 150 0 69 4 26 0 69 7 37 0 69 4 16 0 69 4 16 0 69 7 5 0 69 4 144 0 69 4 144 0 69 7 30 0 69 4 144 0 69 4 144 0 69 7 28 0 69 4 144 0 69 4 144 0 69 7 15 0 69 4 3 0 69 4 26 0 69 7 90 0 69 4 16 0 69 4 16 0 69 7 30 0 69 4 24 0 69 4 24 0 69 7 30 0 69 4 144 0 69 4 9 0 69 7 30 0 69 4 24 0 69 4 9 0 69 4 0 0 69 0 0 0 3 3 3 3 0 0 241 66 6 122 69 194 165 174 211 192 197 55 122 100 23 0 0 0 50 137 250 65 108 248 127 21 56 0 0 0 50 60 219 65 183 50 128 253 55 0 0 0 165 174 211 64 57 56 122 154 24 0 0 0 48 137 250 65 108 248 127 234 55 0 0 0 64 60 219 65 183 178 127 1 56 0 0 0 255 255 159 64 255 255 159 192 255 255 159 64 255 255 31 193 255 255 159 64 0 0 112 193 254 255 159 192 0 0 112 193 254 255 159 192 255 255 159 192 254 255 159 192 255 255 31 193 2 0 160 192 254 255 159 192 7 0 160 192 254 255 111 193 6 0 160 192 254 255 31 193 243 255 159 64 0 0 112 193 250 255 159 64 255 255 159 192 247 255 159 64 255 255 31 193 218 172 167 192 225 169 114 64 192 247 127 255 55 0 0 0 192 250 11 65 217 248 127 255 55 0 0 0 0 31 140 188 71 211 29 65 163 246 127 255 55 0 0 0 229 248 216 191 63 102 188 64 110 162 155 65 58 21 101 138 94 0 0 0 16 180 96 65 3 0 3 0 0 0 0 14 14 14 14 135 185 161 246 124 129 169 161 248 124 183 218 143 240 123 19 203 141 229 123 0 237 28 162 65 5 0 3 0 0 0 0 6 6 14 14 14 14 151 23 118 193 79 150 55 118 185 79 47 209 121 96 55 22 163 122 76 55 202 131 124 45 55 225 163 124 42 55 0 224 248 216 63 63 102 188 64 105 162 155 65 155 88 120 108 28 0 0 0 32 180 96 65 59 146 158 79 58 0 0 0 234 28 162 65 155 210 141 83 56 0 0 0 254 255 159 192 255 255 159 64 1 220 220 60 199 80 176 65 121 156 127 242 55 0 0 0 112 25 13 65 3 11 128 255 55 0 0 0 184 18 0 65 16 244 136 64 151 95 128 65 11 0 3 0 0 0 0 3 7 7 7 10 10 10 13 14 14 14 14 57 100 115 90 50 58 244 113 66 50 58 84 110 5 50 33 20 105 168 49 20 36 102 117 49 221 51 102 74 49 167 67 102 32 49 115 99 102 249 48 68 147 108 239 48 239 146 118 224 48 232 146 123 230 48 231 210 124 231 48 0 149 95 128 65 6 0 3 0 0 0 0 2 6 6 14 14 14 14 19 165 138 161 62 25 229 138 167 62 47 53 139 229 62 33 181 139 142 62 51 53 140 165 62 83 85 141 207 62 72 165 141 163 62 0 0 0 99 207 27 192 72 24 229 64 166 141 37 166 61 0 0 0 77 55 42 192 82 178 251 64 88 130 37 88 34 0 0 0 99 207 27 192 72 24 229 64 166 109 218 166 93 0 0 0 90 57 69 63 31 125 22 192 142 44 219 64 88 130 37 166 125 0 0 0 75 182 49 193 96 32 129 63 97 159 94 65 194 168 95 207 55 0 0 0 70 182 49 65 112 32 129 63 71 159 94 65 194 72 160 47 56 0 0 0 163 69 143 64 193 116 182 64 62 248 127 255 55 0 0 0 82 102 102 191 35 56 95 192 131 249 11 65 163 102 102 63 32 56 95 192 120 249 11 65 218 161 56 65 129 151 81 192 0 185 133 188 7 148 42 65 0 187 133 188 7 148 42 65 98 224 33 65 8 0 3 0 0 0 0 3 3 10 10 10 14 14 14 14 181 101 5 73 74 185 85 5 69 74 200 21 5 54 74 76 246 2 178 73 148 22 2 106 73 245 38 1 9 73 248 22 1 6 73 242 38 1 12 73 241 38 1 13 73 0 0 0 180 111 148 64 4 0 3 0 0 0 0 10 14 14 14 14 160 246 1 94 73 165 230 1 89 73 75 135 0 179 72 70 151 0 184 72 64 151 0 190 72 0 0 0 3 0 3 0 0 0 0 14 14 14 14 150 0 80 254 106 151 208 79 1 107 62 224 96 240 105 58 0 98 222 105 0 93 74 225 64 3 0 3 0 0 0 0 14 14 14 14 214 245 127 255 55 212 245 127 255 55 157 246 127 255 55 170 246 127 255 55 0 30 224 33 65 179 198 1 179 54 0 0 0 154 112 148 64 39 119 114 242 95 0 0 0 130 71 0 130 55 0 0 0 99 74 225 64 79 248 127 255 55 0 0 0 146 75 31 193 224 8 127 193 1 135 30 64 134 59 19 191 43 0 0 0 32 142 181 65 192 145 217 192 17 20 57 193 203 139 221 227 61 0 0 0 35 254 160 65 203 34 74 193 31 236 192 65 56 156 177 107 78 0 0 0 131 71 189 64 117 54 89 193 62 199 150 65 66 123 24 162 44 0 0 0 219 79 46 193 193 134 32 65 193 32 164 64 159 80 107 197 58 0 0 0 249 92 144 65 191 44 61 192 161 148 151 64 191 109 38 253 3 0 0 0 78 64 135 193 146 49 140 64 1 129 197 64 137 193 80 54 44 0 0 0 154 16 55 192 134 147 107 191 203 176 74 64 7 0 3 0 0 0 0 10 10 11 13 14 14 14 14 199 214 37 196 61 199 214 37 196 61 199 214 37 196 61 212 182 36 196 61 14 87 32 200 61 156 135 22 203 61 201 215 19 203 61 216 231 18 203 61 0 0 182 84 64 6 0 3 0 0 0 0 11 11 11 14 14 14 14 49 28 141 171 55 41 44 141 172 55 66 28 141 170 55 36 44 141 172 55 251 59 141 175 55 183 91 141 181 55 127 107 141 185 55 0 0 0 137 165 59 64 3 0 3 0 0 0 0 14 14 14 14 141 43 132 233 55 105 43 132 234 55 221 27 132 231 55 59 43 132 235 55 0 148 222 18 192 197 80 152 189 33 153 19 65 3 0 3 0 0 0 0 14 14 14 14 131 103 136 224 54 129 71 135 225 54 138 7 139 221 54 124 135 133 226 54 0 227 82 73 64 6 0 3 0 0 0 0 10 10 11 14 14 14 14 1 249 127 255 55 202 248 127 255 55 132 248 127 255 55 65 248 127 255 55 185 248 127 255 55 93 249 127 255 55 149 249 127 255 55 0 0 0 43 69 242 63 5 0 3 0 0 0 0 10 10 14 14 14 14 118 248 127 255 55 125 248 127 255 55 187 247 127 255 55 71 247 127 255 55 193 247 127 255 55 175 247 127 255 55 0 222 189 163 59 56 150 50 190 37 99 19 65 172 88 126 228 54 0 0 0 69 252 114 64 13 0 3 0 0 0 0 3 10 10 10 11 11 11 13 13 13 14 14 14 14 93 249 127 255 55 79 249 127 255 55 251 248 127 255 55 147 248 127 255 55 67 248 127 255 55 123 248 127 255 55 178 248 127 255 55 234 248 127 255 55 220 249 127 255 55 205 250 127 255 55 183 251 127 255 55 235 251 127 255 55 31 252 127 255 55 83 252 127 255 55 0 184 72 8 64 9 0 3 0 0 0 0 5 5 6 8 8 11 14 14 14 14 170 248 127 255 55 133 248 127 255 55 96 248 127 255 55 70 248 127 255 55 138 248 127 255 55 230 248 127 255 55 192 249 127 255 55 228 250 127 255 55 172 251 127 255 55 202 251 127 255 55 0 40 115 243 63 209 233 54 191 37 106 12 65 3 0 3 0 0 0 0 14 14 14 14 131 169 125 204 53 109 233 125 204 53 187 249 124 205 53 70 105 126 204 53 0 50 21 85 64 3 0 3 0 0 0 0 14 14 14 14 93 251 127 255 55 97 251 127 255 55 184 252 127 255 55 191 252 127 255 55 0 31 2 255 63 4 0 3 0 0 0 0 10 14 14 14 14 41 251 127 255 55 35 251 127 255 55 213 253 127 255 55 183 254 127 255 55 199 254 127 255 55 0 0 0 15 223 89 64 23 228 200 191 19 221 250 64 3 0 3 0 0 0 0 14 14 14 14 70 41 128 251 53 55 89 128 251 53 113 185 127 251 53 10 217 128 251 53 0 1 248 21 64 3 0 3 0 0 0 0 14 14 14 14 144 253 127 255 55 148 253 127 255 55 202 254 127 255 55 208 254 127 255 55 0 233 118 223 63 3 0 3 0 0 0 0 14 14 14 14 241 254 127 255 55 246 254 127 255 55 255 247 127 169 15 255 247 127 161 15 0 163 16 55 64 154 147 107 191 178 176 74 64 0 169 198 173 50 0 0 0 244 181 84 64 198 216 113 14 56 0 0 0 141 165 59 64 3 0 3 0 0 0 0 14 14 14 14 114 170 123 14 56 114 170 123 14 56 9 170 123 11 56 221 169 123 10 56 0 138 222 18 64 120 82 152 189 31 153 19 65 3 0 3 0 0 0 0 14 14 14 14 31 8 130 136 118 31 24 130 136 118 150 39 130 92 118 95 7 130 74 118 0 195 82 73 64 3 0 3 0 0 0 0 14 14 14 14 162 248 127 255 55 172 248 127 255 55 27 249 127 255 55 247 248 127 255 55 0 61 69 242 63 3 0 3 0 0 0 0 14 14 14 14 109 248 127 255 55 108 248 127 255 55 202 247 127 255 55 199 247 127 255 55 0 35 178 163 187 43 149 50 190 30 99 19 65 3 0 3 0 0 0 0 14 14 14 14 187 71 138 119 118 187 71 138 119 118 10 248 138 124 118 42 56 139 126 118 0 97 252 114 64 3 0 3 0 0 0 0 14 14 14 14 84 250 127 255 55 84 250 127 255 55 118 249 127 255 55 24 249 127 255 55 0 169 72 8 64 3 0 3 0 0 0 0 14 14 14 14 138 250 127 255 55 138 250 127 255 55 44 250 127 255 55 250 249 127 255 55 0 65 115 243 191 203 233 54 191 36 106 12 65 3 0 3 0 0 0 0 14 14 14 14 163 246 147 205 117 163 246 147 205 117 0 23 149 216 117 39 151 149 220 117 0 35 21 85 64 3 0 3 0 0 0 0 14 14 14 14 213 253 127 255 55 213 253 127 255 55 71 253 127 255 55 10 253 127 255 55 0 17 2 255 63 248 249 127 255 55 0 0 0 11 223 89 192 2 228 200 191 28 221 250 64 3 0 3 0 0 0 0 14 14 14 14 136 166 149 170 117 136 166 149 170 117 224 214 150 181 117 5 87 151 186 117 0 20 248 21 64 3 0 3 0 0 0 0 14 14 14 14 169 252 127 255 55 169 252 127 255 55 88 252 127 255 55 53 252 127 255 55 0 201 118 223 63 26 251 127 255 55 0 0 0 0 0 241 66 0 0 128 63 0 0 128 63 0 0 128 63 0 0 128 63 0 0 0 0 0 0 0 0</hkparam>
+      <hkparam name="endian">0</hkparam>
+    </hkobject>
+    <hkobject name="#0053" class="hkaAnimationBinding" signature="0x66eac971">
+      <hkparam name="originalSkeletonName">NPC Root [Root]</hkparam>
+      <hkparam name="animation">#0052</hkparam>
+      <hkparam name="transformTrackToBoneIndices" numelements="0"></hkparam>
+      <hkparam name="floatTrackToFloatSlotIndices" numelements="4">4 5 6 7</hkparam>
+      <hkparam name="blendHint">NORMAL</hkparam>
+    </hkobject>
+    <hkobject name="#0054" class="hkMemoryResourceContainer" signature="0x4762f92a">
+      <hkparam name="name"></hkparam>
+      <hkparam name="resourceHandles" numelements="0"></hkparam>
+      <hkparam name="children" numelements="0"></hkparam>
+    </hkobject>
+  </hksection>
+</hkpackfile>

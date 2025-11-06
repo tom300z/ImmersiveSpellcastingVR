@@ -5,6 +5,12 @@ This is a basic plugin template using CommonLibSSE-NG.
 ### Requirements
 * [XMake](https://xmake.io) [2.8.2+]
 * C++23 Compiler (MSVC, Clang-CL)
+* hkxvonv.exe in PATH
+* Env var `XSE_TES5_MODS_PATH` set to ModOrganizer "mods" folder. The parent folder MUST contain `ModOrganizer.exe`.
+* (For building MCM papyrus scripts) [SKSEVR](https://skse.silverlock.org/), [Skyrim VR Tools](https://www.nexusmods.com/skyrimspecialedition/mods/27782) & [SkyUI VR](https://www.nexusmods.com/skyrimspecialedition/mods/91535) installed in `%XSE_TES5_MODS_PATH%\..\ModOrganizer.exe`
+* Env var `SkyrimVRPath` set to folder containing `SkyrimVR.exe`
+* Creation Kit Installed to `SkyrimVRPath` (See [How do I set up creation kit for VR? ](https://www.reddit.com/r/skyrimvr/comments/1d5aloz/how_do_i_set_up_creation_kit_for_vr/))
+* Skyrim papyrus scripts extracted to `%SkyrimVRPath%\data\scripts\source` (Open CreationKit once to do this)
 
 ## Getting Started
 ```bat
@@ -18,7 +24,7 @@ To build the project, run the following command:
 xmake build
 ```
 
-> ***Note:*** *This will generate a `build/windows/` directory in the **project's root directory** with the build output.*
+> ***Note:*** *This will generate a `build/windows/` directory in the **project's root directory** with the build output. It will also install the mod to `XSE_TES5_MODS_PATH` (must be enabled manually in MO2).*
 
 ### Build Output (Optional)
 If you want to redirect the build output, set one of or both of the following environment variables:
