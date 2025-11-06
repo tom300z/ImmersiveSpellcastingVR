@@ -2,3 +2,4 @@ build/
 vsxmake2022/
 .xmake/
 *.hkx
+compile_commands.json

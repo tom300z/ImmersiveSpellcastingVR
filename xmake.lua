@@ -49,7 +49,7 @@ rule("hkx-anim")
 
         depend.on_changed(function ()
             -- process the file
-            local animation_subfolder = path.relative(path.directory(sourcefile), path.join(os.projectdir(), "mod_data"))
+            local animation_subfolder = path.relative(path.directory(sourcefile), path.join(os.projectdir(), "mod_data_source"))
             local outdir = path.join(target:installdir(), animation_subfolder)
             os.mkdir(outdir)
             os.exec("hkxconv.exe convert -v hkx " .. sourcefile .. " " .. outdir)
@@ -79,11 +79,11 @@ target("ImmersiveSpellcastingVR")
 
     -- papyrus
     add_rules("papyrus")
-    add_files("mod_data/scripts/**.psc")
+    add_files("mod_data_source/scripts/**.psc")
 
     -- animations
     add_rules("hkx-anim")
-    add_files("mod_data/**/animations/**.xml")
+    add_files("mod_data_source/**/animations/**.xml")
 
     -- custom
     add_ldflags("/INCREMENTAL:NO", {force = true})  -- Ensure the new dll is always copied so it matches the symbols
