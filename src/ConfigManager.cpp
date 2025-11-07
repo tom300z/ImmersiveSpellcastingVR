@@ -657,7 +657,7 @@ namespace Config
 		};
 
 		std::string defaultInputMethod = Utils::Input::IsUsingIndexControllers() ? std::string("grip_touch") : std::string("grip");  // Use grip touch for index controllers, grip press for oculus, etc.
-		config.RegisterSetting(std::string(Settings::kInputMethod), Config::Type::kString, Config::Value{ defaultInputMethod }, "OpenVR button name that should be treated as the casting button.", inputSection);
+		config.RegisterSetting(std::string(Settings::kInputMethod), Config::Type::kString, Config::Value{ defaultInputMethod }, "OpenVR button name that should be treated as the casting button. Options: 'grip_touch' (recommended for index controllers), 'grip_press' (recommended for oculus)", inputSection);
 		registerBool(Settings::kInputShowBindingWarning, true, "Show a warning when the grip button is bound in the gameplay context.", inputSection);
 		registerBool(Settings::kInputEnable, true, "Enable Immersive Casting VR's input redirection system.", inputSection);
 		registerBool(Settings::kInputCastAfterMenuExit, true, "Immediately resumes casting after closing menus if the hand is in casting position. If disabled hands have to be closed/opened once after leaving a menu.", inputSection);
