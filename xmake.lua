@@ -6,7 +6,7 @@ includes("lib/commonlibsse-ng")
 
 -- set project
 set_project("ImmersiveSpellcastingVR")
-set_version("0.0.0")
+set_version("1.0.0")
 set_license("MIT")
 
 -- set defaults
@@ -49,10 +49,10 @@ rule("hkx-anim")
 
         depend.on_changed(function ()
             -- process the file
-            local animation_subfolder = path.relative(path.directory(sourcefile), path.join(os.projectdir(), "mod_data_source"))
-            local outdir = path.join(target:installdir(), animation_subfolder)
-            os.mkdir(outdir)
-            os.exec("hkxconv.exe convert -v hkx " .. sourcefile .. " " .. outdir)
+            local animation_path = path.relative(sourcefile, path.join(os.projectdir(), "mod_data_source"))
+            local outfile = path.join(target:installdir(), animation_path):gsub("%.%w+$", ".hkx")
+            os.exec("hkxc.exe convert -v amd64 --input \"" .. sourcefile .. "\" --output \"" .. outfile .. "\"")
+            --os.exec("hkxconv.exe convert -v hkx " .. sourcefile .. " " .. outdir)
         end, {files = sourcefile})
     end)
 
@@ -65,7 +65,10 @@ target("ImmersiveSpellcastingVR")
     add_rules("commonlibsse-ng.plugin", {
         name = "ImmersiveSpellcastingVR",
         author = "tom300z",
-        description = "SKSEVR Plugin that makes VR Spellcasting more immersive."
+        description = "SKSEVR Plugin that makes VR Spellcasting more immersive.",
+        options = {
+          address_library = true
+        }
     })
 
     -- cpp
@@ -85,10 +88,18 @@ target("ImmersiveSpellcastingVR")
     add_files("mod_data_source/**/animations/**.xml")
 
     -- custom
-    add_ldflags("/INCREMENTAL:NO", {force = true})  -- Ensure the new dll is always copied so it matches the symbols
+    before_build(function(target)
+        -- Kill existing process before copying files
+        if is_mode("debug") then
+            os.exec("scripts\\kill_skyrimvr.bat")
+        end
+    end)
     after_build(function(target)
         -- Copy static mod data (esp, assets, etc)
         os.cp("mod_data_static/**", target:installdir())
+
+        -- Ensure the new dll is always copied so it matches the symbols
+        os.cp(target:targetfile(), path.join(target:installdir(), "SKSE\\Plugins"))
 
         -- (Re)start SkyrimVR if debugging
         if is_mode("debug") then
