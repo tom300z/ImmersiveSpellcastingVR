@@ -23,6 +23,7 @@ namespace Haptics
 
 	void HandHaptics::ScheduleEvent(HapticEvent event)
 	{
+		//logger::info("{} p{}", isLeftHand ? "Left" : "Right", event.pulseStrength);
 		{
 			std::lock_guard lock(eventsMutex);
 			if (event.interruptPulse || event.replaceScheduledEvents) {
