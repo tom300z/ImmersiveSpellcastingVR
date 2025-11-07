@@ -10,6 +10,7 @@
 #include "SKSE/API.h"
 #include "SKSE/Interfaces.h"
 #include "RE/Skyrim.h"
+#include "REL/Module.h"
 #include "SKSE/Trampoline.h"
 #include "InputDispatcher.h"
 #include "ConfigManager.h"
@@ -29,7 +30,7 @@ using namespace RE;
 using namespace SKSE;
 
 SKSE::PluginHandle g_pluginHandle;
-std::string g_pluginName = "Immersive Spellcasting VR";
+std::string g_pluginName;
 
 /*extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
 {
@@ -133,14 +134,17 @@ void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 
 extern "C" [[maybe_unused]] __declspec(dllexport) bool SKSEPlugin_Load(const SKSE::LoadInterface* a_skse)
 {
-	while (!::IsDebuggerPresent());
 #ifndef NDEBUG
 		// Wait for debugger
-		while (!::IsDebuggerPresent());
+		//while (!::IsDebuggerPresent());
 #endif
 
+
+	REL::Module::get().reset(); // Somehow the module resets itself during init, this works around the issue
 	SKSE::Init(a_skse);
+	Utils::Setup::SetupLogger();
 	g_pluginHandle = a_skse->GetPluginHandle();
+	g_pluginName = SKSE::PluginDeclaration::GetSingleton()->GetName();
 
 	SKSE::AllocTrampoline(1 << 10, false); // Unused for now, might come in handy later when i use write_call/write_branch
 

@@ -6,6 +6,7 @@
 #include <windows.h>
 #include <Settings.h>
 #include "compat/HapticSkyrimVR.h"
+#include <spdlog/sinks/msvc_sink.h>
 
 
 namespace Utils
@@ -260,9 +261,8 @@ Please update Haptic Skyrim VR to version 1.8.0 or higher! )",
 
 		void SetupLogger() {
 			// Set up logger
-			/*
 #ifndef NDEBUG
-			auto sink = std::make_shared<spdlog::sinks::sink>();
+			auto sink = std::make_shared<spdlog::sinks::msvc_sink_mt>();
 #else
 			auto path = logger::log_directory();
 			if (!path) {
@@ -285,7 +285,6 @@ Please update Haptic Skyrim VR to version 1.8.0 or higher! )",
 
 			spdlog::set_default_logger(std::move(log));
 			spdlog::set_pattern("%s(%#): [%^%l%$] %v"s);
-			*/
 		}
 	}
 
