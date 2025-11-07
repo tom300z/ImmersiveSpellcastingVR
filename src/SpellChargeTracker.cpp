@@ -86,7 +86,7 @@ namespace SpellChargeTracker
 				return;
 			}
 			bool gameIsLeftHand = caster->castingSource == RE::MagicSystem::CastingSource::kLeftHand;
-			bool isLeftHand = gameIsLeftHand; 
+			bool isLeftHand = gameIsLeftHand;
 			if (reinterpret_cast<RE::PlayerCharacter*>(caster->actor)->isLeftHandMainHand) {
 				isLeftHand = !gameIsLeftHand;
 			}
@@ -117,7 +117,7 @@ namespace SpellChargeTracker
 
 				handHaptics->ScheduleEvent({
 					.pulseInterval = static_cast<int>(std::lerp(100, 20, chargeProgress)),
-					.pulseStrength = static_cast<float>(std::pow(chargeProgress, 6)),  // Using pow makes the interpolation exponential instead of linear
+					.pulseStrength = static_cast<float>(std::lerp(0.01, 1, std::pow(chargeProgress, 6))),  // Using pow makes the interpolation exponential instead of linear
 					.interruptPulse = newState == ActualState::kStart  // Interrupt current pulse on first update
 				});
 				//logger::info("Setting haptics for Progress: {}", chargeProgress);
@@ -130,8 +130,8 @@ namespace SpellChargeTracker
 					// "Concentration" spells get a medium interval pulses as long as they are released
 					handHaptics->ScheduleEvent({ 30, 1, 0, interrupt });
 				} else {
-					// "Charge & Release" spells get a short strong pulse with a min duration of 10 pulses when released
-					handHaptics->ScheduleEvent({ 10, 1, 10, interrupt });
+					// "Charge & Release" spells get a short strong pulse with a duration of 10 pulses when released
+					handHaptics->ScheduleEvent({ 10, 1, 10, interrupt, false });
 				}
 				//logger::info("Setting haptics for release!");
 			}
