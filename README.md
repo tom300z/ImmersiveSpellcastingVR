@@ -2,12 +2,12 @@
 
 Magic no longer feels like merely shooting a gun. Your physical hand position is now used as input for spellcasting, and you can feel the Magicka flowing through your hands thanks to a dynamic haptic system. Basically a much better version of VRIK's "Open Hand Casting".
 
-## TLDR
+## Features
 
 * Cast spells immersively by opening and closing your hands!
 * Get dynamic haptic feedback based on spell charge progress
 * Allows jumping while holding a charged spell
-* Removes transition animations that cause in-game animations to lag behind your physical hand
+* Removes transition animations that cause in-game hand animations to lag behind your physical hand
 * Supports all controller types by allowing both grip_touch and grip_press as input methods
 * Fully configurable via INI file or MCM
 * Fully compatible with [Haptic Skyrim VR](https://www.nexusmods.com/skyrimspecialedition/mods/20364) (only replaces spellcasting haptics), [VRIK](https://www.nexusmods.com/skyrimspecialedition/mods/23416), [HIGGS](https://www.nexusmods.com/skyrimspecialedition/mods/43930), [Magic Improvements for Skyrim VR](https://www.nexusmods.com/skyrimspecialedition/mods/55751)
