@@ -24,7 +24,7 @@
     </hkobject>
     <hkobject name="#0052" class="hkaSplineCompressedAnimation" signature="0x792ee0bb">
       <hkparam name="type">HK_SPLINE_COMPRESSED_ANIMATION</hkparam>
-      <hkparam name="duration">4.000000</hkparam>
+      <hkparam name="duration">0.0001</hkparam>
       <hkparam name="numberOfTransformTracks">99</hkparam>
       <hkparam name="numberOfFloatTracks">4</hkparam>
       <hkparam name="extractedMotion">null</hkparam>

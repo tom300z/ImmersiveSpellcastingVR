@@ -14,7 +14,7 @@ State: Disabled
 Spell charge animation (Hand slowly closing while charging). If disabled hand closes immediately
 Generic left-hand spell starting a charge when you hold the cast button.
 Example spell: Firebolt
-State: Enabled (No effect on timing, smoother animation)
+State: Disabled (Might be a bit more accurate to physical hand position when using VRIK)
 
 ### mlh_preready.xml
 Readies the left-hand spell from idle to the standard combat-ready pose.
