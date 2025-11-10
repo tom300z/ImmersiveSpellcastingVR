@@ -172,11 +172,11 @@ namespace Utils
 
 You have 3 options to mitigate this:
 a) Unmap the buttons in gameplay using the "VR Key Remapping Tool" from NexusMods.
-b) Use the "Grip Touch" input instead of "Grip Press". See also HIGGS's "useTouchForGrip" (Index Controllers).
+b) Use the "grip_touch" input instead of "grip_press". See also HIGGS's "useTouchForGrip" (Index Controllers).
 c) Ignore this warning and do without the actions. )",
 				g_pluginName,
 				unwantedMappings);
-			std::vector<std::string> options = { "a) Show Remapping Tool on Nexusmods", "b) Use Touch input", "c) Ignore disabled actions", "Ignore once" };
+			std::vector<std::string> options = { "a) Show Remapping Tool on Nexusmods", "b) Use grip_touch input", "c) Ignore disabled actions", "Ignore once" };
 			Utils::MessageBoxResultCallbackFunc handler;
 			handler = [unwantedMappings](int index) {
 				bool showAgain = false;
@@ -188,16 +188,14 @@ c) Ignore this warning and do without the actions. )",
 					if (Compat::HIGGSUseTouchForGrip::g_installed && (!std::get<bool>(Config::Manager::GetSingleton().GetValue("InputHackHiggsTouchInput")))) {
 						ShowMessageBox(
 							std::format(
-								R"({} has noticed that you are using grip_touch as the input method and have HIGGS VR installed.
+								R"({} has noticed that you are using "grip_touch" as the input method and have HIGGS VR installed.
 
-By default HIGGS uses grip_press for grabbing objects. {} can patch HIGGS to use grip_touch instead (can be toggled in MCM and {}.ini). 
-If you have currently remapped grip_press via the SteamVR bindings UI (f.e. by using a Community binding), you can revert this change and use grip_press as a separate input from grip_touch again.
-
-Please keep in mind that this patch only works for HIGGS 1.10.6 and will stop working if HIGGS is updated. A Pull Request with a native HIGGS config option has been opened.)",
+By default HIGGS uses "grip_press" for grabbing objects. {} can patch HIGGS to use "grip_touch" instead (can be toggled in MCM and ini). 
+If you are currently emulating "grip_press" via a SteamVR Binding, you can revert this change and use "grip_press" as a separate input from "grip_touch" again.)",
 								g_pluginName, g_pluginName, g_pluginName),
 							{ "Use grip_touch for HIGGS", "Keep using grip_press for HIGGS" },
 							[](int index) {
-								if (index == 1) {
+								if (index == 0) {
 									Config::Manager::GetSingleton().SetValue("InputHackHiggsTouchInput", true);
 								}
 							}
