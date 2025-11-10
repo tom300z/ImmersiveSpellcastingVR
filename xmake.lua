@@ -1,7 +1,11 @@
 -- set minimum xmake version
 set_xmakever("2.8.2")
 
--- includes
+-- set config options before including commonlib
+set_config("skyrim_se", false)
+set_config("skyrim_ae", false)
+set_config("skyrim_vr", true)
+
 includes("lib/commonlibsse-ng")
 
 -- set project
@@ -19,11 +23,6 @@ set_policy("package.requires_lock", true)
 -- add rules
 add_rules("mode.debug", "mode.releasedbg")
 add_rules("plugin.vsxmake.autoupdate")
-
--- custom stuff
-set_config("skyrim_se", false)
-set_config("skyrim_ae", false)
-set_config("skyrim_vr", true)
 
 -- Papyrus rule
 rule("papyrus")
