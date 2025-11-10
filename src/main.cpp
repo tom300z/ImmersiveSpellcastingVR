@@ -66,7 +66,7 @@ void OnPlayerAnimationGraphEvent(const RE::BSAnimationGraphEvent& event)
 		return;
 	}
 
-	// Refresh casting state after spell was equipped so it is immediately fired after draw. TODO: Make this toggleable via config option?
+	// Refresh casting state after spell was equipped so it is immediately fired after draw.
 	if (event.tag == "Magic_Equip_Out") {
 		InputInterceptor::RefreshCastingState();
 	}

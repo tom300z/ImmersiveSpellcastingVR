@@ -1,4 +1,4 @@
-# ImmersiveSpellcastingVR
+# ISPVR - Immersive Spellcasting VR
 Magic no longer feels like merely shooting a gun. Your physical hand position is now used as input for spellcasting, and you can feel the Magicka flowing through your hands thanks to a dynamic haptic system. Basically a much better version of VRIK's "Open Hand Casting".
 
 ## TLDR
@@ -12,9 +12,19 @@ Magic no longer feels like merely shooting a gun. Your physical hand position is
 - *Advanced* Includes an optional patch for HIGGS 1.10.6 that makes it use grip_touch instead of grip_press for grabbing objects. This allows you to use grip_press for other inputs if you decide to use grip_touch for your hands.
 
 ## Installation
-todo
-### Dependencies
-todo
+Use a mod manager, or manually put the files into your Data folder. Make sure to include the esp in your plugins.txt
+
+### Requirements
+- [SKSE VR](https://skse.silverlock.org/)
+- [VR Address Library for SKSEVR](https://www.nexusmods.com/skyrimspecialedition/mods/58101)
+- (optional for MCM) [SkyUI VR](https://www.nexusmods.com/skyrimspecialedition/mods/91535)
+
+## Compatibility
+The mod is incompatible with VRIK's "Open Hand Casting" as it replaces that feature. You have to disable it in the VRIK MCM (Controls, Cast Spells > NEVER).
+
+Other than that, ISPVR was designed to be as compatible with other mods as possible. Compatibility with VRIK, HIGGS, Magic Improvements for Skyrim VR & Haptic Skyrim VR has been tested.
+
+If you discover a compatibility issue please [report it](todo).
 
 ## How to use
 
@@ -34,6 +44,12 @@ You can configure the mod either through the INI file (located at `<SKYRIM_VR_IN
 Both configuration methods are synced automatically.
 
 ## FAQ
+<details>
+<summary> <b>Fire & Forget spells keep firing when i open my Hand/start charging only after i open my hand.</b> </summary>
+
+You probably have VRIK's "Open Hand Casting" enabled. This mod replaces that feature so you have to disable it in the VRIK MCM (Controls, Cast Spells > NEVER)
+</details>
+
 <details>
 <summary> <b>MCM not showing</b> </summary>
 
@@ -73,15 +89,21 @@ To disable this:
 </details>
 
 <details>
-<summary> <b>I think i've encountered a bug</b> </summary>
+<summary> <b>I think i've encountered a bug. Please help!</b> </summary>
 
-Please open an Issue on Github. I'll try to fix it as soon as i can
+Please [open an Issue](todo) on Github. I'll try to fix it as soon as i can.
 </details>
 
 <details>
 <summary> <b>I have a question and the FAQ doesn't answer it</b> </summary>
 
 Feel free to reach out via a post on the Nexusmods mod page
+</details>
+
+<details>
+<summary> <b>Is the ImmersiveSpellcastingVR Open Source</b> </summary>
+
+Yes, check it out on [Github](todo)!
 </details>
 
 ## Special thanks

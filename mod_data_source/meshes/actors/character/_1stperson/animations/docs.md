@@ -51,6 +51,3 @@ State: Disabled (No visible change)
 Fire & forget spells have a release timer that starts once you release the casting button
 Example spell: Ice Spike
 State: Disabled
-
-## TODO:
-- Fix healing spell animation not matching being instant (Probably no universal way to do this...)
