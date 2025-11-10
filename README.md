@@ -139,6 +139,14 @@ xmake project -k vsxmake
 
 > ***Note:*** *This will generate a `vsxmakeXXXX/` directory in the **project's root directory** using the latest version of Visual Studio installed on the system.*
 
+#### Debugging
+To configure Visual Studio to attach it's debugger to SkyrimVR after build, right click `ImmersiveSpellcastingVR` in the Solution Explorer, go to `Properties`, `Configuration Properties`, `Debugging`. Set `Command` to `SkyrimVR.exe` and `Attach` to `Yes`.
+
+Clicking the Debug button should now automatically: Stop Skyrim, build and install the mod, Start skyrim and attach the debugger to it.
+
+> ***Note:*** This has to be repeated every time the vsproject is regenerated
+
+
 ### Upgrading Packages (Optional)
 If you want to upgrade the project's dependencies, run the following commands:
 ```bat
