@@ -10,5 +10,7 @@ namespace Settings
 	inline constexpr auto kInputShowBindingWarning = "ShowBindingWarning"sv;
 	inline constexpr auto kInputEnable = "InputEnable"sv;
 	inline constexpr auto kInputCastAfterMenuExit = "InputCastAfterMenuExit"sv;
+	inline constexpr auto kInputHackHiggsTouchInput = "InputHackHiggsTouchInput"sv;
+
 	inline constexpr auto kHapticsEnable = "HapticsEnable"sv;
 }

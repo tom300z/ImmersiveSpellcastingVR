@@ -25,6 +25,7 @@
 #include "compat/HapticSkyrimVR.h"
 #include "compat/HapticSkyrimVRinterface001.h"
 #include "PCH.h"
+#include <compat/HIGGS.h>
 
 using namespace RE;
 using namespace SKSE;
@@ -111,6 +112,7 @@ void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 				SKSE::GetMessagingInterface()
 			);
 			Compat::HapticSkyrimVR::DisableMagicHaptics(true);
+			Compat::HIGGSUseTouchForGrip::Install();
 		}
 		break;
 	case SKSE::MessagingInterface::kPostPostLoad:

@@ -8,6 +8,7 @@
 - Supports all controller types by allowing both grip_touch and grip_press as input methods
 - Fully configurable via ini file or MCM
 - Fully compatible with [Haptic Skyrim VR](https://www.nexusmods.com/skyrimspecialedition/mods/20364) (only replaces spellcasting haptics), [VRIK](https://www.nexusmods.com/skyrimspecialedition/mods/23416), [HIGGS](https://www.nexusmods.com/skyrimspecialedition/mods/43930), [Magic Improvements for Skyrim VR](https://www.nexusmods.com/skyrimspecialedition/mods/55751)
+- *Advanced* Includes an optional patch for HIGGS 1.10.6 that makes it use grip_touch instead of grip_press for grabbing objects. This allows you to use grip_press for other inputs if you decide to use grip_touch for your hands.
 
 ## Installation
 todo
@@ -25,16 +26,63 @@ Close your hand to charge the spell. Once the haptic feedback spikes, the spell 
 ### Concentration spells (Flames, Sparks, Healing, Wards)
 Open your hand to cast the spell, close it to stop.
 
-But beware, with great power comes great responsibility! So don't acidentally let go and shoot innocent bystanders (unless thats your playstyle of course xD).
+But beware, with great power comes great responsibility! So don't acidentally let go and shoot innocent bystanders (unless thats your playstyle of course).
 > ***TIP:*** Sheathing your weapons can be helpful to avoid unwanted massacres
 
 ## Configuration
-You can configure the mod either through the INI file located at `%USERPROFILE%\Documents\My Games\SkyrimVR`
+You can configure the mod either through the INI file (located at `<SKYRIM_VR_INSTALL>\SKSE\Plugins\ImmersiveSpellcastingVR.ini`) or via the ingame MCM.
+Both configuration methods are synced automatically.
 
 ## FAQ
-### MCM not showing
-New MCM menus sometimes take a while to show up, especially in existing saves. If it doesn't show up after a while, try running `setstage SKI_ConfigManagerInstance 1` in the console and wait for 5 minutes. Alternatively use the INI file for configuration.
+<details>
+<summary> <b>MCM not showing</b> </summary>
 
+New MCM menus sometimes take a while to show up, especially in existing saves. If it doesn't show up after a while, try running `setstage SKI_ConfigManagerInstance 1` in the console and wait for 5 minutes. Alternatively use the INI file for configuration.
+</details>
+
+<details>
+<summary><b>What is the difference between the `grip_touch` and `grip_press` input methods?</b></summary>
+
+#### grip_touch
+Triggered when you touch the grip button without a significant force. On Valve Index Controllers this correlates to closing your hands. On Oculus Controllers this mean touching the button without pressing it.
+
+This input is not used by Vanilla Skyrim VR at all, so using it avoids conflicts with Vanilla inputs.
+
+#### grip_press
+Triggered when you apply a force to the grip button. On Valve Index controllers this means squeezing the controller. On Oculus controllers this correlates to pressing down the grip button by closing your hand.
+
+This input is used by vanilla Skyrim during gameplay for various actions. To avoid conflicts you must remap the input in gameplay by using a tool like MoDErahN's [Key Remapping Tool](https://www.nexusmods.com/skyrimspecialedition/mods/68164). If this input method is used for ImmersiveSpellcastingVR, it will hide it from the game for every hand that is currently holding a drawn spell. You will be warned about this in-game.
+</details>
+
+<details>
+<summary> <b>I'm using the grip_touch input method but i still trigger unwanted ingame actions when touching the grip button</b> </summary>
+
+You probably have remapped the `grip_touch` button to emulate `grip_press` via the SteamVR Controller Binding UI.
+
+To disable this:
+
+- Open your SteamVR settings
+- Go to "Controllers" > "SHOW BINDING UI"
+- In the new window: Click on "SHOW MORE BINDINGS" > "THE ELDER SCROLLS V: SKYRIM VR"
+- Wait a few settings for the bindings to load
+- On the top left, under "Current Binding", click the "Edit" button
+- On the left side, scroll down to the "Grip" section
+- Under "Use as Button" it should say "Touch > Left Grip Button **Touch**". If it only says "Touch > Left Grip Button", click the pencil icon and change it to "Left Grip Button **Touch**"
+- Repeat this for the right side
+- On the bottom, click "Save Personal Binding" > "Save"
+</details>
+
+<details>
+<summary> <b>I think i've encountered a bug</b> </summary>
+
+Please open an Issue on Github. I'll try to fix it as soon as i can
+</details>
+
+<details>
+<summary> <b>I have a question and the FAQ doesn't answer it</b> </summary>
+
+Feel free to reach out via a post on the Nexusmods mod page
+</details>
 
 ## Special thanks
 - Shizof for adding a compatibility API to HapticSkyrimVR super quickly and giving me a few modding tips

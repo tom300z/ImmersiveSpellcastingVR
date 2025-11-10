@@ -661,6 +661,7 @@ namespace Config
 		registerBool(Settings::kInputShowBindingWarning, true, "Show a warning when the grip button is bound in the gameplay context.", inputSection);
 		registerBool(Settings::kInputEnable, true, "Enable Immersive Casting VR's input redirection system.", inputSection);
 		registerBool(Settings::kInputCastAfterMenuExit, true, "Immediately resumes casting after closing menus if the hand is in casting position. If disabled hands have to be closed/opened once after leaving a menu.", inputSection);
+		registerBool(Settings::kInputHackHiggsTouchInput, false, "Hacks HIGGS to make it use grip_touch instead of grip_press for grabbing stuff. This way you can use you grip_press for other inputs. Especially useful on index controllers. INFO: this is a Hack that only works on HIGGS 1.10.6 and will be removed once HIGGS's PR #4 is merged.", inputSection);
 		registerBool(Settings::kHapticsEnable, true, "Enable Immersive Casting VR's spellcasting haptics integration. Disables other mod's spellcasting haptics (such as HapticSkyrimVR).", hapticsSection);
 
 		config.LoadFromDisk();

@@ -6,6 +6,7 @@
 #include <windows.h>
 #include <Settings.h>
 #include "compat/HapticSkyrimVR.h"
+#include "compat/HIGGS.h"
 #include <spdlog/sinks/msvc_sink.h>
 
 
@@ -184,6 +185,24 @@ c) Ignore this warning and do without the actions. )",
 					showAgain = true;
 				} else if (index == 1) {
 					Config::Manager::GetSingleton().SetValue("CastingInputMethod", "grip_touch");
+					if (Compat::HIGGSUseTouchForGrip::g_installed && (!std::get<bool>(Config::Manager::GetSingleton().GetValue("InputHackHiggsTouchInput")))) {
+						ShowMessageBox(
+							std::format(
+								R"({} has noticed that you are using grip_touch as the input method and have HIGGS VR installed.
+
+By default HIGGS uses grip_press for grabbing objects. {} can patch HIGGS to use grip_touch instead (can be toggled in MCM and {}.ini). 
+If you have currently remapped grip_press via the SteamVR bindings UI (f.e. by using a Community binding), you can revert this change and use grip_press as a separate input from grip_touch again.
+
+Please keep in mind that this patch only works for HIGGS 1.10.6 and will stop working if HIGGS is updated. A Pull Request with a native HIGGS config option has been opened.)",
+								g_pluginName, g_pluginName, g_pluginName),
+							{ "Use grip_touch for HIGGS", "Keep using grip_press for HIGGS" },
+							[](int index) {
+								if (index == 1) {
+									Config::Manager::GetSingleton().SetValue("InputHackHiggsTouchInput", true);
+								}
+							}
+						);
+					}
 				} else if (index == 2) {
 					Config::Manager::GetSingleton().SetValue("ShowBindingWarning", false);
 				}

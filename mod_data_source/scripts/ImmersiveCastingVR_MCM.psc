@@ -10,6 +10,7 @@ Int Property SelectedInputMethod Auto Hidden
 Bool Property ShowDoubleBindingWarning Auto Hidden
 Bool Property InputEnabled Auto Hidden
 Bool Property InputCastAfterMenuExit Auto Hidden
+Bool Property InputHackHiggsTouchInput Auto Hidden
 Bool Property HapticsEnabled Auto Hidden
 
 Event OnConfigInit()
@@ -71,6 +72,17 @@ State ICVR_InputMethod
 	EndEvent
 EndState
 
+State ICVR_InputHackHiggsTouchInput
+	Event OnSelectST()
+		InputHackHiggsTouchInput = ToggleSetting("InputHackHiggsTouchInput", InputHackHiggsTouchInput)
+		SetToggleOptionValueST(InputHackHiggsTouchInput)
+	EndEvent
+
+	Event OnHighlightST()
+		SetInfoText("Hacks HIGGS to make it use grip_touch instead of grip_press for grabbing stuff. This way you can use you grip_press for other inputs. Especially useful on index controllers.\nINFO: this is a Hack that only works on HIGGS 1.10.6 and will be removed once HIGGS's PR #4 is merged.")
+	EndEvent
+EndState
+
 State ICVR_ShowDoubleBindingWarning
 	Event OnSelectST()
 		ShowDoubleBindingWarning = !ShowDoubleBindingWarning
@@ -119,6 +131,7 @@ Function UpdateFromConfig()
 	ShowDoubleBindingWarning = ImmersiveCastingVR_Config.GetBool("ShowBindingWarning")
 	InputEnabled = ImmersiveCastingVR_Config.GetBool("InputEnable")
 	InputCastAfterMenuExit = ImmersiveCastingVR_Config.GetBool("InputCastAfterMenuExit")
+	InputHackHiggsTouchInput = ImmersiveCastingVR_Config.GetBool("InputHackHiggsTouchInput")
 	HapticsEnabled = ImmersiveCastingVR_Config.GetBool("HapticsEnable")
 EndFunction
 
@@ -130,6 +143,8 @@ Function DrawInputPage()
 	AddHeaderOption("Casting Controls")
 	AddMenuOptionST("ICVR_InputMethod", "Immersive Input Method", InputMethodLabels[SelectedInputMethod])
 	AddToggleOptionST("ICVR_ShowDoubleBindingWarning", "Show \"buttons already used\" Warning", ShowDoubleBindingWarning)
+	AddHeaderOption("Funny Hacks")
+	AddToggleOptionST("ICVR_InputHackHiggsTouchInput", "Make HIGGS use grip_touch", InputHackHiggsTouchInput)
 EndFunction
 
 Function DrawHapticsPage()
