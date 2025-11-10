@@ -4,7 +4,7 @@
 <img src="images\log-transparent.png" alt="Logo" width="200"/>
 </p>
 
-Magic no longer feels like merely shooting a gun. Your physical hand position is now used as input for spellcasting, and you can feel the Magicka flowing through your hands thanks to a dynamic haptic system. Basically a much better version of VRIK's "Open Hand Casting".
+Magic in Skyrim VR no longer feels like merely shooting a gun. Your physical hand position is now used as input for spellcasting, and you can feel the Magicka flowing through your hands thanks to a dynamic haptic system. Basically a much better version of VRIK's "Open Hand Casting".
 
 ## Features
 
