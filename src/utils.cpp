@@ -8,6 +8,7 @@
 #include "compat/HapticSkyrimVR.h"
 #include "compat/HIGGS.h"
 #include <spdlog/sinks/msvc_sink.h>
+#include <spdlog/sinks/basic_file_sink.h>
 
 
 namespace Utils
@@ -283,10 +284,10 @@ Please update Haptic Skyrim VR to version 1.8.0 or higher! )",
 #else
 			auto path = logger::log_directory();
 			if (!path) {
-				return false;
+				return;
 			}
 
-			*path /= Plugin::NAME;
+			*path /= g_pluginName;
 			*path += ".log"sv;
 			auto sink = std::make_shared<spdlog::sinks::basic_file_sink_mt>(path->string(), true);
 #endif
