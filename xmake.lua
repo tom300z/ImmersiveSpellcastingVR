@@ -29,11 +29,14 @@ rule("papyrus")
     set_extensions(".psc")
     on_build_files(function (target, sourcebatch, opt)
         import("core.project.depend")
-        print(target:installdir())
         depend.on_changed(function ()
-            os.exec("scripts\\compile_papyrus_mo2.cmd " .. target:installdir())
+            os.exec("scripts\\compile_papyrus_mo2.cmd " .. "\"" .. path.join(os.projectdir(), target:targetdir()) .. "\"")
             print("Compiled papyrus")
         end, {files = sourcebatch.sourcefiles})
+    end)
+
+    on_install(function (target)
+        os.cp(path.join(target:targetdir(), "scripts"), path.join(target:installdir(), "scripts"))
     end)
 
 -- hkx animation rule
@@ -45,14 +48,16 @@ rule("hkx-anim")
             return
         end
         import("core.project.depend")
-
         depend.on_changed(function ()
             -- process the file
             local animation_path = path.relative(sourcefile, path.join(os.projectdir(), "mod_data_source"))
-            local outfile = path.join(target:installdir(), animation_path):gsub("%.%w+$", ".hkx")
+            local outfile = path.join(path.join(os.projectdir(), target:targetdir()), animation_path):gsub("%.%w+$", ".hkx")
             os.exec("hkxc.exe convert -v amd64 --input \"" .. sourcefile .. "\" --output \"" .. outfile .. "\"")
-            --os.exec("hkxconv.exe convert -v hkx " .. sourcefile .. " " .. outdir)
         end, {files = sourcefile})
+    end)
+
+    on_install(function (target)
+        os.cp(path.join(target:targetdir(), "meshes"), path.join(target:installdir(), "meshes"))
     end)
 
 -- targets
@@ -88,6 +93,9 @@ target("ImmersiveSpellcastingVR")
 
     -- custom
     before_build(function(target)
+        -- Ensure install dir exists
+        os.mkdir(target:installdir())
+
         -- Kill existing process before copying files
         if is_mode("debug") then
             os.exec("scripts\\kill_skyrimvr.bat")
@@ -95,7 +103,7 @@ target("ImmersiveSpellcastingVR")
     end)
     after_build(function(target)
         -- Copy static mod data (esp, assets, etc)
-        os.cp("mod_data_static/**", target:installdir())
+        os.cp("mod_data_static/*", target:installdir())
 
         -- Ensure the new dll is always copied so it matches the symbols
         os.cp(target:targetfile(), path.join(target:installdir(), "SKSE\\Plugins"))
