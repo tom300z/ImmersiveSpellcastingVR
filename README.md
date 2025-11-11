@@ -33,17 +33,27 @@ The mod is incompatible with VRIK's "Open Hand Casting" as it replaces that feat
 
 Other than that, ISPVR was designed to be as compatible with other mods as possible. Compatibility with VRIK, HIGGS, Magic Improvements for Skyrim VR, and Haptic Skyrim VR has been tested.
 
-If you discover a compatibility issue, please [report it](todo).
+If you discover a compatibility issue, please [report it](https://github.com/tom300z/ImmersiveSpellcastingVR/issues).
 
 ## How to use
 
 ### Fire & Forget / Charged spells (Fireball, Ice Spike, Fast Healing, Bound Weapons)
+
+<div style="display: flex; justify-content: center; align-items: center; height: 150px; flex-wrap: wrap; gap: 20px">
+  <img src="images\demo\Fire & Forget Charge.png" alt="Fire & Forget Charge" height="200">
+  <img src="images\demo\Fire & Forget Release.png" alt="Fire & Forget Release" height="200">
+</div>
 
 Close your hand to charge the spell. Once the haptic feedback spikes, the spell is charged. Aim and open your hand any time to release it.
 
 > ***TIP:*** You can sheathe your weapons to abort a charged spell and reclaim your Magicka.
 
 ### Concentration spells (Flames, Sparks, Healing, Wards)
+
+<div style="display: flex; justify-content: center; align-items: center; height: 150px; flex-wrap: wrap; gap: 20px">
+  <img src="images\demo\Concentration Hold.png" alt="Concentration Hold" height="200">
+  <img src="images\demo\Concentration Release.png" alt="Concentration Release" height="200">
+</div>
 
 Open your hand to cast the spell, close it to stop.
 
@@ -111,7 +121,7 @@ To disable this:
 <details>
 <summary><b>I think I’ve encountered a bug. Please help!</b></summary>
 
-Please [open an issue](todo) on GitHub. I’ll try to fix it as soon as I can.
+Please [open an issue](https://github.com/tom300z/ImmersiveSpellcastingVR/issues) on GitHub. I’ll try to fix it as soon as I can.
 
 </details>
 
@@ -125,7 +135,7 @@ Feel free to reach out via a post on the NexusMods mod page.
 <details>
 <summary><b>Is ImmersiveSpellcastingVR open source?</b></summary>
 
-Yes, check it out on [GitHub](todo)!
+Yes, check it out on [GitHub](https://github.com/tom300z/ImmersiveSpellcastingVR/)!
 
 </details>
 
@@ -159,7 +169,7 @@ I’ve tried to make this as easy to set up as possible, but I may have missed s
 ### Getting Started
 
 ```bat
-git clone --recurse-submodules <TODO: add repo URL>
+git clone --recurse-submodules https://github.com/tom300z/ImmersiveSpellcastingVR/
 cd ImmersiveSpellcastingVR
 ```
 
