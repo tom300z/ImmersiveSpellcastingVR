@@ -121,7 +121,7 @@ Function InitializeData()
 
 	If !InputMethodValues || InputMethodValues.Length != 2
 		InputMethodValues = new String[2]
-		InputMethodValues[0] = "grip"
+		InputMethodValues[0] = "grip_press"
 		InputMethodValues[1] = "grip_touch"
 	EndIf
 EndFunction

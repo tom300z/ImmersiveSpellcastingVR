@@ -240,8 +240,8 @@ If you are currently emulating "grip_press" via a SteamVR Binding, you can rever
 					//logger::info("{} -> {} ({})", mapping.eventID.c_str(), inputKeyName, mapping.inputKey);
 
 					// Show warning if grip is used in Gameplay and grip press is configured as input
-					auto inputType = Config::Manager::GetSingleton().Get<std::string>(Settings::kInputMethod, "grip");
-					if (inputType == "grip" && mapping.inputKey == vr::EVRButtonId::k_EButton_Grip) {
+					auto inputType = Config::Manager::GetSingleton().Get<std::string>(Settings::kInputMethod, "grip_press");
+					if (inputType == "grip_press" && mapping.inputKey == vr::EVRButtonId::k_EButton_Grip) {
 						unwantedMappings += std::format("\n {} {} Press -> {}", sideName, inputKeyName, mapping.eventID.c_str());
 					}
 				}

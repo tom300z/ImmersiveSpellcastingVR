@@ -43,7 +43,7 @@ namespace InputInterceptor
 			std::string congfiguredInputMethod = *std::get_if<std::string>(&value);
 			vr::EVRButtonId newButton = vr::EVRButtonId::k_EButton_Grip;
 			bool newButtonTouch = false;
-			if (congfiguredInputMethod == "grip") {
+			if (congfiguredInputMethod == "grip_press") {
 				newButton = vr::EVRButtonId::k_EButton_Grip;
 				newButtonTouch = false;
 			} else if (congfiguredInputMethod == "grip_touch") {
