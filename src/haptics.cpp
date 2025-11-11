@@ -63,7 +63,12 @@ namespace Haptics
 		}
 
 		if (activeEvent.pulseStrength > 0 && activeEvent.pulseStrength <= 1 && activeEvent.pulseInterval >= 5) {
-			g_vrsystem->TriggerHapticPulse(!isLeftHand, activeEvent.pulseStrength);
+			//std::scoped_lock lock(g_pulseMutex);
+			auto vrsystem = g_vrsystem;
+			auto lefthand = isLeftHand;
+			auto pulseStrength = activeEvent.pulseStrength;
+			SKSE::GetTaskInterface()->AddTask([vrsystem, lefthand, pulseStrength] { vrsystem->TriggerHapticPulse(!lefthand, pulseStrength); });
+
 		}
 
 		if (activeEvent.pulses > 0) {
