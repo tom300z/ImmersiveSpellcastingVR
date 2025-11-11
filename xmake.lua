@@ -39,7 +39,7 @@ rule("papyrus")
         -- Build on changed files or missing target dir
         import("core.project.depend")
         depend.on_changed(build, {files = sourcebatch.sourcefiles})
-        if os.exists(papyrus_targetdir(target)) then
+        if not os.exists(papyrus_targetdir(target)) then
             build()
         end
 
