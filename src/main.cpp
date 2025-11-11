@@ -36,7 +36,7 @@ std::string g_pluginName;
 /*extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
 {
 	Utils::Setup::SetupLogger();
-	logger::info("{} v{} queried"s, Plugin::NAME, Plugin::VERSION);
+	logger::info("{} v{} queried", Plugin::NAME, Plugin::VERSION);
 
 	// Initialize Plugin Info
 	a_info->infoVersion = SKSE::PluginInfo::kVersion;
@@ -45,7 +45,7 @@ std::string g_pluginName;
 
 	// Check runtime compatibility
 	if (a_skse->IsEditor()) {
-		logger::critical("Loaded in editor, marking as incompatible"sv);
+		logger::critical("Loaded in editor, marking as incompatible");
 		return false;
 	}
 	const auto ver = a_skse->RuntimeVersion();
@@ -144,9 +144,9 @@ extern "C" [[maybe_unused]] __declspec(dllexport) bool SKSEPlugin_Load(const SKS
 
 	REL::Module::get().reset(); // Somehow the module resets itself during init, this works around the issue
 	SKSE::Init(a_skse);
-	Utils::Setup::SetupLogger();
 	g_pluginHandle = a_skse->GetPluginHandle();
 	g_pluginName = SKSE::PluginDeclaration::GetSingleton()->GetName();
+	Utils::Setup::SetupLogger();
 
 	SKSE::AllocTrampoline(1 << 10, false); // Unused for now, might come in handy later when i use write_call/write_branch
 
@@ -173,7 +173,7 @@ extern "C" [[maybe_unused]] __declspec(dllexport) bool SKSEPlugin_Load(const SKS
 
 	InputInterceptor::Install(a_skse);
 
-	logger::info("{} loaded!"s, g_pluginName);
+	logger::info("{} loaded!", g_pluginName);
 
 	return true;
 }
