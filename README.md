@@ -121,7 +121,7 @@ To disable this:
 <details>
 <summary><b>I think I’ve encountered a bug. Please help!</b></summary>
 
-Please [open an issue](https://github.com/tom300z/ImmersiveSpellcastingVR/issues) on GitHub. I’ll try to fix it as soon as I can.
+Please [open an issue](https://github.com/tom300z/ImmersiveSpellcastingVR/issues) on GitHub. Make sure to include the logs from `%USERPROFILE%\Documents\My Games\Skyrim VR\SKSE\ImmersiveSpellcastingVR.log`. I’ll try to fix it as soon as I can.
 
 </details>
 
