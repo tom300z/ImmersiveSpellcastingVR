@@ -49,6 +49,8 @@ namespace Utils
 	void TimedWorker::Run()
 	{
 		while (running.load(std::memory_order::relaxed)) {
+			Work();
+
 			auto interval = minInterval.load(std::memory_order::relaxed);
 			auto now = std::chrono::steady_clock::now();
 			bool waitForNotifyOnly = interval.count() <= 0;
@@ -60,8 +62,6 @@ namespace Utils
 				}
 				nextLoop = now + interval;
 			}
-
-			Work();
 
 			if (!running.load(std::memory_order::relaxed)) {
 				break;
