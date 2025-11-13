@@ -66,9 +66,27 @@ void OnPlayerAnimationGraphEvent(const RE::BSAnimationGraphEvent& event)
 		return;
 	}
 
+	//logger::info("Event: {}", event.tag.c_str());
+
 	// Refresh casting state after spell was equipped so it is immediately fired after draw.
 	if (event.tag == "Magic_Equip_Out") {
 		InputInterceptor::RefreshCastingState();
+	}
+}
+
+void OnEquipEvent(const RE::TESEquipEvent& event) {
+	const auto* player = RE::PlayerCharacter::GetSingleton();
+	if (auto* form = RE::TESForm::LookupByID(event.baseObject)) {
+		//logger::info("{} {}", event.equipped ? "Equipped" : "Unequipped", form->GetName() );
+
+		// TODO: Decide whether i want this fix or a short re-equip time for spellsiphoning
+		if (!event.equipped && std::strcmp(form->GetName(), "Draw") == 0) {
+			if (player->GetEquippedObject(true) == nullptr) {
+				InputDispatcher::leftDisp.SuppressUntilCasterInactive();
+			} else if (player->GetEquippedObject(false) == nullptr) {
+				InputDispatcher::rightDisp.SuppressUntilCasterInactive();
+			}
+		}
 	}
 }
 
@@ -90,13 +108,15 @@ void OnMenuOpenCloseEvent(const RE::MenuOpenCloseEvent& event)
 	// Pause haptics while in menus
 	const bool inGame = Utils::InGame();
 	Haptics::Pause(!inGame);
+	InputDispatcher::Pause(!inGame);
 
 	if (!event.opening && inGame) {
 		if (Config::Manager::GetSingleton().Get<bool>(Settings::kInputCastAfterMenuExit, false)) {
 			InputInterceptor::RefreshCastingState();
 		} else {
-			// Unpress buttons and disable input for a few ms
-			InputDispatcher::SuppressInput(100);
+			// Suppress active input until it has been released by the player
+			InputDispatcher::leftDisp.SuppressUntilCasterInactive();
+			InputDispatcher::rightDisp.SuppressUntilCasterInactive();
 		}
 	}
 }
@@ -157,12 +177,11 @@ extern "C" [[maybe_unused]] __declspec(dllexport) bool SKSEPlugin_Load(const SKS
 	}
 
 	static auto loadGameHandler = Utils::EventHandler<RE::TESLoadGameEvent>(OnSaveLoadEvent);
+	static auto equipHandler = Utils::EventHandler<RE::TESEquipEvent>(OnEquipEvent);
 	auto* scriptEventSource = RE::ScriptEventSourceHolder::GetSingleton();
 	if (scriptEventSource) {
-		scriptEventSource->AddEventSink(
-			&loadGameHandler
-		);
-
+		scriptEventSource->AddEventSink(&loadGameHandler);
+		scriptEventSource->AddEventSink(&equipHandler);
 	}
 
 	auto* papyrus = SKSE::GetPapyrusInterface();

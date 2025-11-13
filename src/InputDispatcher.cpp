@@ -19,6 +19,11 @@ namespace InputDispatcher
 			return;
 		}
 
+		auto player = RE::PlayerCharacter::GetSingleton();
+		if (player && player->isLeftHandMainHand) {
+			// Invert if left handed
+			left = !left;
+		}
 		auto* ue = RE::UserEvents::GetSingleton();
 		auto* q = RE::BSInputEventQueue::GetSingleton();
 		if (!ue || !q)
@@ -26,46 +31,134 @@ namespace InputDispatcher
 
 		const float value = pressed ? 1.0f : 0.0f;
 		const float heldSec = heldSecOverride ? heldSecOverride : pressed ? 0.0 : 0.1f;
-		//logger::info("{} {}", left ? "Left" : "Right", pressed ? "press" : "unpress");
 
 		// Arg order per your ButtonEvent::Init signature: device, idCode, value, duration, userEvent
 		q->AddButtonEvent(
 			RE::INPUT_DEVICE::kGamepad,               // VR right-hand: kViveSecondary
 			0,                                        // idCode
 			value,                                    // 1.0=down, 0.0=up
-			heldSec,                                   // 0.0 new press; >0.0 signals release
-			left ? ue->leftAttack : ue->rightAttack  //ue->leftAttack : ue->rightAttack,  // BSFixedString user event
+			heldSec,                                  // 0.0 new press; >0.0 signals release
+			left ? ue->leftAttack : ue->rightAttack   //ue->leftAttack : ue->rightAttack,  // BSFixedString user event
 		);
 	}
-	void AddAttackButtonEvent(bool left, bool pressed) {
-		SKSE::GetTaskInterface()->AddUITask([left, pressed]() { _AddAttackButtonEvent(left, pressed); });
 
-		if (pressed) {
-			// Add another event after 50ms in case the player is dual casting (spells will o)
-			std::thread([left] {
-				std::this_thread::sleep_for(std::chrono::milliseconds(60));
-				SKSE::GetTaskInterface()->AddUITask([left]() { _AddAttackButtonEvent(left, true, 0.06f); });
-			}).detach();
+	HandInputDispatcher::HandInputDispatcher(bool isLeftHand) :
+		isLeftHand(isLeftHand)
+	{
+		handName = isLeftHand ? "Left" : "Right";
+
+		// TODO: Swap hands here?
+		currentCasterState = isLeftHand ? &SpellChargeTracker::lastLeftHandState : &SpellChargeTracker::lastRightHandState;
+
+		minInterval.store(std::chrono::milliseconds(0), std::memory_order::relaxed);
+		Start();
+	}
+
+	void HandInputDispatcher::DeclareCasterState(bool casterActive) {
+		// Store state if it changed
+		const bool kOldCasterActive = casterDeclaredActive.exchange(casterActive, std::memory_order_relaxed);
+
+		// If it changed, trigger a dispatch now and set the minInterval to 20ms to ensure it goes through.
+		// Inputs typically take 10ms to result in a changed caster state so 20ms should be pretty efficient in case a repress is needed.
+		if (kOldCasterActive != casterActive) {
+			auto time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+			logger::trace("{}: {} caster declared {}", time, isLeftHand ? "Left" : "Right", casterActive ? "active" : "inactive");
+			casterDeclarationChanged = true;
+			this->Notify();
+		}
+
+	}
+
+	void HandInputDispatcher::SuppressUntilCasterInactive()
+	{
+		suppressUntilCasterInactive.store(true);
+	}
+
+	void HandInputDispatcher::AddAttackButtonEvent(bool left, bool pressed, float heldSecOverride)
+	{
+		auto time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+		logger::trace("{}: {} {}", time, left ? "Left" : "Right", pressed ? "press" : "unpress");
+		SKSE::GetTaskInterface()->AddUITask([left, pressed, heldSecOverride]() { _AddAttackButtonEvent(left, pressed, heldSecOverride); });
+	}
+
+	void HandInputDispatcher::Work() {
+
+		// Determine desired and currend caster state
+		const bool kCasterDesiredActive = casterDeclaredActive.load(std::memory_order_relaxed);
+		const SpellChargeTracker::ActualState kCasterState = currentCasterState->load(std::memory_order_relaxed);
+		const bool kCasterActive = !(kCasterState == SpellChargeTracker::ActualState::kIdle || kCasterState == SpellChargeTracker::ActualState::kReleasing);
+
+		// Return if suppressUntilCasterInactive is true but caster is desired active
+		if (suppressUntilCasterInactive.load(std::memory_order_relaxed)) {
+			if (kCasterDesiredActive) {
+				return;
+			} else {
+				suppressUntilCasterInactive.store(false, std::memory_order_relaxed);
+			}
+		}
+
+
+		// Return if caster already has desired state and the declaration was not just updated. Also slow down the worker until a new state is declared
+		if (kCasterActive == kCasterDesiredActive && !casterDeclarationChanged.load(std::memory_order_relaxed))
+		{
+			// The worker still runs every 60ms in case the caster state drifts (for example after a fast healing spell kCasterActive lingers true for a short period after releasing.)
+			minInterval.store(std::chrono::milliseconds(60), std::memory_order::relaxed);
+			return;
+		}
+
+		// Dispatch input to reconciliate caster state. Work every 20ms during reconciliation
+		minInterval.store(std::chrono::milliseconds(20), std::memory_order::relaxed);
+		
+		// Compute the appropriate input
+		const auto now = std::chrono::steady_clock::now();
+		
+		if (casterDeclarationChanged.exchange(false, std::memory_order_relaxed)) {
+			// Start new input if the caster state declaration changed
+			currentInputStartTime = now;
+		}
+		std::chrono::duration<float> timeSinceCurrentInput = now - currentInputStartTime;
+
+		if (timeSinceCurrentInput <= kGracePeriod) {
+			// If in grace period, just send the attack button event with the real time held
+			this->AddAttackButtonEvent(isLeftHand, kCasterDesiredActive, timeSinceCurrentInput.count());
+		} else {
+			// If caster still hasn't adjusted after the grace period, we need to repress (or release)
+			if (kCasterDesiredActive) {
+				// If trigger should be pressed,  before repressing it for another gracePeriod. Repeat this until the caster reaches it's desired state which causes this code to no longer be reached.
+				this->AddAttackButtonEvent(isLeftHand, true);
+
+				/* TODO: Readd more complex repress logic if it is really necessary
+				if (!isRePressing) {
+					// Release trigger, store the repress & repress start time in state, wait kRePressReleaseDuration
+					isRePressing = true;
+					currentRePressStartTime = now + kRePressReleaseDuration;
+					minInterval = kRePressReleaseDuration;
+					logger::trace("{}: {} Re-press: released trigger...", std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count(), handName);
+				} else {
+					// Re-press trigger for grace period, then, stop the re-press if it was unsuccessful. (Leading to another release & re-press)
+					std::chrono::duration<float> timeSinceRePressStart = now - currentRePressStartTime; // TODO Must be 0 on first hit
+					if (timeSinceRePressStart <= kGracePeriod) {
+						this->AddAttackButtonEvent(isLeftHand, true, timeSinceRePressStart.count());
+						logger::trace("{}: {} Re-press: pressed trigger for {}s...", std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count(), handName, timeSinceRePressStart.count());
+					} else {
+						isRePressing = false;
+					}
+				}*/
+			}
 		}
 	}
 
-	// Sometimes you have to simulate letting go of the input for a few ms to make sure the game starts casting a spell (For example shortly after casting fast healing)
-	void RepressAttackButton(bool left)
-	{
-		std::thread([left] {
-			AddAttackButtonEvent(left, false);
-			std::this_thread::sleep_for(std::chrono::milliseconds(25));
-			AddAttackButtonEvent(left, true);
-		}).detach();
-	}
+	HandInputDispatcher leftDisp(true);
+	HandInputDispatcher rightDisp(false);
 
-	void SuppressInput(int ms) {
-		std::thread([ms] {
-			inputSuppressed = true;
-			SKSE::GetTaskInterface()->AddUITask([]() { _AddAttackButtonEvent(true, false); });
-			SKSE::GetTaskInterface()->AddUITask([ms]() { _AddAttackButtonEvent(false, false, ms); });
-			std::this_thread::sleep_for(std::chrono::milliseconds(ms));
-			inputSuppressed = false;
-		}).detach();
+	void Pause(bool paused)
+	{
+		if (paused) {
+			leftDisp.Stop();
+			rightDisp.Stop();
+		} else {
+			leftDisp.Start();
+			rightDisp.Start();
+		}
 	}
 }

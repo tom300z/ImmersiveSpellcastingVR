@@ -12,6 +12,7 @@
 
 #include "SpellChargeTracker.h"
 #include "InputInterceptor.h"
+#include "InputDispatcher.h"
 #include "utils.h"
 
 namespace ActionAllowedHook
@@ -40,15 +41,6 @@ namespace ActionAllowedHook
 			} else if (result && actionID == "ActionLand") {
 				// Force the input interceptor to reread the controller state so that spells are charged if hand was closed during jump
 				InputInterceptor::RefreshCastingState();
-			} else if (result && (actionID == "ActionLeftInterrupt" || actionID == "ActionRightInterrupt")) {
-				// Force the input interceptor to reread the controller state so that spells are charged again after interrupting them
-				auto* player = RE::PlayerCharacter::GetSingleton();
-				if (player && player->isLeftHandMainHand) {
-					// swap
-					InputInterceptor::RefreshCastingState(actionID == "ActionRightInterrupt", actionID == "ActionLeftInterrupt");
-				} else {
-					InputInterceptor::RefreshCastingState(actionID == "ActionLeftInterrupt", actionID == "ActionRightInterrupt");
-				}
 			}
 
 			//logger::info("{} -> {}", actionID.c_str(), result);

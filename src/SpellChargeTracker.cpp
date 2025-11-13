@@ -20,6 +20,9 @@ namespace SpellChargeTracker
 {
 	bool installed = false;
 
+	std::atomic<ActualState> lastLeftHandState = ActualState::kUnknown;
+	std::atomic<ActualState> lastRightHandState = ActualState::kUnknown;
+
 	namespace
 	{
 		using HapticEvent = Haptics::HapticEvent;
@@ -29,9 +32,6 @@ namespace SpellChargeTracker
 		std::uint64_t g_configListenerId{ 0 };
 
 		UpdateFunc g_originalUpdate{ nullptr };
-
-		ActualState lastLeftHandState = ActualState::kUnknown;
-		ActualState lastRightHandState = ActualState::kUnknown;
 
 		void ApplyHapticsEnabled(const Config::Value& value)
 		{
@@ -98,9 +98,10 @@ namespace SpellChargeTracker
 			ActualState newState = (ActualState)caster->state.get();
 
 			// Return if the state is unchanged and current state is idle/hold/release
-			ActualState* lastStatePtr = (isLeftHand ? &lastLeftHandState : &lastRightHandState);
+			std::atomic<ActualState>* lastStatePtr = (isLeftHand ? &lastLeftHandState : &lastRightHandState);
+			ActualState lastState = lastStatePtr->load(std::memory_order_relaxed);
 			if (
-				(newState == *lastStatePtr) &&
+				(newState == lastState) &&
 				(newState == ActualState::kIdle || newState == ActualState::kHolding || newState == ActualState::kReleasing)
 			) {
 				return;
@@ -125,7 +126,7 @@ namespace SpellChargeTracker
 				handHaptics->ScheduleEvent({ 50, 0.01f, 0, true });
 			} else if (newState == ActualState::kReleasing) {
 				auto spell = static_cast<RE::SpellItem*>(caster->actor->GetEquippedObject(gameIsLeftHand));
-				bool interrupt = !(*lastStatePtr == ActualState::kReleasing);
+				bool interrupt = !(lastState == ActualState::kReleasing);
 				if (Utils::InvertVRInputForSpell(spell)) {
 					// "Concentration" spells get a medium interval pulses as long as they are released
 					handHaptics->ScheduleEvent({ 30, 1, 0, interrupt });
@@ -139,7 +140,9 @@ namespace SpellChargeTracker
 			//if (*lastStatePtr == ActualState::kHolding)
 
 			// Update last state
-			*lastStatePtr = newState;
+			lastStatePtr->store(newState, std::memory_order_relaxed);
+			//auto time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+			//logger::trace("{}: {}", time, (int)lastState);
 		}
 
 		void UpdateHook(RE::ActorMagicCaster* caster, float delta)
@@ -151,6 +154,7 @@ namespace SpellChargeTracker
 			g_originalUpdate(caster, delta);
 			SetHapticState(caster);
 		}
+
 	}  // namespace
 
 	void Install()

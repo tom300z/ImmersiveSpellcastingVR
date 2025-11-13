@@ -22,6 +22,8 @@ namespace InputInterceptor
 {
 	vr::EVRButtonId g_castingButtonId = vr::EVRButtonId::k_EButton_Grip;
 	bool g_castingButtonTouch = false;
+	std::atomic_bool g_refreshLeft{ false };
+	std::atomic_bool g_refreshRight{ false };
 
 	HandState g_leftHandState = HandState();
 	HandState g_rightHandState = HandState();
@@ -104,6 +106,7 @@ namespace InputInterceptor
 
 			auto player = RE::PlayerCharacter::GetSingleton();
 			bool gameIsLeftHand = isLeftHand;
+			InputDispatcher::HandInputDispatcher& kDispatcher = (isLeftHand ? InputDispatcher::leftDisp : InputDispatcher::rightDisp);
 			if (player && player->isLeftHandMainHand) {
 				gameIsLeftHand = !isLeftHand;
 			}
@@ -118,18 +121,16 @@ namespace InputInterceptor
 				bool invertInput = Utils::InvertVRInputForSpell(spell);
 				const bool desiredAttackPressed = invertInput ? !castingButtonActivated : castingButtonActivated;
 
-				// Fire&Forget spells sometimes need the trigger to be released for a few ms before they can be recast. This can be emulated via the forceRepress option
-				// I wish there was a cleaner way to do this but i don't know any.
-				if (!invertInput && desiredAttackPressed && forceRepress) {
-					InputDispatcher::RepressAttackButton(gameIsLeftHand);
-				} else {
-					InputDispatcher::AddAttackButtonEvent(gameIsLeftHand, desiredAttackPressed);
-				}
+				// Declare desired caster state
+				kDispatcher.DeclareCasterState(desiredAttackPressed);
+
 
 				// Hide original input from game, if it is currently pressed
 				if (newState == ButtonState::kPressed) {
 					handState->hideCastingButtonFromGame = true;
 				}
+
+				(isLeftHand? g_refreshLeft : g_refreshRight).store(false, std::memory_order_relaxed);
 			} else {
 				// Unhide original input from game if the casting button is not pressed (to avoid unwanted inputs when opening menus)
 				if (newState == ButtonState::kUnpressed || handState->lastCastingButtonState == ButtonState::kUnpressed) {
@@ -161,7 +162,8 @@ namespace InputInterceptor
 		// Check if the casting button is pressed/touched
 		const bool castingButtonActivated = (*buttonActivationMask & vr::ButtonMaskFromId(g_castingButtonId));
 
-		ProcessCastingButtonState(isLeftHand, castingButtonActivated, false);
+		// Process button state, force dispatch if refresh was scheduled, otherwise only process on changed state
+		ProcessCastingButtonState(isLeftHand, castingButtonActivated, (isLeftHand ? g_refreshLeft : g_refreshRight).load(std::memory_order_relaxed));
 
 		// Hide the casting button press from the game if it is supposed to be hidden
 		HandState* handState = isLeftHand ? &g_leftHandState : &g_rightHandState;
@@ -186,25 +188,10 @@ namespace InputInterceptor
 		}
 	}
 
-	void RefreshCastingState(bool forceRepressLeft, bool forceRepressRight)
+	void RefreshCastingState()
 	{
-		if (!Utils::InGame()) {
-			return;
-		}
-
-		if (!g_inputEnabled.load(std::memory_order::relaxed)) {
-			return;
-		}
-
-		if (g_leftHandState.lastCastingButtonState != ButtonState::kUnknown) {
-			const bool castingButtonActivated = g_leftHandState.lastCastingButtonState == ButtonState::kPressed;
-			ProcessCastingButtonState(true, castingButtonActivated, true, forceRepressLeft);
-		}
-
-		if (g_rightHandState.lastCastingButtonState != ButtonState::kUnknown) {
-			const bool castingButtonActivated = g_rightHandState.lastCastingButtonState == ButtonState::kPressed;
-			ProcessCastingButtonState(false, castingButtonActivated, true, forceRepressRight);
-		}
+		g_refreshLeft.store(true);
+		g_refreshRight.store(true);
 	}
 
 	void Install(const SKSE::LoadInterface* a_skse)
@@ -217,5 +204,4 @@ namespace InputInterceptor
 		auto g_vrinterface = (SKSEVRInterface*)a_skse->QueryInterface(kInterface_VR);
 		g_vrinterface->RegisterForControllerState(a_skse->GetPluginHandle(), std::numeric_limits<std::int32_t>::max(), ControllerCallback);
 	}
-
 }

@@ -19,6 +19,9 @@ namespace SpellChargeTracker
 		kUnk09,  // Interrupt/Deselect
 	};
 
+	extern std::atomic<ActualState> lastLeftHandState;
+	extern std::atomic<ActualState> lastRightHandState;
+
 	/// Install the detour for magic caster updates.
 	void Install();
 }
