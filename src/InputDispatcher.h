@@ -28,8 +28,11 @@ namespace InputDispatcher
 		void Work() override;
 		void AddAttackButtonEvent(bool left, bool pressed, float heldSecOverride = 0.0f);
 
+		// Current state of the respective MagicCaster
+		std::atomic<SpellChargeTracker::ActualState>* currentCasterState;
+
 		/// <summary>
-		/// The caster being active meant that the attack button is held and the casters state is appropriate (anything other than kIdle kReleasing).
+		/// The caster being active means that the attack button is held to ensure the casters state is appropriate (anything other than kIdle kReleasing).
 		/// This way inputs can be retriggered if the game ignored them for some reason until the caster has the desired state.
 		/// </summary>
 		std::atomic<bool> casterDeclaredActive;
@@ -45,9 +48,7 @@ namespace InputDispatcher
 		/// </summary>
 		constexpr static std::chrono::milliseconds kGracePeriod = std::chrono::milliseconds(200);
 
-		std::atomic<SpellChargeTracker::ActualState>* currentCasterState;
-
-
+		/*
 		// Duration to release trigger for during re-press
 		constexpr static std::chrono::milliseconds kRePressReleaseDuration = std::chrono::milliseconds(50);
 
@@ -56,6 +57,7 @@ namespace InputDispatcher
 
 		// Time at which the current re-press was started
 		std::chrono::steady_clock::time_point currentRePressStartTime = std::chrono::steady_clock::now();
+		*/
 	};
 
 	extern HandInputDispatcher leftDisp;
