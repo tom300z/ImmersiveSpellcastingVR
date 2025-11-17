@@ -79,14 +79,14 @@ void OnEquipEvent(const RE::TESEquipEvent& event) {
 	if (auto* form = RE::TESForm::LookupByID(event.baseObject)) {
 		//logger::info("{} {}", event.equipped ? "Equipped" : "Unequipped", form->GetName() );
 
-		// TODO: Decide whether i want this fix or a short re-equip time for spellsiphoning
-		if (!event.equipped && std::strcmp(form->GetName(), "Draw") == 0) {
+		/*
+		if (!event.equipped && std::strcmp(form->GetName(), "Draww") == 0) {
 			if (player->GetEquippedObject(true) == nullptr) {
 				InputDispatcher::leftDisp.SuppressUntilCasterInactive();
 			} else if (player->GetEquippedObject(false) == nullptr) {
 				InputDispatcher::rightDisp.SuppressUntilCasterInactive();
 			}
-		}
+		}*/
 	}
 }
 
