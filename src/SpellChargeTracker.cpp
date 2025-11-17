@@ -114,11 +114,11 @@ namespace SpellChargeTracker
 				handHaptics->ScheduleEvent({});
 				//logger::info("Setting haptics for idle...");
 			} else if (newState == ActualState::kStart || newState == ActualState::kCharging) {
-				float chargeProgress = (newState == ActualState::kCharging) ? (1 - (caster->castingTimer * 2)) : (caster->castingTimer > 0)? 0: 1;  // castingTimer goes down from 0.5 to 0 (No idea why...)
+				float chargeProgress = (newState == ActualState::kCharging) ? (1 - (caster->castingTimer * 2)) : 0;  //(caster->castingTimer > 0)? 0: 1;  // castingTimer goes down from 0.5 to 0 (No idea why...)
 
 				handHaptics->ScheduleEvent({
 					.pulseInterval = static_cast<int>(std::lerp(100, 20, chargeProgress)),
-					.pulseStrength = static_cast<float>(std::lerp(0.01, 1, std::pow(chargeProgress, 6))),  // Using pow makes the interpolation exponential instead of linear
+					.pulseStrength = static_cast<float>(std::lerp(0, 1, std::pow(chargeProgress, 6))),  // Using pow makes the interpolation exponential instead of linear. Keep min=0 So Concentration spells dont play haptics while starting
 					.interruptPulse = newState == ActualState::kStart  // Interrupt current pulse on first update
 				});
 				//logger::info("Setting haptics for Progress: {}", chargeProgress);
