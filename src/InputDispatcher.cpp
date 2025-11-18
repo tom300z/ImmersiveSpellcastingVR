@@ -20,10 +20,8 @@ namespace InputDispatcher
 		}
 
 		auto player = RE::PlayerCharacter::GetSingleton();
-		if (player && player->isLeftHandMainHand) {
-			// Invert if left handed
-			left = !left;
-		}
+		const bool isMainHand = RE::BSOpenVRControllerDevice::IsLeftHandedMode() ? left : !left;              // in-game notion of “main hand”
+
 		auto* ue = RE::UserEvents::GetSingleton();
 		auto* q = RE::BSInputEventQueue::GetSingleton();
 		if (!ue || !q)
@@ -38,7 +36,7 @@ namespace InputDispatcher
 			0,                                        // idCode
 			value,                                    // 1.0=down, 0.0=up
 			heldSec,                                  // 0.0 new press; >0.0 signals release
-			left ? ue->leftAttack : ue->rightAttack   //ue->leftAttack : ue->rightAttack,  // BSFixedString user event
+			isMainHand ? ue->rightAttack : ue->leftAttack  //ue->leftAttack : ue->rightAttack,  // BSFixedString user event
 		);
 	}
 
@@ -46,8 +44,6 @@ namespace InputDispatcher
 		isLeftHand(isLeftHand)
 	{
 		handName = isLeftHand ? "Left" : "Right";
-
-		// TODO: Swap hands here?
 		currentCasterState = isLeftHand ? &SpellChargeTracker::lastLeftHandState : &SpellChargeTracker::lastRightHandState;
 
 		minInterval.store(std::chrono::milliseconds(0), std::memory_order::relaxed);
@@ -62,7 +58,7 @@ namespace InputDispatcher
 		// Inputs typically take 10ms to result in a changed caster state so 20ms should be pretty efficient in case a repress is needed.
 		if (kOldCasterActive != casterActive) {
 			auto time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-			logger::trace("{}: {} caster declared {}", time, isLeftHand ? "Left" : "Right", casterActive ? "active" : "inactive");
+			//logger::trace("{}: {} caster declared {}", time, isLeftHand ? "Left" : "Right", casterActive ? "active" : "inactive");
 			casterDeclarationChanged = true;
 			this->Notify();
 		}
@@ -76,19 +72,20 @@ namespace InputDispatcher
 
 	void HandInputDispatcher::AddAttackButtonEvent(bool left, bool pressed, float heldSecOverride)
 	{
-		auto time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-		logger::trace("{}: {} {}", time, left ? "Left" : "Right", pressed ? "press" : "unpress");
+		//auto time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
+		//logger::trace("{}: {} {}", time, left ? "Left" : "Right", pressed ? "press" : "unpress");
 		SKSE::GetTaskInterface()->AddUITask([left, pressed, heldSecOverride]() { _AddAttackButtonEvent(left, pressed, heldSecOverride); });
 	}
 
 	void HandInputDispatcher::Work() {
 		auto player = RE::PlayerCharacter::GetSingleton();
+		const bool isMainHand = RE::BSOpenVRControllerDevice::IsLeftHandedMode() ? isLeftHand : !isLeftHand;  // in-game notion of “main hand”
 
 		// release & return if player is not holding spell
 		if (!(player
 			&& player->actorState2.weaponState == RE::WEAPON_STATE::kDrawn  // has the weapons drawn
-			&& player->GetEquippedObject(isLeftHand)                   // Hand has object equipped
-			&& player->GetEquippedObject(isLeftHand)->GetFormType() == RE::FormType::Spell
+			&& player->GetEquippedObject(!isMainHand)                   // Hand has object equipped
+			&& player->GetEquippedObject(!isMainHand)->GetFormType() == RE::FormType::Spell
 			&& player->GetMagicCaster(RE::MagicSystem::CastingSource::kOther)
 			&& player->GetMagicCaster(RE::MagicSystem::CastingSource::kOther)->state == RE::MagicCaster::State::kNone)) {
 			return;

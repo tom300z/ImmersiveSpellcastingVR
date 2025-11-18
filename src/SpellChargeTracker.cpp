@@ -85,13 +85,10 @@ namespace SpellChargeTracker
 			if (!(caster->castingSource == RE::MagicSystem::CastingSource::kLeftHand || caster->castingSource == RE::MagicSystem::CastingSource::kRightHand)) {
 				return;
 			}
-			bool gameIsLeftHand = caster->castingSource == RE::MagicSystem::CastingSource::kLeftHand;
-			bool isLeftHand = gameIsLeftHand;
-			if (reinterpret_cast<RE::PlayerCharacter*>(caster->actor)->isLeftHandMainHand) {
-				isLeftHand = !gameIsLeftHand;
-			}
+			const bool isMainHand = caster->castingSource == RE::MagicSystem::CastingSource::kRightHand;  // in-game notion of “main hand”
+			const bool isLeftHand = RE::BSOpenVRControllerDevice::IsLeftHandedMode() ? isMainHand : !isMainHand;  // physical controller on the user’s left
 
-			if (!gameIsLeftHand && caster->actor->IsDualCasting()) {
+			if (!isMainHand && caster->actor->IsDualCasting()) {
 				// Use left hand caster for both hands if dual casting
 				caster = reinterpret_cast<RE::ActorMagicCaster*>(RE::PlayerCharacter::GetSingleton()->GetMagicCaster(RE::MagicSystem::CastingSource::kLeftHand));
 			}
@@ -125,7 +122,7 @@ namespace SpellChargeTracker
 			} else if (newState == ActualState::kHolding) {
 				handHaptics->ScheduleEvent({ 50, 0.01f, 0, true });
 			} else if (newState == ActualState::kReleasing) {
-				auto spell = static_cast<RE::SpellItem*>(caster->actor->GetEquippedObject(gameIsLeftHand));
+				auto spell = static_cast<RE::SpellItem*>(caster->actor->GetEquippedObject(!isMainHand));
 				bool interrupt = !(lastState == ActualState::kReleasing);
 				if (Utils::InvertVRInputForSpell(spell)) {
 					// "Concentration" spells get a medium interval pulses as long as they are released
@@ -136,8 +133,6 @@ namespace SpellChargeTracker
 				}
 				//logger::info("Setting haptics for release!");
 			}
-
-			//if (*lastStatePtr == ActualState::kHolding)
 
 			// Update last state
 			lastStatePtr->store(newState, std::memory_order_relaxed);

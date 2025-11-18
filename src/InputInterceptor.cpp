@@ -105,19 +105,17 @@ namespace InputInterceptor
 
 
 			auto player = RE::PlayerCharacter::GetSingleton();
-			bool gameIsLeftHand = isLeftHand;
+			const bool isMainHand = RE::BSOpenVRControllerDevice::IsLeftHandedMode() ? isLeftHand : !isLeftHand;  // in-game notion of “main hand”
 			InputDispatcher::HandInputDispatcher& kDispatcher = (isLeftHand ? InputDispatcher::leftDisp : InputDispatcher::rightDisp);
-			if (player && player->isLeftHandMainHand) {
-				gameIsLeftHand = !isLeftHand;
-			}
+
 			if ((
 				player                                                                          // Player exists
 				&& Utils::InGame()                                                              // player is in Game
 				&& player->actorState2.weaponState == RE::WEAPON_STATE::kDrawn                  // has the weapons drawn
-				&& player->GetEquippedObject(gameIsLeftHand)                                    // Hand has object equipped
-				&& player->GetEquippedObject(gameIsLeftHand)->GetFormType() == RE::FormType::Spell  // Equipped Object is Spell
+					&& player->GetEquippedObject(!isMainHand)                                            // Hand has object equipped
+					&& player->GetEquippedObject(!isMainHand)->GetFormType() == RE::FormType::Spell  // Equipped Object is Spell
 			)) {
-				auto spell = static_cast<RE::SpellItem*>(player->GetEquippedObject(gameIsLeftHand));
+				auto spell = static_cast<RE::SpellItem*>(player->GetEquippedObject(!isMainHand));
 				bool invertInput = Utils::InvertVRInputForSpell(spell);
 				const bool desiredAttackPressed = invertInput ? !castingButtonActivated : castingButtonActivated;
 
