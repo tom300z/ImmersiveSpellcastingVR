@@ -85,7 +85,7 @@ namespace InputInterceptor
 			}
 		}
 
-		void ProcessCastingButtonState(bool isLeftHand, bool castingButtonActivated, bool forceDispatch = false, bool forceRepress = false)
+		void ProcessCastingButtonState(bool isLeftHand, bool castingButtonActivated, bool forceDispatch = false)
 		{
 			if (!g_inputEnabled.load(std::memory_order::relaxed)) {
 				return;
