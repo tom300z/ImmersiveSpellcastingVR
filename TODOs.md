@@ -1,4 +1,7 @@
 # Issues
+- Use Actor::SetWantCasting for input
+- Run input dispatcher in UI thread, maybe hook PollInputDevices
+- Fix sheathe not working (being interrupted by 60ms spellchargetracker). Maybe works now???
 - Fix left handed mode
 - Remove logging
 - Disable spell equip/unequip animations (for faster spellsiphoning). Or maybe just shorten them?

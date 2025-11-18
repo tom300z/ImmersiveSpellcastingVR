@@ -60,7 +60,7 @@ namespace Compat::HIGGSUseTouchForGrip {
 	void Install()
 	{
 		if (g_patcher.ResolveTargets()) {
-			// Could not be installed due to missing higgs or incompatibility. 
+			// Could not be installed due to missing higgs or incompatibility.
 			return;
 		}
 		if (g_configListenerId != 0) {
