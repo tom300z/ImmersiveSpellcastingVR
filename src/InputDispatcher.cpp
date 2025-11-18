@@ -134,24 +134,6 @@ namespace InputDispatcher
 			if (kCasterDesiredActive) {
 				// If trigger should be pressed,  before repressing it for another gracePeriod. Repeat this until the caster reaches it's desired state which causes this code to no longer be reached.
 				this->AddAttackButtonEvent(isLeftHand, true);
-
-				/* TODO: Readd more complex repress logic if it is really necessary
-				if (!isRePressing) {
-					// Release trigger, store the repress & repress start time in state, wait kRePressReleaseDuration
-					isRePressing = true;
-					currentRePressStartTime = now + kRePressReleaseDuration;
-					minInterval = kRePressReleaseDuration;
-					logger::trace("{}: {} Re-press: released trigger...", std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count(), handName);
-				} else {
-					// Re-press trigger for grace period, then, stop the re-press if it was unsuccessful. (Leading to another release & re-press)
-					std::chrono::duration<float> timeSinceRePressStart = now - currentRePressStartTime; // TODO Must be 0 on first hit
-					if (timeSinceRePressStart <= kGracePeriod) {
-						this->AddAttackButtonEvent(isLeftHand, true, timeSinceRePressStart.count());
-						logger::trace("{}: {} Re-press: pressed trigger for {}s...", std::chrono::duration_cast<std::chrono::milliseconds>(now.time_since_epoch()).count(), handName, timeSinceRePressStart.count());
-					} else {
-						isRePressing = false;
-					}
-				}*/
 			}
 		}
 	}
