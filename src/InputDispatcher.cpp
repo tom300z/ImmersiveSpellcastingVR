@@ -82,6 +82,17 @@ namespace InputDispatcher
 	}
 
 	void HandInputDispatcher::Work() {
+		auto player = RE::PlayerCharacter::GetSingleton();
+
+		// release & return if player is not holding spell
+		if (!(player
+			&& player->actorState2.weaponState == RE::WEAPON_STATE::kDrawn  // has the weapons drawn
+			&& player->GetEquippedObject(isLeftHand)                   // Hand has object equipped
+			&& player->GetEquippedObject(isLeftHand)->GetFormType() == RE::FormType::Spell
+			&& player->GetMagicCaster(RE::MagicSystem::CastingSource::kOther)
+			&& player->GetMagicCaster(RE::MagicSystem::CastingSource::kOther)->state == RE::MagicCaster::State::kNone)) {
+			return;
+		}
 
 		// Determine desired and currend caster state
 		const bool kCasterDesiredActive = casterDeclaredActive.load(std::memory_order_relaxed);
@@ -101,17 +112,17 @@ namespace InputDispatcher
 		// Return if caster already has desired state and the declaration was not just updated. Also slow down the worker until a new state is declared
 		if (kCasterActive == kCasterDesiredActive && !casterDeclarationChanged.load(std::memory_order_relaxed))
 		{
-			// The worker still runs every 60ms in case the caster state drifts (for example after a fast healing spell kCasterActive lingers true for a short period after releasing.)
-			minInterval.store(std::chrono::milliseconds(60), std::memory_order::relaxed);
+			// The worker still runs every 100ms in case the caster state drifts (for example after a fast healing spell kCasterActive lingers true for a short period after releasing.)
+			minInterval.store(std::chrono::milliseconds(100), std::memory_order::relaxed);
 			return;
 		}
 
 		// Dispatch input to reconciliate caster state. Work every 20ms during reconciliation
 		minInterval.store(std::chrono::milliseconds(20), std::memory_order::relaxed);
-		
+
 		// Compute the appropriate input
 		const auto now = std::chrono::steady_clock::now();
-		
+
 		if (casterDeclarationChanged.exchange(false, std::memory_order_relaxed)) {
 			// Start new input if the caster state declaration changed
 			currentInputStartTime = now;
