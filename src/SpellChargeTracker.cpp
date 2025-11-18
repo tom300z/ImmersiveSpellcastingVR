@@ -88,7 +88,7 @@ namespace SpellChargeTracker
 			const bool isMainHand = caster->castingSource == RE::MagicSystem::CastingSource::kRightHand;  // in-game notion of “main hand”
 			const bool isLeftHand = RE::BSOpenVRControllerDevice::IsLeftHandedMode() ? isMainHand : !isMainHand;  // physical controller on the user’s left
 
-			if (!isMainHand && caster->actor->IsDualCasting()) {
+			if (caster->actor->IsDualCasting()) {
 				// Use left hand caster for both hands if dual casting
 				caster = reinterpret_cast<RE::ActorMagicCaster*>(RE::PlayerCharacter::GetSingleton()->GetMagicCaster(RE::MagicSystem::CastingSource::kLeftHand));
 			}
