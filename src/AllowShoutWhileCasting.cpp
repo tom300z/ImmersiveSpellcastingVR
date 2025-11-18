@@ -28,7 +28,7 @@ namespace AllowShoutWhileCasting
 		{
 			bool result = g_originalCheckCast(magicCaster, spellOrShout, bDualCast, pfEffectiveStrength, pCannotCastReason, bUseBaseValueForCost);
 
-			if (!result && magicCaster->actor == RE::PlayerCharacter::GetSingleton() && spellOrShout->GetSpellType() == RE::MagicSystem::SpellType::kVoicePower) {
+			if (!result && magicCaster->actor == RE::PlayerCharacter::GetSingleton() && spellOrShout->GetSpellType() == RE::MagicSystem::SpellType::kVoicePower && *pCannotCastReason == RE::MagicSystem::CannotCastReason::kShoutWhileCasting) {
 				// Interrupt hand casters and try again
 				for (auto caster : { magicCaster->actor->GetMagicCaster(RE::MagicSystem::CastingSource::kLeftHand), magicCaster->actor->GetMagicCaster(RE::MagicSystem::CastingSource::kRightHand) }) {
 					caster->InterruptCast(true);
@@ -48,16 +48,43 @@ namespace AllowShoutWhileCasting
 			return;
 		}
 
-		constexpr REL::Offset kCheckCastCallSiteOffset{ 0x545363 };  // ActorMagicCaster::DoSpellOrShout? call to ActorMagicCaster::CheckCast, Called when trying to shout
-		constexpr REL::Offset kCheckCastOffset{ 0x5465a0 };
-		REL::Relocation<std::uint8_t*> CheckCastCallSite{ kCheckCastCallSiteOffset };
+		if (auto* player = RE::PlayerCharacter::GetSingleton()) {
+			RE::ActorMagicCaster* sample = nullptr;
+			for (auto slot : { RE::Actor::SlotTypes::kLeftHand, RE::Actor::SlotTypes::kRightHand }) {
+				sample = player->magicCasters[slot];
+				if (sample) {
+					break;
+				}
+			}
 
-		auto& trampoline = SKSE::GetTrampoline();
-		trampoline.write_call<5>(kCheckCastCallSiteOffset.address(), CheckCastHook);
-		g_originalCheckCast = (CheckCastFunc)kCheckCastOffset.address();
+			if (!sample) {
+				logger::warn("AllowShoutWhileCasting: player has no ActorMagicCaster instances yet");
+				return;
+			}
 
-		g_installed = true;
-		logger::info("CheckCastHook: installed");
+			auto** vtblPtr = reinterpret_cast<std::uintptr_t**>(sample);
+			if (!vtblPtr || !*vtblPtr) {
+				logger::warn("AllowShoutWhileCasting: unable to resolve caster vtable");
+				return;
+			}
 
+			constexpr std::size_t kCheckCastIndex = 10;
+			auto* vtbl = *vtblPtr;
+
+			g_originalCheckCast = reinterpret_cast<CheckCastFunc>(vtbl[kCheckCastIndex]);
+			const auto hookAddr = reinterpret_cast<std::uintptr_t>(&CheckCastHook);
+			REL::safe_write(reinterpret_cast<std::uintptr_t>(&vtbl[kCheckCastIndex]), hookAddr);
+
+			if (!g_originalCheckCast) {
+				logger::warn("AllowShoutWhileCasting: original ActorMagicCaster::CheckCast resolved as nullptr");
+			}
+
+			logger::info("AllowShoutWhileCasting: original ActorMagicCaster::CheckCast {:p}", reinterpret_cast<const void*>(g_originalCheckCast));
+			logger::info("AllowShoutWhileCasting: vtable slot patched -> {:p}", reinterpret_cast<const void*>(vtbl[kCheckCastIndex]));
+
+			g_installed = true;
+		} else {
+			logger::warn("AllowShoutWhileCasting: PlayerCharacter not available, skip hook");
+		}
 	}
 }

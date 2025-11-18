@@ -94,6 +94,7 @@ void OnEquipEvent(const RE::TESEquipEvent& event) {
 void OnSaveLoadEvent([[maybe_unused]] RE::TESLoadGameEvent event)
 {
 	SpellChargeTracker::Install();
+	AllowShoutWhileCasting::Install();
 	ActionAllowedHook::Install();
 	Utils::Setup::PerformInteractiveSetup();
 
@@ -115,6 +116,12 @@ void OnMenuOpenCloseEvent(const RE::MenuOpenCloseEvent& event)
 		if (Config::Manager::GetSingleton().Get<bool>(Settings::kInputCastAfterMenuExit, false)) {
 			InputInterceptor::RefreshCastingState();
 		} else {
+			// Interrupt hand casters and try again
+			if (auto player = RE::PlayerCharacter::GetSingleton()) {
+				for (auto caster : { player->GetMagicCaster(RE::MagicSystem::CastingSource::kLeftHand), player->GetMagicCaster(RE::MagicSystem::CastingSource::kRightHand) }) {
+					caster->InterruptCast(true);
+				}
+			}
 			// Suppress active input until it has been released by the player
 			InputDispatcher::leftDisp.SuppressUntilCasterInactive();
 			InputDispatcher::rightDisp.SuppressUntilCasterInactive();
@@ -134,7 +141,6 @@ void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 			);
 			Compat::HapticSkyrimVR::DisableMagicHaptics(true);
 			Compat::HIGGSUseTouchForGrip::Install();
-			AllowShoutWhileCasting::Install();
 		}
 		break;
 	case SKSE::MessagingInterface::kPostPostLoad:
