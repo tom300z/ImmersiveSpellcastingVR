@@ -11,6 +11,7 @@ Magic in Skyrim VR no longer feels like merely shooting a gun. Your physical han
 * Cast spells immersively by opening and closing your hands!
 * Get dynamic haptic feedback based on spell charge progress
 * Allows jumping while holding a charged spell
+* Allows pressing shout while casting/charging a spell (the spell will be interrupted and magicka refunded).
 * Removes transition animations that cause in-game hand animations to lag behind your physical hand
 * Supports all controller types by allowing both grip_touch and grip_press as input methods
 * Fully configurable via INI file or MCM

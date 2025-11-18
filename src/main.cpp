@@ -26,6 +26,7 @@
 #include "compat/HapticSkyrimVRinterface001.h"
 #include "PCH.h"
 #include <compat/HIGGS.h>
+#include <AllowShoutWhileCasting.h>
 
 using namespace RE;
 using namespace SKSE;
@@ -68,8 +69,8 @@ void OnPlayerAnimationGraphEvent(const RE::BSAnimationGraphEvent& event)
 
 	//logger::info("Event: {}", event.tag.c_str());
 
-	// Refresh casting state after spell was equipped so it is immediately fired after draw.
-	if (event.tag == "Magic_Equip_Out") {
+	// Refresh casting state after spell was equipped so it is immediately fired after draw. Also refresh after a weapon
+	if (event.tag == "Magic_Equip_Out" || event.tag == "WeapEquip_Out") {
 		InputInterceptor::RefreshCastingState();
 	}
 }
@@ -133,6 +134,7 @@ void OnSKSEMessage(SKSE::MessagingInterface::Message* msg)
 			);
 			Compat::HapticSkyrimVR::DisableMagicHaptics(true);
 			Compat::HIGGSUseTouchForGrip::Install();
+			AllowShoutWhileCasting::Install();
 		}
 		break;
 	case SKSE::MessagingInterface::kPostPostLoad:
