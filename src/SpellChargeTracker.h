@@ -1,27 +1,14 @@
 #pragma once
 
-#include "RE/Skyrim.h"
+#include "CasterStateTracker.h"
 
 namespace SpellChargeTracker
 {
-	enum class ActualState  // RE::MagicCaster::State seems to be annotated incorrectly
-	{
-		kUnknown = -1,
-		kIdle = 0,
-		kStart,     // Start?
-		kCharging,  // StartCharge?
-		kHolding,
-		kReleasing,  // PreStart?
-		kChargingUnk,
-		kCasting,
-		kUnk07,  // Unknown
-		kUnk08,  // Interrupt
-		kUnk09,  // Interrupt/Deselect
-	};
+	using ActualState = CasterStateTracker::ActualState;
 
-	extern std::atomic<ActualState> lastLeftHandState;
-	extern std::atomic<ActualState> lastRightHandState;
+	inline std::atomic<ActualState>& lastLeftHandState = CasterStateTracker::lastLeftHandState;
+	inline std::atomic<ActualState>& lastRightHandState = CasterStateTracker::lastRightHandState;
 
-	/// Install the detour for magic caster updates.
+	/// Install spell haptics subscriber.
 	void Install();
 }
