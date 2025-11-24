@@ -45,6 +45,14 @@ namespace Utils
 		return true;
 	}
 
+	bool IsPlayerHoldingSpell(bool mainHand) {
+		const auto player = RE::PlayerCharacter::GetSingleton();
+		return player 
+			&& player->actorState2.weaponState == RE::WEAPON_STATE::kDrawn           // has the weapons drawn
+		    && player->GetEquippedObject(!mainHand)                                         // Hand has object equipped
+		    && player->GetEquippedObject(!mainHand)->GetFormType() == RE::FormType::Spell;  //Has Spell equipped
+	}
+
 	bool InvertVRInputForSpell(RE::SpellItem *spell) {
 		bool invertInput = spell->GetCastingType() == RE::MagicSystem::CastingType::kConcentration;
 

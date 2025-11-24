@@ -8,9 +8,39 @@
 #include <chrono>
 #include <thread>
 
+
 namespace InputDispatcher
 {
 	std::atomic<bool> inputSuppressed{ false };
+
+	/*
+	using StartCastFunc = bool (*)(RE::ActorMagicCaster*, RE::MagicItem*, void*, uint8_t);
+	StartCastFunc StartCast = reinterpret_cast<StartCastFunc>(REL::Offset(0x550540).address());
+
+	void SetCasting(RE::Actor* actor, bool mainHand, bool enabled) {
+		//using func_t = bool (*)(RE::Actor*, RE::MagicSystem::CastingSource, bool);
+		//REL::Relocation<func_t> func{ REL::ID(36925) };
+		//return func(a_actor, a_source, a_enable);
+
+		SKSE::GetTaskInterface()->AddUITask([actor, mainHand, enabled]() {
+			if (Utils::InGame()) {
+				const auto kSlot = mainHand ? RE::Actor::SlotTypes::kRightHand : RE::Actor::SlotTypes::kLeftHand;
+				const auto kCastingSource = mainHand ? RE::MagicSystem::CastingSource::kRightHand : RE::MagicSystem::CastingSource::kLeftHand;
+
+				if (enabled) {
+					StartCast(
+						actor->magicCasters[kSlot],
+						actor->selectedSpells[kSlot],
+						nullptr,
+						0);
+				} else {
+					actor->GetMagicCaster(kCastingSource)->FinishCastImpl();
+				}
+			}
+		});
+	}
+	*/
+
 
 	// Run on UI thread
 	void _AddAttackButtonEvent(bool left, bool pressed, float heldSecOverride = 0.0f)
@@ -81,13 +111,8 @@ namespace InputDispatcher
 		auto player = RE::PlayerCharacter::GetSingleton();
 		const bool isMainHand = RE::BSOpenVRControllerDevice::IsLeftHandedMode() ? isLeftHand : !isLeftHand;  // in-game notion of “main hand”
 
-		// release & return if player is not holding spell
-		if (!(player
-			&& player->actorState2.weaponState == RE::WEAPON_STATE::kDrawn  // has the weapons drawn
-			&& player->GetEquippedObject(!isMainHand)                   // Hand has object equipped
-			&& player->GetEquippedObject(!isMainHand)->GetFormType() == RE::FormType::Spell
-			&& player->GetMagicCaster(RE::MagicSystem::CastingSource::kOther)
-			&& player->GetMagicCaster(RE::MagicSystem::CastingSource::kOther)->state == RE::MagicCaster::State::kNone)) {
+		// return if player is not holding spell or shouting
+		if (!Utils::IsPlayerHoldingSpell(isMainHand) || player->GetMagicCaster(RE::MagicSystem::CastingSource::kOther)->state != RE::MagicCaster::State::kNone) {
 			return;
 		}
 
@@ -104,7 +129,6 @@ namespace InputDispatcher
 				suppressUntilCasterInactive.store(false, std::memory_order_relaxed);
 			}
 		}
-
 
 		// Return if caster already has desired state and the declaration was not just updated. Also slow down the worker until a new state is declared
 		if (kCasterActive == kCasterDesiredActive && !casterDeclarationChanged.load(std::memory_order_relaxed))

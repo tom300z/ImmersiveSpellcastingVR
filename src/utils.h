@@ -6,6 +6,7 @@
 namespace Utils
 {
 	bool InGame();
+	bool IsPlayerHoldingSpell(bool mainHand);
 	bool InvertVRInputForSpell(RE::SpellItem* spell);
 	void ExecuteConsoleCommand(std::string_view command);
 	using MessageBoxResultCallbackFunc = std::function<void(unsigned int)>;

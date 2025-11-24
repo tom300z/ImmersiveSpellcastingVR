@@ -111,9 +111,7 @@ namespace InputInterceptor
 			if ((
 				player                                                                          // Player exists
 				&& Utils::InGame()                                                              // player is in Game
-				&& player->actorState2.weaponState == RE::WEAPON_STATE::kDrawn                  // has the weapons drawn
-					&& player->GetEquippedObject(!isMainHand)                                            // Hand has object equipped
-					&& player->GetEquippedObject(!isMainHand)->GetFormType() == RE::FormType::Spell  // Equipped Object is Spell
+				&& Utils::IsPlayerHoldingSpell(isMainHand)                                      // is holding spell
 			)) {
 				auto spell = static_cast<RE::SpellItem*>(player->GetEquippedObject(!isMainHand));
 				bool invertInput = Utils::InvertVRInputForSpell(spell);
