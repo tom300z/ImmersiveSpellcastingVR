@@ -140,9 +140,11 @@ target("ISPVR")
         os.cp("mod_data_static/*", target:installdir() .. path.sep())
 
         -- Copy dll & symbols
-        --print(target:targetfile())
         os.cp(target:targetfile(), path.join(target:installdir(), "SKSE\\Plugins") .. path.sep())
-        os.cp(target:targetfile():gsub("%.%w+$", "") .. ".pdb", path.join(target:installdir(), "SKSE\\Plugins") .. path.sep())
+        local pdbpath = target:targetfile():gsub("%.%w+$", "") .. ".pdb"
+        if os.exists(pdbpath) then
+            os.cp(pdbpath, path.join(target:installdir(), "SKSE\\Plugins") .. path.sep())
+        end
 
         -- (Re)start SkyrimVR if debugging
         if is_mode("debug") then

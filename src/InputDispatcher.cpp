@@ -13,6 +13,34 @@ namespace InputDispatcher
 {
 	std::atomic<bool> inputSuppressed{ false };
 
+	namespace
+	{
+		std::uint64_t g_casterStateListenerId{ 0 };
+
+		void HandleCasterStateChanged(const CasterStateTracker::StateChangedEvent& event)
+		{
+			auto& dispatcher = event.isPhysicalLeft ? leftDisp : rightDisp;
+			dispatcher.OnCasterStateChanged();
+		}
+
+		struct StateListenerRegistrar
+		{
+			StateListenerRegistrar()
+			{
+				g_casterStateListenerId = CasterStateTracker::AddListener(HandleCasterStateChanged);
+			}
+
+			~StateListenerRegistrar()
+			{
+				if (g_casterStateListenerId != 0) {
+					CasterStateTracker::RemoveListener(g_casterStateListenerId);
+				}
+			}
+		};
+	}
+
+	static StateListenerRegistrar g_stateListenerRegistrar;
+
 	/*
 	using StartCastFunc = bool (*)(RE::ActorMagicCaster*, RE::MagicItem*, void*, uint8_t);
 	StartCastFunc StartCast = reinterpret_cast<StartCastFunc>(REL::Offset(0x550540).address());
@@ -80,6 +108,11 @@ namespace InputDispatcher
 		Start();
 	}
 
+	void HandInputDispatcher::OnCasterStateChanged()
+	{
+		this->Notify();
+	}
+
 	void HandInputDispatcher::DeclareCasterState(bool casterActive) {
 		// Store state if it changed
 		const bool kOldCasterActive = casterDeclaredActive.exchange(casterActive, std::memory_order_relaxed);
@@ -130,11 +163,9 @@ namespace InputDispatcher
 			}
 		}
 
-		// Return if caster already has desired state and the declaration was not just updated. Also slow down the worker until a new state is declared
-		if (kCasterActive == kCasterDesiredActive && !casterDeclarationChanged.load(std::memory_order_relaxed))
-		{
-			// The worker still runs every 100ms in case the caster state drifts (for example after a fast healing spell kCasterActive lingers true for a short period after releasing.)
-			minInterval.store(std::chrono::milliseconds(100), std::memory_order::relaxed);
+		// Return if caster already has desired state and the declaration was not just updated. Also pause the worker until the next event.
+		if (kCasterActive == kCasterDesiredActive && !casterDeclarationChanged.load(std::memory_order_relaxed)) {
+			minInterval.store(std::chrono::milliseconds(0), std::memory_order::relaxed);
 			return;
 		}
 

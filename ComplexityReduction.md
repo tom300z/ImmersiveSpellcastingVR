@@ -5,10 +5,9 @@
 - `src/SpellChargeTracker.cpp` now subscribes to those events purely for haptic scheduling and no longer gates the atomics behind the haptics toggle, so input reconciliation keeps working even when haptics are disabled.
 - Existing call sites still use `SpellChargeTracker::ActualState` via inline aliases, preserving the public API while the internals run through the new tracker.
 
-## 2. Streamline HandInputDispatcher without losing resilience
-- `src/InputDispatcher.cpp:73-163` currently spins `Utils::TimedWorker` threads with several atomics just to reissue attack inputs.
-- `src/InputInterceptor.cpp:88-139` is already the single place that knows whenever the casting button toggles, yet it only sets `DeclareCasterState` and a "refresh" flag, leaving the workers to poll every 20 ms until the states reconcile.
-- Updated plan: keep a lightweight worker (or scheduled timer) that only retries when an event-driven attempt fails. Use caster-state events to trigger immediate reconciliation, but fall back to periodic re-presses if cooldowns or engine hiccups swallow the inputs. This preserves the necessary monitoring while reducing the complexity of the current always-on polling loop.
+## 2. Streamline HandInputDispatcher without losing resilience (🚧 partially implemented)
+- `src/InputDispatcher.cpp:12-178` still uses `Utils::TimedWorker`, but it now subscribes to `CasterStateTracker` events so the worker wakes only when desired/actual states diverge or a retry is needed. When hands are idle, the worker sleeps until an event arrives; during reconciliation it keeps the existing 20 ms interval to handle cooldown hiccups.
+- Remaining opportunity: simplify the retry state machine (`casterDeclarationChanged`, grace-period tracking, etc.) now that the core loop is event-triggered, and consider collapsing the atomics into a single struct to reduce branching.
 
 ## 3. Introduce a shared hand-orientation helper (mind left vs. main hand)
 - Every subsystem recomputes how “physical left/right controller” maps to Skyrim’s notion of main/off hand (`RE::BSOpenVRControllerDevice::IsLeftHandedMode()`) – see `src/InputDispatcher.cpp:53-70`, `src/InputDispatcher.cpp:110-163`, `src/InputInterceptor.cpp:107-139`, and `src/SpellChargeTracker.cpp:88-135`.

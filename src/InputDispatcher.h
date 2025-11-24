@@ -15,6 +15,7 @@ namespace InputDispatcher
 		std::string handName;
 
 		HandInputDispatcher(bool isLeftHand);
+		void OnCasterStateChanged();
 
 		void DeclareCasterState(bool casterActive);
 
