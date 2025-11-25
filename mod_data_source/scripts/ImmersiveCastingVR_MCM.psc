@@ -15,7 +15,6 @@ Bool Property HapticsEnabled Auto Hidden
 
 Event OnConfigInit()
 	SetName("Immersive Casting VR")
-	InitializeData()
 	UpdateFromConfig()
 EndEvent
 
@@ -127,6 +126,7 @@ Function InitializeData()
 EndFunction
 
 Function UpdateFromConfig()
+	InitializeData()
 	SelectedInputMethod = ImmersiveCastingVR_Helpers.IndexOfStr(InputMethodValues, ImmersiveCastingVR_Config.GetString("CastingInputMethod"))
 	ShowDoubleBindingWarning = ImmersiveCastingVR_Config.GetBool("ShowBindingWarning")
 	InputEnabled = ImmersiveCastingVR_Config.GetBool("InputEnable")
