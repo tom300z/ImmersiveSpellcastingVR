@@ -107,21 +107,27 @@ void OnSaveLoadEvent([[maybe_unused]] RE::TESLoadGameEvent event)
 
 void OnMenuOpenCloseEvent(const RE::MenuOpenCloseEvent& event)
 {
+	// Only handle game relevant menus
+	if (!std::ranges::contains(Utils::kGameBlockingMenus, event.menuName.c_str())) {
+		return;
+	}
+
 	// Pause haptics while in menus
 	const bool inGame = Utils::InGame();
 	Haptics::Pause(!inGame);
 	InputDispatcher::Pause(!inGame);
 
+	// Interrupt hand casters
+	if (auto player = RE::PlayerCharacter::GetSingleton()) {
+		for (auto caster : { player->GetMagicCaster(RE::MagicSystem::CastingSource::kLeftHand), player->GetMagicCaster(RE::MagicSystem::CastingSource::kRightHand) }) {
+			caster->InterruptCast(true);
+		}
+	}
 	if (!event.opening && inGame) {
+
 		if (Config::Manager::GetSingleton().Get<bool>(Settings::kInputCastAfterMenuExit, false)) {
 			InputInterceptor::RefreshCastingState();
 		} else {
-			// Interrupt hand casters and try again
-			if (auto player = RE::PlayerCharacter::GetSingleton()) {
-				for (auto caster : { player->GetMagicCaster(RE::MagicSystem::CastingSource::kLeftHand), player->GetMagicCaster(RE::MagicSystem::CastingSource::kRightHand) }) {
-					caster->InterruptCast(true);
-				}
-			}
 			// Suppress active input until it has been released by the player
 			InputDispatcher::leftDisp.SuppressUntilCasterInactive();
 			InputDispatcher::rightDisp.SuppressUntilCasterInactive();
