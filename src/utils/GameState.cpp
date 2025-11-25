@@ -13,12 +13,8 @@ namespace Utils
 			return false;
 		}
 
-		static constexpr std::string_view blockedMenus[] = {
-			"Console", "InventoryMenu", "MagicMenu", "ContainerMenu", "BarterMenu",
-			"Dialogue Menu", "MapMenu", "Journal Menu"
-		};
 
-		for (auto menu : blockedMenus) {
+		for (auto menu : kGameBlockingMenus) {
 			if (ui->IsMenuOpen(menu)) {
 				return false;
 			}
