@@ -5,6 +5,7 @@ set_xmakever("2.8.2")
 set_config("skyrim_se", false)
 set_config("skyrim_ae", false)
 set_config("skyrim_vr", true)
+set_config("rex_ini", true)
 
 includes("lib/commonlibsse-ng")
 
@@ -160,4 +161,3 @@ target("ISPVR")
             })
         end
     end)
-

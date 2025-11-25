@@ -14,10 +14,9 @@
 - `CasterStateTracker`, `InputDispatcher`, and `InputInterceptor` now use this helper instead of re-deriving `IsLeftHandedMode()` logic, keeping the physical-vs-main-hand distinction clear and eliminating duplicate code paths.
 
 
-## 4. Rebuild the configuration layer with rex_ini
-- `src/ConfigManager.cpp:48-208` hand-parses INI files (manual trim helpers, string copies, error handling), and `SaveToDisk` repeats the process in reverse with custom sorting logic.
-- The getters/setters span almost 400 lines for four value types, and the Papyrus bindings duplicate boilerplate for each primitive.
-- Updated plan: enable the `rex_ini` option in `lib/commonlibsse-ng/xmake.lua`, switch `ConfigManager` over to SimpleIni from commonlibsse-ng, and define settings via a constexpr table that drives registration, serialization, and Papyrus binding generation. This should eliminate the bespoke parser while keeping behavior intact.
+## 4. Rebuild the configuration layer with rex_ini (✅ implemented)
+- Enabled the `rex_ini` option (pulling in SimpleIni) and rewired `ConfigManager` to load/save via `CSimpleIniA` rather than manually parsing and emitting INI files.
+- The settings map is now the single source of truth; `LoadFromDisk` reads each section/key straight from SimpleIni, `SaveToDisk` emits entries with their descriptions, and the bulky stream/trim code was removed accordingly. Papyrus bindings continue to use the same API, but the underlying persistence layer is far simpler.
 
 ## 5. Share the ActorMagicCaster hook plumbing (consider folder/grouping)
 - Both `src/SpellChargeTracker.cpp:155-201` and `src/AllowShoutWhileCasting.cpp:45-88` perform the same steps: wait for `PlayerCharacter`, fetch a caster, validate the vtable, and overwrite a slot. Only the index and hook differ.

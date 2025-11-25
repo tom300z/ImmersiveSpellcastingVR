@@ -43,6 +43,14 @@
             },
             version = "v8.89"
         },
+        ["simpleini#f56260b5"] = {
+            repo = {
+                branch = "master",
+                commit = "6e0aa54f304434eba0e87e3715b0b20f6a109aba",
+                url = "https://github.com/xmake-io/xmake-repo.git"
+            },
+            version = "v4.22"
+        },
         ["spdlog#09c8c173"] = {
             repo = {
                 branch = "master",
