@@ -22,10 +22,6 @@
 - Added `hooks/ActorMagicCaster.{h,cpp}` to resolve the player’s caster vtable once and patch arbitrary slots with a templated helper.
 - Both `AllowShoutWhileCasting` and `CasterStateTracker` now call `Hooks::ActorMagicCaster::WriteHook`, eliminating duplicated logic for resolving the player caster, validating the vtable, and logging patched slots.
 
-## 6. Break up `utils.cpp` into purpose-specific modules (✅ go implement)
-- `src/utils.cpp:14-368` currently holds unrelated features: console scripting, VR input helpers, UI dialogs, startup/setup flows, logging bootstrap, animation debugging, and developer logging tools. Any file that needs one helper has to include all dependencies (spdlog, Windows, OpenVR, ConfigManager, compatibility headers).
-- Plan: move each concern into its own header/translation unit (`ConsoleCommands`, `MessageBox`, `VRInput`, `Setup`, `AnimationDebug`, etc.) and leave `utils.h` as a thin facade. This was explicitly requested, so treat it as an actionable task.
-
-## 7. Consolidate setup-time warnings into data (low priority)
-- `Utils::Setup::CheckForUnwantedBindings` (`src/utils.cpp:228-263`) repeatedly queries config values and formats long `std::format` strings inline for every controller hand. Adding new warnings currently means cloning another 30–40 lines of logic.
-- Represent the warnings as simple data (e.g., vector of `{settingKey, messageBuilder, remediationAction}`) and drive the UI through that table. This is sensible but low priority; revisit after higher-impact refactors above.
+## 6. Break up `utils.cpp` into purpose-specific modules (✅ implemented)
+- Replaced the monolithic `src/utils.cpp` with focused modules under `src/utils/` (Console, GameState, MessageBox, Input, Setup, Animation, LogUtils, EventHandler) and turned `utils.h` into a light aggregator.
+- Each subsystem now includes only what it needs (e.g., Setup handles Config/HIGGS/Windows, Input pulls in OpenVR, etc.), shrinking compile-time dependencies and making future edits localized.
