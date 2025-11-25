@@ -26,7 +26,7 @@ namespace InputDispatcher
 
 		void HandleCasterStateChanged(const CasterStateTracker::StateChangedEvent& event)
 		{
-			auto& dispatcher = event.isPhysicalLeft ? leftDisp : rightDisp;
+			auto& dispatcher = event.orientation.isPhysicalLeft ? leftDisp : rightDisp;
 			dispatcher.OnCasterStateChanged();
 		}
 

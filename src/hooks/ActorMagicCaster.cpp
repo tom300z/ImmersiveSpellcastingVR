@@ -7,7 +7,7 @@ namespace Hooks::ActorMagicCaster
 		std::uintptr_t* g_playerCasterVTable = nullptr;
 	}
 
-	std::uintptr_t* ResolvePlayerVTable(std::string_view logTag)
+	std::uintptr_t* ResolveCasterVTable(std::string_view logTag)
 	{
 		if (g_playerCasterVTable) {
 			return g_playerCasterVTable;

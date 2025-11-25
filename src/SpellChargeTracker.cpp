@@ -73,7 +73,7 @@ namespace SpellChargeTracker
 				return;
 			}
 
-			auto* handHaptics = Haptics::GetHandHaptics(event.isPhysicalLeft);
+			auto* handHaptics = Haptics::GetHandHaptics(event.orientation.isPhysicalLeft);
 			if (!handHaptics) {
 				return;
 			}
@@ -103,7 +103,7 @@ namespace SpellChargeTracker
 			}
 
 			if (newState == ActualState::kReleasing) {
-				auto* spell = static_cast<RE::SpellItem*>(player->GetEquippedObject(!event.isMainHand));
+				auto* spell = static_cast<RE::SpellItem*>(player->GetEquippedObject(!event.orientation.isMainHand));
 				const bool interrupt = previousState != ActualState::kReleasing;
 				if (Utils::InvertVRInputForSpell(spell)) {
 					handHaptics->ScheduleEvent({ 30, 1, 0, interrupt });

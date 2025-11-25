@@ -44,10 +44,6 @@ namespace CasterStateTracker
 
 		bool IsHandCaster(RE::ActorMagicCaster* caster)
 		{
-			if (!caster) {
-				return false;
-			}
-
 			switch (caster->castingSource) {
 			case RE::MagicSystem::CastingSource::kLeftHand:
 			case RE::MagicSystem::CastingSource::kRightHand:
@@ -59,18 +55,12 @@ namespace CasterStateTracker
 
 		void UpdateState(RE::ActorMagicCaster* caster)
 		{
-			if (!caster) {
-				return;
-			}
-
 			auto* player = RE::PlayerCharacter::GetSingleton();
 			if (!player || caster->actor != player || !IsHandCaster(caster)) {
 				return;
 			}
 
 			const auto orientation = HandOrientation::FromCastingSource(caster->castingSource);
-			const bool isMainHand = orientation.isMainHand;
-			const bool isPhysicalLeft = orientation.isPhysicalLeft;
 
 			// When dual casting, use the left-hand caster state for both hands to avoid divergent timers.
 			auto* stateSource = caster;
@@ -80,12 +70,8 @@ namespace CasterStateTracker
 				}
 			}
 
-			if (!stateSource) {
-				return;
-			}
-
 			const ActualState newState = static_cast<ActualState>(stateSource->state.get());
-			auto& handState = isPhysicalLeft ? lastLeftHandState : lastRightHandState;
+			auto& handState = orientation.isPhysicalLeft ? lastLeftHandState : lastRightHandState;
 			const ActualState previousState = handState.exchange(newState, std::memory_order_relaxed);
 
 			if (previousState == newState) {
@@ -93,8 +79,7 @@ namespace CasterStateTracker
 			}
 
 			DispatchEvent({
-				.isPhysicalLeft = isPhysicalLeft,
-				.isMainHand = isMainHand,
+				.orientation = orientation,
 				.castingSource = caster->castingSource,
 				.previousState = previousState,
 				.currentState = newState,
@@ -104,9 +89,7 @@ namespace CasterStateTracker
 
 		void UpdateHook(RE::ActorMagicCaster* caster, float delta)
 		{
-			if (g_originalUpdate) {
-				g_originalUpdate(caster, delta);
-			}
+			g_originalUpdate(caster, delta);
 
 			UpdateState(caster);
 		}
@@ -114,10 +97,6 @@ namespace CasterStateTracker
 
 	std::uint64_t AddListener(Listener listener)
 	{
-		if (!listener) {
-			return 0;
-		}
-
 		const auto id = g_nextListenerId.fetch_add(1, std::memory_order_relaxed);
 		std::scoped_lock lock(g_listenerMutex);
 		g_listeners.emplace_back(id, std::move(listener));
@@ -126,10 +105,6 @@ namespace CasterStateTracker
 
 	void RemoveListener(std::uint64_t id)
 	{
-		if (id == 0) {
-			return;
-		}
-
 		std::scoped_lock lock(g_listenerMutex);
 		const auto it = std::remove_if(g_listeners.begin(), g_listeners.end(), [id](const auto& entry) {
 			return entry.first == id;

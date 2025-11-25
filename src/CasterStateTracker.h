@@ -25,12 +25,11 @@ namespace CasterStateTracker
 
 	struct StateChangedEvent
 	{
-		bool isPhysicalLeft{ false };
-		bool isMainHand{ false };
-		RE::MagicSystem::CastingSource castingSource{ RE::MagicSystem::CastingSource::kOther };
+		HandOrientation::Info orientation;
+		RE::MagicSystem::CastingSource castingSource;
 		ActualState previousState{ ActualState::kUnknown };
 		ActualState currentState{ ActualState::kUnknown };
-		RE::ActorMagicCaster* caster{ nullptr };
+		RE::ActorMagicCaster* caster;
 	};
 
 	using Listener = std::function<void(const StateChangedEvent&)>;

@@ -7,7 +7,7 @@
 
 namespace Hooks::ActorMagicCaster
 {
-	[[nodiscard]] std::uintptr_t* ResolvePlayerVTable(std::string_view logTag);
+	[[nodiscard]] std::uintptr_t* ResolveCasterVTable(std::string_view logTag);
 
 	template <class T>
 	bool WriteHook(std::size_t slotIndex, std::string_view logTag, T*& original, T* replacement)
@@ -17,7 +17,7 @@ namespace Hooks::ActorMagicCaster
 			return false;
 		}
 
-		auto* vtbl = ResolvePlayerVTable(logTag);
+		auto* vtbl = ResolveCasterVTable(logTag);
 		if (!vtbl) {
 			return false;
 		}
