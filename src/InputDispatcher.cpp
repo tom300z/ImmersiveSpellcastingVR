@@ -3,6 +3,7 @@
 #include "SKSE/SKSE.h"
 #include "utils.h"
 #include "InputDispatcher.h"
+#include "CasterStateTracker.h"
 
 #include <atomic>
 #include <chrono>
@@ -16,6 +17,11 @@ namespace InputDispatcher
 	namespace
 	{
 		std::uint64_t g_casterStateListenerId{ 0 };
+
+		bool IsStateActive(SpellChargeTracker::ActualState state)
+		{
+			return !(state == SpellChargeTracker::ActualState::kIdle || state == SpellChargeTracker::ActualState::kReleasing);
+		}
 
 		void HandleCasterStateChanged(const CasterStateTracker::StateChangedEvent& event)
 		{
@@ -108,9 +114,15 @@ namespace InputDispatcher
 		Start();
 	}
 
+	void HandInputDispatcher::RequestWork()
+	{
+		workScheduled.store(true, std::memory_order_relaxed);
+		this->Notify();
+	}
+
 	void HandInputDispatcher::OnCasterStateChanged()
 	{
-		this->Notify();
+		RequestWork();
 	}
 
 	void HandInputDispatcher::DeclareCasterState(bool casterActive) {
@@ -120,12 +132,10 @@ namespace InputDispatcher
 		// If it changed, trigger a dispatch now and set the minInterval to 20ms to ensure it goes through.
 		// Inputs typically take 10ms to result in a changed caster state so 20ms should be pretty efficient in case a repress is needed.
 		if (kOldCasterActive != casterActive) {
-			auto time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
-			//logger::trace("{}: {} caster declared {}", time, isLeftHand ? "Left" : "Right", casterActive ? "active" : "inactive");
 			casterDeclarationChanged = true;
-			this->Notify();
 		}
 
+		RequestWork();
 	}
 
 	void HandInputDispatcher::SuppressUntilCasterInactive()
@@ -140,58 +150,64 @@ namespace InputDispatcher
 		SKSE::GetTaskInterface()->AddUITask([left, pressed, heldSecOverride]() { _AddAttackButtonEvent(left, pressed, heldSecOverride); });
 	}
 
-	void HandInputDispatcher::Work() {
+	void HandInputDispatcher::Work()
+	{
+		const bool scheduledRun = workScheduled.exchange(false, std::memory_order_relaxed);
+		const bool timedRun = minInterval.load(std::memory_order_relaxed).count() > 0;
+		if (!scheduledRun && !timedRun) {
+			return;
+		}
+
 		auto player = RE::PlayerCharacter::GetSingleton();
-		const bool isMainHand = RE::BSOpenVRControllerDevice::IsLeftHandedMode() ? isLeftHand : !isLeftHand;  // in-game notion of “main hand”
+		const bool isMainHand = RE::BSOpenVRControllerDevice::IsLeftHandedMode() ? isLeftHand : !isLeftHand;
+
+		if (!player) {
+			minInterval.store(std::chrono::milliseconds(0), std::memory_order_relaxed);
+			return;
+		}
 
 		// return if player is not holding spell or shouting
 		if (!Utils::IsPlayerHoldingSpell(isMainHand) || player->GetMagicCaster(RE::MagicSystem::CastingSource::kOther)->state != RE::MagicCaster::State::kNone) {
+			minInterval.store(std::chrono::milliseconds(0), std::memory_order_relaxed);
 			return;
 		}
 
-		// Determine desired and currend caster state
 		const bool kCasterDesiredActive = casterDeclaredActive.load(std::memory_order_relaxed);
 		const SpellChargeTracker::ActualState kCasterState = currentCasterState->load(std::memory_order_relaxed);
-		const bool kCasterActive = !(kCasterState == SpellChargeTracker::ActualState::kIdle || kCasterState == SpellChargeTracker::ActualState::kReleasing);
+		const bool kCasterActive = IsStateActive(kCasterState);
 
-		// Return if suppressUntilCasterInactive is true but caster is desired active
 		if (suppressUntilCasterInactive.load(std::memory_order_relaxed)) {
 			if (kCasterDesiredActive) {
+				minInterval.store(std::chrono::milliseconds(0), std::memory_order_relaxed);
 				return;
-			} else {
-				suppressUntilCasterInactive.store(false, std::memory_order_relaxed);
 			}
+			suppressUntilCasterInactive.store(false, std::memory_order_relaxed);
 		}
 
-		// Return if caster already has desired state and the declaration was not just updated. Also pause the worker until the next event.
 		if (kCasterActive == kCasterDesiredActive && !casterDeclarationChanged.load(std::memory_order_relaxed)) {
-			minInterval.store(std::chrono::milliseconds(0), std::memory_order::relaxed);
+			minInterval.store(std::chrono::milliseconds(0), std::memory_order_relaxed);
 			return;
 		}
 
-		// Dispatch input to reconciliate caster state. Work every 20ms during reconciliation
-		minInterval.store(std::chrono::milliseconds(20), std::memory_order::relaxed);
-
-		// Compute the appropriate input
+		minInterval.store(std::chrono::milliseconds(20), std::memory_order_relaxed);
 		const auto now = std::chrono::steady_clock::now();
 
 		if (casterDeclarationChanged.exchange(false, std::memory_order_relaxed)) {
-			// Start new input if the caster state declaration changed
 			currentInputStartTime = now;
+			this->AddAttackButtonEvent(isLeftHand, kCasterDesiredActive);
+			return;
 		}
-		std::chrono::duration<float> timeSinceCurrentInput = now - currentInputStartTime;
 
-		if (timeSinceCurrentInput <= kGracePeriod) {
-			// If in grace period, just send the attack button event with the real time held
-			this->AddAttackButtonEvent(isLeftHand, kCasterDesiredActive, timeSinceCurrentInput.count());
-		} else {
-			// If caster still hasn't adjusted after the grace period, we need to repress (or release)
-			if (kCasterDesiredActive) {
-				// If trigger should be pressed,  before repressing it for another gracePeriod. Repeat this until the caster reaches it's desired state which causes this code to no longer be reached.
-				this->AddAttackButtonEvent(isLeftHand, true);
-			}
+		const auto elapsed = now - currentInputStartTime;
+		if (elapsed <= kGracePeriod) {
+			this->AddAttackButtonEvent(isLeftHand, kCasterDesiredActive, std::chrono::duration<float>(elapsed).count());
+			return;
 		}
+
+		this->AddAttackButtonEvent(isLeftHand, kCasterDesiredActive);
+		currentInputStartTime = now;
 	}
+
 
 	HandInputDispatcher leftDisp(true);
 	HandInputDispatcher rightDisp(false);

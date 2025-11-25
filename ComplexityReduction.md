@@ -5,9 +5,9 @@
 - `src/SpellChargeTracker.cpp` now subscribes to those events purely for haptic scheduling and no longer gates the atomics behind the haptics toggle, so input reconciliation keeps working even when haptics are disabled.
 - Existing call sites still use `SpellChargeTracker::ActualState` via inline aliases, preserving the public API while the internals run through the new tracker.
 
-## 2. Streamline HandInputDispatcher without losing resilience (🚧 partially implemented)
-- `src/InputDispatcher.cpp:12-178` still uses `Utils::TimedWorker`, but it now subscribes to `CasterStateTracker` events so the worker wakes only when desired/actual states diverge or a retry is needed. When hands are idle, the worker sleeps until an event arrives; during reconciliation it keeps the existing 20 ms interval to handle cooldown hiccups.
-- Remaining opportunity: simplify the retry state machine (`casterDeclarationChanged`, grace-period tracking, etc.) now that the core loop is event-triggered, and consider collapsing the atomics into a single struct to reduce branching.
+## 2. Streamline HandInputDispatcher without losing resilience (✅ implemented)
+- `src/InputDispatcher.cpp:12-190` now treats `HandInputDispatcher` as an event-driven worker: `CasterStateTracker` events and input declarations call `RequestWork()`, which wakes the `TimedWorker` immediately. When no retries are pending, the worker sleeps indefinitely (`minInterval = 0`), cutting idle CPU usage.
+- The reconciliation loop was rewritten to check for scheduled runs vs. timed retries, pause when the player isn’t casting, and restart the grace-period timer only when the desired state changes. Once the states match, the worker returns to sleep; otherwise it keeps the 20 ms retry cadence for cooldown hiccups.
 
 ## 3. Introduce a shared hand-orientation helper (mind left vs. main hand)
 - Every subsystem recomputes how “physical left/right controller” maps to Skyrim’s notion of main/off hand (`RE::BSOpenVRControllerDevice::IsLeftHandedMode()`) – see `src/InputDispatcher.cpp:53-70`, `src/InputDispatcher.cpp:110-163`, `src/InputInterceptor.cpp:107-139`, and `src/SpellChargeTracker.cpp:88-135`.

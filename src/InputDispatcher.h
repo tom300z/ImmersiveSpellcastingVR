@@ -16,6 +16,7 @@ namespace InputDispatcher
 
 		HandInputDispatcher(bool isLeftHand);
 		void OnCasterStateChanged();
+		void RequestWork();
 
 		void DeclareCasterState(bool casterActive);
 
@@ -40,6 +41,7 @@ namespace InputDispatcher
 
 		// Set to true whenever the caster state declaration changes, set to false after the change was processed.
 		std::atomic<bool> casterDeclarationChanged;
+		std::atomic<bool> workScheduled{ false };
 
 		// Time point at which input changed last
 		std::chrono::steady_clock::time_point currentInputStartTime = std::chrono::steady_clock::now();
