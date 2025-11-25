@@ -78,14 +78,13 @@ namespace InputDispatcher
 
 
 	// Run on UI thread
-	void _AddAttackButtonEvent(bool left, bool pressed, float heldSecOverride = 0.0f)
+	void _AddAttackButtonEvent(bool isMainHand, bool pressed, float heldSecOverride = 0.0f)
 	{
 		if (inputSuppressed.load(std::memory_order_relaxed) && pressed) {
 			return;
 		}
 
 		auto player = RE::PlayerCharacter::GetSingleton();
-		const auto orientation = HandOrientation::FromPhysical(left);
 
 		auto* ue = RE::UserEvents::GetSingleton();
 		auto* q = RE::BSInputEventQueue::GetSingleton();
@@ -101,7 +100,7 @@ namespace InputDispatcher
 			0,                                        // idCode
 			value,                                    // 1.0=down, 0.0=up
 			heldSec,                                  // 0.0 new press; >0.0 signals release
-			orientation.isMainHand ? ue->rightAttack : ue->leftAttack
+			isMainHand ? ue->rightAttack : ue->leftAttack
 		);
 	}
 
@@ -144,11 +143,11 @@ namespace InputDispatcher
 		suppressUntilCasterInactive.store(true);
 	}
 
-	void HandInputDispatcher::AddAttackButtonEvent(bool left, bool pressed, float heldSecOverride)
+	void HandInputDispatcher::AddAttackButtonEvent(bool isMainHand, bool pressed, float heldSecOverride)
 	{
 		//auto time = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::steady_clock::now().time_since_epoch()).count();
 		//logger::trace("{}: {} {}", time, left ? "Left" : "Right", pressed ? "press" : "unpress");
-		SKSE::GetTaskInterface()->AddUITask([left, pressed, heldSecOverride]() { _AddAttackButtonEvent(left, pressed, heldSecOverride); });
+		SKSE::GetTaskInterface()->AddUITask([isMainHand, pressed, heldSecOverride]() { _AddAttackButtonEvent(isMainHand, pressed, heldSecOverride); });
 	}
 
 	void HandInputDispatcher::Work()
@@ -195,17 +194,17 @@ namespace InputDispatcher
 
 		if (casterDeclarationChanged.exchange(false, std::memory_order_relaxed)) {
 			currentInputStartTime = now;
-			this->AddAttackButtonEvent(isLeftHand, kCasterDesiredActive);
+			this->AddAttackButtonEvent(orientation.isMainHand, kCasterDesiredActive);
 			return;
 		}
 
 		const auto elapsed = now - currentInputStartTime;
 		if (elapsed <= kGracePeriod) {
-			this->AddAttackButtonEvent(isLeftHand, kCasterDesiredActive, std::chrono::duration<float>(elapsed).count());
+			this->AddAttackButtonEvent(orientation.isMainHand, kCasterDesiredActive, std::chrono::duration<float>(elapsed).count());
 			return;
 		}
 
-		this->AddAttackButtonEvent(isLeftHand, kCasterDesiredActive);
+		this->AddAttackButtonEvent(orientation.isMainHand, kCasterDesiredActive);
 		currentInputStartTime = now;
 	}
 

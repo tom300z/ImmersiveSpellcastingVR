@@ -5,6 +5,8 @@
 #include <atomic>
 #include <cstdint>
 #include <functional>
+#include <functional>
+#include "HandOrientation.h"
 
 namespace CasterStateTracker
 {

@@ -74,7 +74,8 @@ namespace CasterStateTracker
 			auto& handState = orientation.isPhysicalLeft ? lastLeftHandState : lastRightHandState;
 			const ActualState previousState = handState.exchange(newState, std::memory_order_relaxed);
 
-			if (previousState == newState) {
+			// Dispatch event if state changed or every frame while charging
+			if (previousState == newState && newState != ActualState::kCharging) {
 				return;
 			}
 
