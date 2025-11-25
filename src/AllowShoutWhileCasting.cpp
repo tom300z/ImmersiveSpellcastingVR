@@ -37,8 +37,6 @@ namespace AllowShoutWhileCasting
 				result = g_originalCheckCast(magicCaster, spellOrShout, bDualCast, pfEffectiveStrength, pCannotCastReason, bUseBaseValueForCost);
 			}
 
-			// Re-run TEST AL, AL is unnecessary in C++ because returning a bool
-			// already sets AL and flags correctly. Equivalent to: test al, al
 			return result;
 		}
 	}  // namespace
