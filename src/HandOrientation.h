@@ -15,7 +15,7 @@ namespace HandOrientation
 
     inline Info FromPhysical(bool physicalLeft)
     {
-        const bool isMain = RE::BSOpenVRControllerDevice::IsLeftHandedMode() ? !physicalLeft : physicalLeft;
+        const bool isMain = RE::BSOpenVRControllerDevice::IsLeftHandedMode() ? physicalLeft : !physicalLeft;
         Info info{};
         info.isPhysicalLeft = physicalLeft;
         info.isMainHand = isMain;
