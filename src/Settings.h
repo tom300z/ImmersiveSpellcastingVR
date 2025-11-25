@@ -1,6 +1,9 @@
 #pragma once
 
 #include <string_view>
+#include <span>
+
+#include "ConfigManager.h"
 
 namespace Settings
 {
@@ -13,4 +16,6 @@ namespace Settings
 	inline constexpr auto kInputHackHiggsTouchInput = "InputHackHiggsTouchInput"sv;
 
 	inline constexpr auto kHapticsEnable = "HapticsEnable"sv;
+
+	std::span<const Config::SettingDefinition> GetSettingDefinitions();
 }

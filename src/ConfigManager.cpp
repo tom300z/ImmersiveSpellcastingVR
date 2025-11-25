@@ -6,9 +6,12 @@
 #include <locale>
 #include <map>
 #include <sstream>
+#include <vector>
+#include <string>
 
 #include "REL/Relocation.h"
 #include "SKSE/API.h"
+#include "utils/Input.h"
 #include <utils.h>
 #include <Settings.h>
 #include <SimpleIni.h>
@@ -48,6 +51,7 @@ namespace
 
 namespace Config
 {
+
 	Manager& Manager::GetSingleton()
 	{
 		static Manager singleton;
@@ -578,26 +582,23 @@ namespace Config
 	}
 
 	bool initialized = false;
-	void Init() {
+
+	void Init()
+	{
 		if (initialized) {
 			return;
 		}
 
 		auto& config = Manager::GetSingleton();
-		const std::string inputSection{ "Input" };
-		const std::string hapticsSection{ "Haptics" };
-
-		const auto registerBool = [&](std::string_view key, bool defaultValue, std::string_view description, const std::string& section) {
-			config.RegisterSetting(std::string(key), Config::Type::kBool, Config::Value{ defaultValue }, std::string(description), section);
-		};
-
-		std::string defaultInputMethod = Utils::Input::IsUsingIndexControllers() ? std::string("grip_touch") : std::string("grip_press");  // Use grip touch for index controllers, grip press for oculus, etc.
-		config.RegisterSetting(std::string(Settings::kInputMethod), Config::Type::kString, Config::Value{ defaultInputMethod }, "OpenVR button name that should be treated as the casting button. Options: 'grip_touch' (recommended for index controllers), 'grip_press' (recommended for oculus)", inputSection);
-		registerBool(Settings::kInputShowBindingWarning, true, "Show a warning when the grip button is bound in the gameplay context.", inputSection);
-		registerBool(Settings::kInputEnable, true, "Enable Immersive Casting VR's input redirection system.", inputSection);
-		registerBool(Settings::kInputCastAfterMenuExit, true, "Immediately resumes casting after closing menus if the hand is in casting position. If disabled hands have to be closed/opened once after leaving a menu.", inputSection);
-		registerBool(Settings::kInputHackHiggsTouchInput, false, "Hacks HIGGS to make it use grip_touch instead of grip_press for grabbing stuff. This way you can use you grip_press for other inputs. Especially useful on index controllers. INFO: this is a Hack that only works on HIGGS 1.10.6 and will be removed once HIGGS's PR #4 is merged.", inputSection);
-		registerBool(Settings::kHapticsEnable, true, "Enable Immersive Casting VR's spellcasting haptics integration. Disables other mod's spellcasting haptics (such as HapticSkyrimVR).", hapticsSection);
+		for (const auto& def : Settings::GetSettingDefinitions()) {
+			Value defaultValue = def.dynamicDefault ? def.dynamicDefault() : def.defaultValue;
+			config.RegisterSetting(
+				std::string(def.key),
+				def.type,
+				std::move(defaultValue),
+				std::string(def.description),
+				std::string(def.section));
+		}
 
 		config.LoadFromDisk();
 		config.SaveToDisk();

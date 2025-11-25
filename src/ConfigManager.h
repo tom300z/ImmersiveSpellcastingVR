@@ -15,11 +15,11 @@
 
 namespace Config
 {
-	enum class Type
-	{
-		kBool,
-		kInteger,
-		kFloat,
+enum class Type
+{
+	kBool,
+	kInteger,
+	kFloat,
 		kString
 	};
 
@@ -30,11 +30,21 @@ namespace Config
 		kFromCode
 	};
 
-	using Value = std::variant<bool, std::int64_t, double, std::string>;
+using Value = std::variant<bool, std::int64_t, double, std::string>;
 
-	struct Setting
-	{
-		Type type;
+struct SettingDefinition
+{
+	std::string_view key;
+	Type type;
+	Value defaultValue;
+	std::string_view description;
+	std::string_view section;
+	Value (*dynamicDefault)();
+};
+
+struct Setting
+{
+	Type type;
 		Value value;
 		Value defaultValue;
 		std::string description;
