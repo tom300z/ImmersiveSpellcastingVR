@@ -142,9 +142,7 @@ namespace Config
 					changedSettings.emplace_back(key, setting.value);
 				}
 			}
-
 			_loaded = true;
-			_dirty = false;
 		}
 
 		for (const auto& [key, value] : changedSettings) {
@@ -159,13 +157,6 @@ namespace Config
 		std::map<std::string, std::vector<std::pair<std::string, Setting>>> sections;
 		{
 			std::shared_lock lock(_mutex);
-			bool shouldWrite = _dirty;
-			if (!shouldWrite) {
-				shouldWrite = !std::filesystem::exists(_iniPath);
-			}
-			if (!shouldWrite) {
-				return;
-			}
 
 			for (const auto& [key, setting] : _settings) {
 				sections[setting.section].emplace_back(key, setting);
@@ -184,7 +175,12 @@ namespace Config
 			const auto* sectionName = section.c_str();
 			for (const auto& [key, setting] : settings) {
 				const auto value = SerializeValue(setting.value, setting.type);
-				const char* comment = setting.description.empty() ? nullptr : setting.description.c_str();
+				std::string comment_storage;
+				const char* comment = nullptr;
+				if (!setting.description.empty()) {
+					comment_storage = std::format("; {}", setting.description);
+					comment = comment_storage.c_str();
+				}
 				ini.SetValue(sectionName, key.c_str(), value.c_str(), comment, true);
 			}
 		}
@@ -203,7 +199,6 @@ namespace Config
 
 		{
 			std::unique_lock lock(_mutex);
-			_dirty = false;
 		}
 	}
 
@@ -217,7 +212,6 @@ namespace Config
 				if (setting.value != setting.defaultValue) {
 					setting.value = setting.defaultValue;
 					changed.emplace_back(key, setting.value);
-					_dirty = true;
 				}
 			}
 		}
@@ -284,7 +278,6 @@ namespace Config
 
 			it->second.value = value;
 			storedValue = it->second.value;
-			_dirty = true;
 		}
 
 		DispatchChangeEvent(keyStr, storedValue, source);
@@ -431,7 +424,10 @@ namespace Config
 				if (!str.empty() && str.front() == '"' && str.back() == '"' && str.size() >= 2) {
 					str = str.substr(1, str.size() - 2);
 				}
-				return Value{ str };
+				if (!str.empty()) {
+					return Value{ str };
+				}
+				return std::nullopt;
 			}
 		}
 
@@ -517,7 +513,8 @@ namespace Config
 
 		RE::BSFixedString GetString(RE::StaticFunctionTag*, RE::BSFixedString key)
 		{
-			return RE::BSFixedString(Manager::GetSingleton().Get<std::string>(key.c_str(), {}).c_str());
+			auto result = RE::BSFixedString(Manager::GetSingleton().Get<std::string>(key.c_str(), {}).c_str());
+			return result;
 		}
 
 		void SetBool(RE::StaticFunctionTag*, RE::BSFixedString key, bool value)

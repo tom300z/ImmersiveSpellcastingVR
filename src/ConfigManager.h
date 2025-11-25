@@ -92,7 +92,6 @@ struct Setting
 		mutable std::shared_mutex _mutex;
 		std::unordered_map<std::string, Setting> _settings;
 		std::filesystem::path _iniPath;
-		bool _dirty{ false };
 		bool _loaded{ false };
 
 		std::vector<std::pair<std::uint64_t, Listener>> _listeners;
