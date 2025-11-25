@@ -17,6 +17,7 @@
 #include "haptics.h"
 #include "math.h"
 #include "InputInterceptor.h"
+#include "HandOrientation.h"
 
 namespace InputInterceptor
 {
@@ -105,15 +106,15 @@ namespace InputInterceptor
 
 
 			auto player = RE::PlayerCharacter::GetSingleton();
-			const bool isMainHand = RE::BSOpenVRControllerDevice::IsLeftHandedMode() ? isLeftHand : !isLeftHand;  // in-game notion of “main hand”
+			const auto orientation = HandOrientation::FromPhysical(isLeftHand);
 			InputDispatcher::HandInputDispatcher& kDispatcher = (isLeftHand ? InputDispatcher::leftDisp : InputDispatcher::rightDisp);
 
 			if ((
 				player                                                                          // Player exists
 				&& Utils::InGame()                                                              // player is in Game
-				&& Utils::IsPlayerHoldingSpell(isMainHand)                                      // is holding spell
+				&& Utils::IsPlayerHoldingSpell(orientation.isMainHand)                                      // is holding spell
 			)) {
-				auto spell = static_cast<RE::SpellItem*>(player->GetEquippedObject(!isMainHand));
+				auto spell = static_cast<RE::SpellItem*>(player->GetEquippedObject(!orientation.isMainHand));
 				bool invertInput = Utils::InvertVRInputForSpell(spell);
 				const bool desiredAttackPressed = invertInput ? !castingButtonActivated : castingButtonActivated;
 

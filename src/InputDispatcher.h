@@ -2,6 +2,7 @@
 #include <chrono>
 #include <utils/TimedWorker.h>
 #include <SpellChargeTracker.h>
+#include "HandOrientation.h"
 
 namespace InputDispatcher
 {

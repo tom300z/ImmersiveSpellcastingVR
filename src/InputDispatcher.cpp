@@ -4,6 +4,7 @@
 #include "utils.h"
 #include "InputDispatcher.h"
 #include "CasterStateTracker.h"
+#include "HandOrientation.h"
 
 #include <atomic>
 #include <chrono>
@@ -84,7 +85,7 @@ namespace InputDispatcher
 		}
 
 		auto player = RE::PlayerCharacter::GetSingleton();
-		const bool isMainHand = RE::BSOpenVRControllerDevice::IsLeftHandedMode() ? left : !left;              // in-game notion of “main hand”
+		const auto orientation = HandOrientation::FromPhysical(left);
 
 		auto* ue = RE::UserEvents::GetSingleton();
 		auto* q = RE::BSInputEventQueue::GetSingleton();
@@ -100,7 +101,7 @@ namespace InputDispatcher
 			0,                                        // idCode
 			value,                                    // 1.0=down, 0.0=up
 			heldSec,                                  // 0.0 new press; >0.0 signals release
-			isMainHand ? ue->rightAttack : ue->leftAttack  //ue->leftAttack : ue->rightAttack,  // BSFixedString user event
+			orientation.isMainHand ? ue->rightAttack : ue->leftAttack
 		);
 	}
 
@@ -159,7 +160,7 @@ namespace InputDispatcher
 		}
 
 		auto player = RE::PlayerCharacter::GetSingleton();
-		const bool isMainHand = RE::BSOpenVRControllerDevice::IsLeftHandedMode() ? isLeftHand : !isLeftHand;
+		const auto orientation = HandOrientation::FromPhysical(isLeftHand);
 
 		if (!player) {
 			minInterval.store(std::chrono::milliseconds(0), std::memory_order_relaxed);
@@ -167,7 +168,7 @@ namespace InputDispatcher
 		}
 
 		// return if player is not holding spell or shouting
-		if (!Utils::IsPlayerHoldingSpell(isMainHand) || player->GetMagicCaster(RE::MagicSystem::CastingSource::kOther)->state != RE::MagicCaster::State::kNone) {
+		if (!Utils::IsPlayerHoldingSpell(orientation.isMainHand) || player->GetMagicCaster(RE::MagicSystem::CastingSource::kOther)->state != RE::MagicCaster::State::kNone) {
 			minInterval.store(std::chrono::milliseconds(0), std::memory_order_relaxed);
 			return;
 		}

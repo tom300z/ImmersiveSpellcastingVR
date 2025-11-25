@@ -2,6 +2,7 @@
 
 #include "REL/Relocation.h"
 #include "SKSE/SKSE.h"
+#include "HandOrientation.h"
 
 #include <algorithm>
 #include <mutex>
@@ -66,8 +67,9 @@ namespace CasterStateTracker
 				return;
 			}
 
-			const bool isMainHand = caster->castingSource == RE::MagicSystem::CastingSource::kRightHand;
-			const bool isPhysicalLeft = RE::BSOpenVRControllerDevice::IsLeftHandedMode() ? isMainHand : !isMainHand;
+			const auto orientation = HandOrientation::FromCastingSource(caster->castingSource);
+			const bool isMainHand = orientation.isMainHand;
+			const bool isPhysicalLeft = orientation.isPhysicalLeft;
 
 			// When dual casting, use the left-hand caster state for both hands to avoid divergent timers.
 			auto* stateSource = caster;

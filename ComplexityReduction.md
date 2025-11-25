@@ -9,10 +9,9 @@
 - `src/InputDispatcher.cpp:12-190` now treats `HandInputDispatcher` as an event-driven worker: `CasterStateTracker` events and input declarations call `RequestWork()`, which wakes the `TimedWorker` immediately. When no retries are pending, the worker sleeps indefinitely (`minInterval = 0`), cutting idle CPU usage.
 - The reconciliation loop was rewritten to check for scheduled runs vs. timed retries, pause when the player isn’t casting, and restart the grace-period timer only when the desired state changes. Once the states match, the worker returns to sleep; otherwise it keeps the 20 ms retry cadence for cooldown hiccups.
 
-## 3. Introduce a shared hand-orientation helper (mind left vs. main hand)
-- Every subsystem recomputes how “physical left/right controller” maps to Skyrim’s notion of main/off hand (`RE::BSOpenVRControllerDevice::IsLeftHandedMode()`) – see `src/InputDispatcher.cpp:53-70`, `src/InputDispatcher.cpp:110-163`, `src/InputInterceptor.cpp:107-139`, and `src/SpellChargeTracker.cpp:88-135`.
-- Each copy has slightly different comments and variable names, which increases the cognitive load and risks inconsistencies (e.g., haptics swapping hands when dual-casting while other code doesn’t).
-- Updated plan: add a helper struct that explicitly exposes both axes (`isPhysicalLeft`, `isMainHand`, `castingSource`, `slotType`). This preserves the semantic distinction between physical hand and main hand, but consolidates the branching logic so all callsites work with the same data.
+## 3. Introduce a shared hand-orientation helper (✅ implemented)
+- Added `src/HandOrientation.h` with a small `Info` struct and helper functions to convert between physical controllers and in-game casting sources/slot indices.
+- `CasterStateTracker`, `InputDispatcher`, and `InputInterceptor` now use this helper instead of re-deriving `IsLeftHandedMode()` logic, keeping the physical-vs-main-hand distinction clear and eliminating duplicate code paths.
 
 
 ## 4. Rebuild the configuration layer with rex_ini
