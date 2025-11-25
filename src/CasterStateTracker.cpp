@@ -3,6 +3,7 @@
 #include "REL/Relocation.h"
 #include "SKSE/SKSE.h"
 #include "HandOrientation.h"
+#include "hooks/ActorMagicCaster.h"
 
 #include <algorithm>
 #include <mutex>
@@ -142,46 +143,10 @@ namespace CasterStateTracker
 			return;
 		}
 
-		auto* player = RE::PlayerCharacter::GetSingleton();
-		if (!player) {
-			logger::warn("CasterStateTracker: PlayerCharacter not available, skip hook");
-			g_installed.store(false);
-			return;
-		}
-
-		RE::ActorMagicCaster* sample = nullptr;
-		for (auto slot : { RE::Actor::SlotTypes::kLeftHand, RE::Actor::SlotTypes::kRightHand }) {
-			sample = player->magicCasters[slot];
-			if (sample) {
-				break;
-			}
-		}
-
-		if (!sample) {
-			logger::warn("CasterStateTracker: player has no ActorMagicCaster instances yet");
-			g_installed.store(false);
-			return;
-		}
-
-		auto** vtblPtr = reinterpret_cast<std::uintptr_t**>(sample);
-		if (!vtblPtr || !*vtblPtr) {
-			logger::warn("CasterStateTracker: unable to resolve caster vtable");
-			g_installed.store(false);
-			return;
-		}
-
 		constexpr std::size_t kUpdateIndex = 0x1F;
-		auto* vtbl = *vtblPtr;
-
-		g_originalUpdate = reinterpret_cast<UpdateFunc>(vtbl[kUpdateIndex]);
-		const auto hookAddr = reinterpret_cast<std::uintptr_t>(&UpdateHook);
-		REL::safe_write(reinterpret_cast<std::uintptr_t>(&vtbl[kUpdateIndex]), hookAddr);
-
-		if (!g_originalUpdate) {
-			logger::warn("CasterStateTracker: original ActorMagicCaster::Update resolved as nullptr");
+		if (!Hooks::ActorMagicCaster::WriteHook(kUpdateIndex, "CasterStateTracker", g_originalUpdate, &UpdateHook)) {
+			g_installed.store(false);
+			return;
 		}
-
-		logger::info("CasterStateTracker: original ActorMagicCaster::Update {:p}", reinterpret_cast<const void*>(g_originalUpdate));
-		logger::info("CasterStateTracker: vtable slot patched -> {:p}", reinterpret_cast<const void*>(vtbl[kUpdateIndex]));
 	}
 }

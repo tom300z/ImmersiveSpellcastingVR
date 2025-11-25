@@ -18,9 +18,9 @@
 - Enabled the `rex_ini` option (pulling in SimpleIni) and rewired `ConfigManager` to load/save via `CSimpleIniA` rather than manually parsing and emitting INI files.
 - The settings map is now the single source of truth; `LoadFromDisk` reads each section/key straight from SimpleIni, `SaveToDisk` emits entries with their descriptions, and the bulky stream/trim code was removed accordingly. Papyrus bindings continue to use the same API, but the underlying persistence layer is far simpler.
 
-## 5. Share the ActorMagicCaster hook plumbing (consider folder/grouping)
-- Both `src/SpellChargeTracker.cpp:155-201` and `src/AllowShoutWhileCasting.cpp:45-88` perform the same steps: wait for `PlayerCharacter`, fetch a caster, validate the vtable, and overwrite a slot. Only the index and hook differ.
-- Revised plan: introduce a reusable helper (e.g., `CasterHook::Install(slotIndex, hook, logTag)`) that returns the original function and logs failures consistently. Place both hook implementations in a dedicated folder or combined file so related logic stays together.
+## 5. Share the ActorMagicCaster hook plumbing (✅ implemented)
+- Added `hooks/ActorMagicCaster.{h,cpp}` to resolve the player’s caster vtable once and patch arbitrary slots with a templated helper.
+- Both `AllowShoutWhileCasting` and `CasterStateTracker` now call `Hooks::ActorMagicCaster::WriteHook`, eliminating duplicated logic for resolving the player caster, validating the vtable, and logging patched slots.
 
 ## 6. Break up `utils.cpp` into purpose-specific modules (✅ go implement)
 - `src/utils.cpp:14-368` currently holds unrelated features: console scripting, VR input helpers, UI dialogs, startup/setup flows, logging bootstrap, animation debugging, and developer logging tools. Any file that needs one helper has to include all dependencies (spdlog, Windows, OpenVR, ConfigManager, compatibility headers).

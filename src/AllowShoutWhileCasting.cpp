@@ -1,4 +1,5 @@
 #include <utils/BinaryPatcher.h>
+#include "hooks/ActorMagicCaster.h"
 
 namespace AllowShoutWhileCasting
 {
@@ -48,43 +49,11 @@ namespace AllowShoutWhileCasting
 			return;
 		}
 
-		if (auto* player = RE::PlayerCharacter::GetSingleton()) {
-			RE::ActorMagicCaster* sample = nullptr;
-			for (auto slot : { RE::Actor::SlotTypes::kLeftHand, RE::Actor::SlotTypes::kRightHand }) {
-				sample = player->magicCasters[slot];
-				if (sample) {
-					break;
-				}
-			}
-
-			if (!sample) {
-				logger::warn("AllowShoutWhileCasting: player has no ActorMagicCaster instances yet");
-				return;
-			}
-
-			auto** vtblPtr = reinterpret_cast<std::uintptr_t**>(sample);
-			if (!vtblPtr || !*vtblPtr) {
-				logger::warn("AllowShoutWhileCasting: unable to resolve caster vtable");
-				return;
-			}
-
-			constexpr std::size_t kCheckCastIndex = 10;
-			auto* vtbl = *vtblPtr;
-
-			g_originalCheckCast = reinterpret_cast<CheckCastFunc>(vtbl[kCheckCastIndex]);
-			const auto hookAddr = reinterpret_cast<std::uintptr_t>(&CheckCastHook);
-			REL::safe_write(reinterpret_cast<std::uintptr_t>(&vtbl[kCheckCastIndex]), hookAddr);
-
-			if (!g_originalCheckCast) {
-				logger::warn("AllowShoutWhileCasting: original ActorMagicCaster::CheckCast resolved as nullptr");
-			}
-
-			logger::info("AllowShoutWhileCasting: original ActorMagicCaster::CheckCast {:p}", reinterpret_cast<const void*>(g_originalCheckCast));
-			logger::info("AllowShoutWhileCasting: vtable slot patched -> {:p}", reinterpret_cast<const void*>(vtbl[kCheckCastIndex]));
-
-			g_installed = true;
-		} else {
-			logger::warn("AllowShoutWhileCasting: PlayerCharacter not available, skip hook");
+		constexpr std::size_t kCheckCastIndex = 10;
+		if (!Hooks::ActorMagicCaster::WriteHook(kCheckCastIndex, "AllowShoutWhileCasting", g_originalCheckCast, &CheckCastHook)) {
+			return;
 		}
+
+		g_installed = true;
 	}
 }
