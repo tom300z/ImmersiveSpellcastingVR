@@ -34,30 +34,6 @@ using namespace SKSE;
 SKSE::PluginHandle g_pluginHandle;
 std::string g_pluginName;
 
-/*extern "C" DLLEXPORT bool SKSEAPI SKSEPlugin_Query(const SKSE::QueryInterface* a_skse, SKSE::PluginInfo* a_info)
-{
-	Utils::Setup::SetupLogger();
-	logger::info("{} v{} queried", Plugin::NAME, Plugin::VERSION);
-
-	// Initialize Plugin Info
-	a_info->infoVersion = SKSE::PluginInfo::kVersion;
-	a_info->name = Plugin::NAME.data();
-	a_info->version = Plugin::VERSION.major();
-
-	// Check runtime compatibility
-	if (a_skse->IsEditor()) {
-		logger::critical("Loaded in editor, marking as incompatible");
-		return false;
-	}
-	const auto ver = a_skse->RuntimeVersion();
-	if (ver < SKSE::RUNTIME_VR_1_4_15) {
-		logger::critical(FMT_STRING("Unsupported runtime version {}"), ver.string());
-		return false;
-	}
-
-	return true;
-}*/
-
 // Event Callbacks
 void OnPlayerAnimationGraphEvent(const RE::BSAnimationGraphEvent& event)
 {
@@ -72,22 +48,6 @@ void OnPlayerAnimationGraphEvent(const RE::BSAnimationGraphEvent& event)
 	// Refresh casting state after spell was equipped so it is immediately fired after draw. Also refresh after a weapon
 	if (event.tag == "Magic_Equip_Out" || event.tag == "WeapEquip_Out") {
 		InputInterceptor::RefreshCastingState();
-	}
-}
-
-void OnEquipEvent(const RE::TESEquipEvent& event) {
-	const auto* player = RE::PlayerCharacter::GetSingleton();
-	if (auto* form = RE::TESForm::LookupByID(event.baseObject)) {
-		//logger::info("{} {}", event.equipped ? "Equipped" : "Unequipped", form->GetName() );
-
-		/*
-		if (!event.equipped && std::strcmp(form->GetName(), "Draww") == 0) {
-			if (player->GetEquippedObject(true) == nullptr) {
-				InputDispatcher::leftDisp.SuppressUntilCasterInactive();
-			} else if (player->GetEquippedObject(false) == nullptr) {
-				InputDispatcher::rightDisp.SuppressUntilCasterInactive();
-			}
-		}*/
 	}
 }
 
@@ -191,11 +151,9 @@ extern "C" [[maybe_unused]] __declspec(dllexport) bool SKSEPlugin_Load(const SKS
 	}
 
 	static auto loadGameHandler = Utils::EventHandler<RE::TESLoadGameEvent>(OnSaveLoadEvent);
-	static auto equipHandler = Utils::EventHandler<RE::TESEquipEvent>(OnEquipEvent);
 	auto* scriptEventSource = RE::ScriptEventSourceHolder::GetSingleton();
 	if (scriptEventSource) {
 		scriptEventSource->AddEventSink(&loadGameHandler);
-		scriptEventSource->AddEventSink(&equipHandler);
 	}
 
 	auto* papyrus = SKSE::GetPapyrusInterface();
@@ -207,7 +165,6 @@ extern "C" [[maybe_unused]] __declspec(dllexport) bool SKSEPlugin_Load(const SKS
 	InputInterceptor::Install(a_skse);
 
 	logger::info("{} loaded!", g_pluginName);
-
 	return true;
 }
 
