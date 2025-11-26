@@ -33,7 +33,7 @@ using namespace SKSE;
 
 SKSE::PluginHandle g_pluginHandle;
 std::string g_pluginName;
-std::string g_pluginNameShort = "ISPVR";
+std::string g_pluginNameShort = "ImmersiveSpellcastingVR";
 
 // Event Callbacks
 void OnPlayerAnimationGraphEvent(const RE::BSAnimationGraphEvent& event)
