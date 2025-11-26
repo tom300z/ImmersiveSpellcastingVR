@@ -11,12 +11,12 @@ Magic in Skyrim VR no longer feels like merely shooting a gun. Your physical han
 * Cast spells immersively by opening and closing your hands!
 * Get dynamic haptic feedback based on spell charge progress
 * Allows jumping while holding a charged spell
-* Allows pressing shout while casting/charging a spell (the spell will be interrupted and magicka refunded).
+* Allows pressing shout while casting/charging a spell (the spell will be interrupted and magicka refunded). This is great for [Spellsiphon](https://www.nexusmods.com/skyrimspecialedition/mods/26627) where you frequently shout while casting spells.
 * Removes transition animations that cause in-game hand animations to lag behind your physical hand
 * Supports all controller types by allowing both grip_touch and grip_press as input methods
 * Fully configurable via INI file or MCM
 * Fully compatible with [Haptic Skyrim VR](https://www.nexusmods.com/skyrimspecialedition/mods/20364) (only replaces spellcasting haptics), [VRIK](https://www.nexusmods.com/skyrimspecialedition/mods/23416), [HIGGS](https://www.nexusmods.com/skyrimspecialedition/mods/43930), [Magic Improvements for Skyrim VR](https://www.nexusmods.com/skyrimspecialedition/mods/55751)
-* *Advanced* Includes an optional patch for HIGGS 1.10.6 that makes it use grip_touch instead of grip_press for grabbing objects. This allows you to use grip_press for other inputs if you decide to use grip_touch for your hands.
+* *Advanced* Includes an optional patch for HIGGS 1.10.6, 1.10.7 that makes it use grip_touch instead of grip_press for grabbing objects. This allows you to use grip_press for other inputs if you decide to use grip_touch for your hands.
 
 ## Installation
 
