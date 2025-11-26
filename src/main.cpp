@@ -68,15 +68,15 @@ void OnSaveLoadEvent([[maybe_unused]] RE::TESLoadGameEvent event)
 
 void OnMenuOpenCloseEvent(const RE::MenuOpenCloseEvent& event)
 {
-	// Only handle game relevant menus
-	if (!std::ranges::contains(Utils::kGameBlockingMenus, event.menuName.c_str())) {
-		return;
-	}
-
 	// Pause haptics while in menus
 	const bool inGame = Utils::InGame();
 	Haptics::Pause(!inGame);
 	InputDispatcher::Pause(!inGame);
+
+	// Only handle game relevant menus
+	if (!std::ranges::contains(Utils::kGameBlockingMenus, event.menuName.c_str())) {
+		return;
+	}
 
 	// Interrupt hand casters
 	if (auto player = RE::PlayerCharacter::GetSingleton()) {
