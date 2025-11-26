@@ -486,7 +486,7 @@ namespace Config
 
 		std::filesystem::path path = std::filesystem::current_path() / std::filesystem::path{ "data\\skse\\plugins" };
 
-		path /= g_pluginName;
+		path /= g_pluginNameShort;
 		path.replace_extension(".ini");
 
 		const_cast<Manager*>(this)->_iniPath = std::move(path);

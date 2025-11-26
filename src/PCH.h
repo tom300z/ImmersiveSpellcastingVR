@@ -11,6 +11,5 @@ using namespace std::literals;
 
 #include "utils.h"
 extern std::string g_pluginName;
-
-//#define DLLEXPORT __declspec(dllexport)
+extern std::string g_pluginNameShort;
 

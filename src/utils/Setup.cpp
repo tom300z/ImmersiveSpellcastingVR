@@ -54,7 +54,7 @@ c) Ignore this warning and do without the actions. )",
 
 By default HIGGS uses "grip_press" for grabbing objects. {} can patch HIGGS to use "grip_touch" instead (can be toggled in MCM and ini).
 If you are currently emulating "grip_press" via a SteamVR Binding, you can revert this change and use "grip_press" as a separate input from "grip_touch" again.)",
-								g_pluginName, g_pluginName, g_pluginName),
+								g_pluginName, g_pluginNameShort, g_pluginNameShort),
 							{ "Use grip_touch for HIGGS", "Keep using grip_press for HIGGS" },
 							[](int result) {
 								if (result == 0) {
