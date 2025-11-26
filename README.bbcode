@@ -1,0 +1,122 @@
+
+[size=5][b]Features[/b][/size]
+
+[list]
+[*] Cast spells immersively by opening and closing your hands!
+[*] Get dynamic haptic feedback based on spell charge progress
+[*] Allows jumping while holding a charged spell
+[*] Removes transition animations that cause in-game hand animations to lag behind your physical hand
+[*] Supports all controller types by allowing both grip_touch and grip_press as input methods
+[*] Fully configurable via INI file or MCM
+[*] Fully compatible with [url=https://www.nexusmods.com/skyrimspecialedition/mods/20364]Haptic Skyrim VR[/url] (only replaces spellcasting haptics), [url=https://www.nexusmods.com/skyrimspecialedition/mods/23416]VRIK[/url], [url=https://www.nexusmods.com/skyrimspecialedition/mods/43930]HIGGS[/url], [url=https://www.nexusmods.com/skyrimspecialedition/mods/55751]Magic Improvements for Skyrim VR[/url]
+[*][i]Advanced[/i] Includes an optional patch for HIGGS 1.10.6 that makes it use grip_touch instead of grip_press for grabbing objects. This allows you to use grip_press for other inputs if you decide to use grip_touch for your hands.
+[/list]
+
+[size=5][b]Installation[/b][/size]
+
+Use a mod manager, or manually put the files into your Data folder. Make sure to include the ESP in your "plugins.txt".
+
+[size=4][b]Requirements[/b][/size]
+
+[list]
+[*][url=https://skse.silverlock.org/]SKSE VR[/url]
+[*][url=https://www.nexusmods.com/skyrimspecialedition/mods/58101]VR Address Library for SKSEVR[/url]
+[*](optional for MCM) [url=https://www.nexusmods.com/skyrimspecialedition/mods/91535]SkyUI VR[/url]
+[/list]
+
+[size=5][b]Compatibility[/b][/size]
+
+The mod is incompatible with VRIK's "Open Hand Casting" as it replaces that feature. You have to disable it in the VRIK MCM (Controls → Cast Spells → NEVER).
+
+Other than that, ISPVR was designed to be as compatible with other mods as possible. Compatibility with VRIK, HIGGS, Magic Improvements for Skyrim VR, and Haptic Skyrim VR has been tested.
+
+If you discover a compatibility issue, please [url=https://github.com/tom300z/ImmersiveSpellcastingVR/issues]report it[/url].
+
+
+[size=5][b]How to use[/b][/size]
+
+[size=4][b]Fire & Forget / Charged spells (Fireball, Ice Spike, Fast Healing, Bound Weapons)[/b][/size]
+
+[url=https://ibb.co/Zp8F8NGQ][img]https://i.ibb.co/gLTfT6m0/Fire-Forget-Demo.png[/img][/url]
+
+Close your hand to charge the spell. Once the haptic feedback spikes, the spell is charged. Aim and open your hand any time to release it.
+
+[quote][b]TIP:[/b] You can sheathe your weapons to abort a charged spell and reclaim your Magicka.[/quote]
+
+[size=4][b]Concentration spells (Flames, Sparks, Healing, Wards)[/b][/size]
+
+[url=https://ibb.co/nqtvmLqx][img]https://i.ibb.co/NgbPCygc/Concentration-Demo.png[/img][/url]
+
+Open your hand to cast the spell, close it to stop.
+
+But beware, with great power comes great responsibility! So don’t accidentally let go and shoot innocent bystanders (unless that’s your playstyle, of course).
+
+[quote][b]TIP:[/b] Sheathing your weapons can be helpful to avoid unwanted massacres.[/quote]
+
+[size=5][b]Configuration[/b][/size]
+
+You can configure the mod either through the INI file (located at "<SKYRIM_DATA>\SKSE\Plugins\ImmersiveSpellcastingVR.ini") or via the in-game MCM.
+Both configuration methods are synced automatically.
+
+[size=5][b]FAQ[/b][/size]
+
+[size=3][b]Fire & Forget spells keep firing when I open my hand or start charging only after I open my hand.[/b][/size]
+You likely still have VRIK's "Open Hand Casting" enabled. This mod replaces that feature, so you must disable it in the VRIK MCM (Controls → Cast Spells → NEVER).
+[size=3]
+[b]The MCM menu is not showing up[/b][/size]
+Make sure you have enabled the "ImmersiveSpellcasting.esp"
+New MCM menus sometimes take a while to show up, especially in existing saves.
+If it doesn't show up after a while, try running [code]setstage SKI_ConfigManagerInstance 1[/code] in the console and wait for 5 minutes.
+Alternatively, use the INI file for configuration.
+
+[b][size=3]What is the difference between the grip_touch and grip_press input methods?[/size][/b]
+[spoiler]
+[b]grip_touch[/b]
+Triggered when you touch the grip button without significant force. On Valve Index controllers this correlates to closing your hands. On Oculus controllers this means touching the button without pressing it.
+This input is not used by vanilla Skyrim VR at all, so using it avoids conflicts with vanilla inputs.
+
+[b]grip_press[/b]
+Triggered when you apply force to the grip button. On Valve Index controllers this means squeezing the controller. On Oculus controllers this correlates to pressing down the grip button by closing your hand.
+This input is used by vanilla Skyrim during gameplay for various actions. To avoid conflicts, you must remap the input using a tool like MoDErahN's [url=https://www.nexusmods.com/skyrimspecialedition/mods/68164]Key Remapping Tool[/url].
+If this input method is used for ImmersiveSpellcastingVR, it will hide it from the game for every hand currently holding a drawn spell. You will be warned about this in-game.
+[/spoiler]
+
+[size=3][b]I'm using the grip_touch input method but still trigger unwanted in-game actions when touching the grip button.[/b][/size]
+[spoiler]
+You probably have remapped the grip_touch button to emulate grip_press via a SteamVR Controller Binding.
+
+To disable this:
+[list]
+[*] Open your SteamVR settings
+[*] Go to "Controllers" → "SHOW BINDING UI"
+[*] In the new window, click on "SHOW MORE BINDINGS" → "THE ELDER SCROLLS V: SKYRIM VR"
+[*] Wait a few seconds for the bindings to load
+[*] On the top left, under "Current Binding", click "Edit"
+[*] On the left side, scroll down to the "Grip" section
+[*] Under "Use as Button" it should say "Touch → Left Grip Button [b]Touch[/b]". If it only says "Touch → Left Grip Button", click the pencil icon and change it to "Left Grip Button [b]Touch[/b]"
+[*] Repeat this on the right side of the screen
+[*] On the bottom, click "Save Personal Binding" → "Save"
+[/list]
+[/spoiler]
+
+[size=3][b]I think I’ve encountered a bug. Please help![/b][/size]
+Please [url=https://github.com/tom300z/ImmersiveSpellcastingVR/issues]open an issue[/url] on GitHub. I’ll try to fix it as soon as I can.
+
+[size=3][b]I have a question and the FAQ doesn’t answer it[/b][/size]
+Feel free to reach out via a post on the NexusMods mod page.
+[size=3][b]
+Is ImmersiveSpellcastingVR open source?[/b][/size]
+Yes, check it out on [url=https://github.com/tom300z/ImmersiveSpellcastingVR/]GitHub[/url]!
+
+
+[size=5][b]Special thanks[/b][/size]
+
+[list]
+[*] Shizof for adding a compatibility API to HapticSkyrimVR quickly and providing helpful modding tips
+[*] libxse for their [url=https://github.com/libxse/commonlibsse-ng-template]commonlibsse-ng-template[/url]
+[*] alandtse and contributors to commonlib for their extensive reverse engineering work and the [url=https://www.nexusmods.com/skyrimspecialedition/mods/58101]VR Address Library for SKSEVR[/url]
+[*] The SKSE team
+[*] SARDONYX7 for [url=https://www.nexusmods.com/skyrimspecialedition/mods/126214]serde-hkx CLI (hkxc.exe)[/url]
+[*] hexabit for the [url=https://www.nexusmods.com/skyrimspecialedition/mods/974]Bethesda Archive Extractor[/url]
+[*] The NSA for [url=https://github.com/NationalSecurityAgency/ghidra]Ghidra[/url], I guess.
+[/list]
