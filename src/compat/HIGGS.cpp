@@ -18,22 +18,22 @@ namespace Compat::HIGGSUseTouchForGrip {
 		std::array<Utils::BinaryPatcher::PatchTarget, 4> kTargets{
 			Utils::BinaryPatcher::PatchTarget{
 				.name = "gripDownPatch",
-				.offset = 0x278cc,
+				.offsets{ 0x278cc, 0x27a7c },
 				.original{ 0xf6, 0x47, 0x08, 0x04 },
 				.patched{ 0xf6, 0x47, 0x10, 0x04 } },
 			Utils::BinaryPatcher::PatchTarget{
 				.name = "leewaySuppressGrip",
-				.offset = 0x27bb5,
+				.offsets{ 0x27bb5, 0x27d65 },
 				.original{ 0x48, 0x83, 0x67, 0x08, 0xfb },
 				.patched{ 0x48, 0x83, 0x67, 0x10, 0xfb } },
 			Utils::BinaryPatcher::PatchTarget{
 				.name = "blockSuppressGrip",
-				.offset = 0x27c38,
+				.offsets{ 0x27c38, 0x27de8 },
 				.original{ 0x48, 0x83, 0x67, 0x08, 0xfb },
 				.patched{ 0x48, 0x83, 0x67, 0x10, 0xfb } },
 			Utils::BinaryPatcher::PatchTarget{
 				.name = "forceSuppressGrip",
-				.offset = 0x27c71,
+				.offsets{ 0x27c71, 0x27e21 },
 				.original{ 0x48, 0x83, 0x4f, 0x08, 0x04 },
 				.patched{ 0x48, 0x83, 0x4f, 0x10, 0x04 } }
 		};
