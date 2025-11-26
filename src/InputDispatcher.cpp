@@ -161,14 +161,15 @@ namespace InputDispatcher
 		auto player = RE::PlayerCharacter::GetSingleton();
 		const auto orientation = HandOrientation::FromPhysical(isLeftHand);
 
-		if (!player) {
+		// return if player is null or is not holding spell
+		if (!player || !Utils::IsPlayerHoldingSpell(orientation.isMainHand)) {
 			minInterval.store(std::chrono::milliseconds(0), std::memory_order_relaxed);
 			return;
 		}
 
-		// return if player is not holding spell or shouting
-		if (!Utils::IsPlayerHoldingSpell(orientation.isMainHand) || player->GetMagicCaster(RE::MagicSystem::CastingSource::kOther)->state != RE::MagicCaster::State::kNone) {
-			minInterval.store(std::chrono::milliseconds(0), std::memory_order_relaxed);
+		// return if player is shouting and wait for shout to stop
+		if (player->GetMagicCaster(RE::MagicSystem::CastingSource::kOther)->state != RE::MagicCaster::State::kNone) {
+			minInterval.store(std::chrono::milliseconds(20), std::memory_order_relaxed);
 			return;
 		}
 
