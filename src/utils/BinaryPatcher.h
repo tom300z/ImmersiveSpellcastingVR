@@ -15,7 +15,7 @@ namespace Utils
 		struct PatchTarget
 		{
 			std::string name;
-			std::uintptr_t offset;
+			std::vector<std::uintptr_t> offsets;
 			std::vector<std::uint8_t> original;
 			std::vector<std::uint8_t> patched;
 		};

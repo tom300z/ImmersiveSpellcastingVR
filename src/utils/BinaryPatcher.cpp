@@ -38,16 +38,28 @@ namespace Utils
 				continue;
 			}
 
-			const auto address = moduleBase + target.data.offset;
-			const auto* current_data = reinterpret_cast<const std::uint8_t*>(address);
-			if (target.data.original.empty() ||
-				std::memcmp(current_data, target.data.original.data(), target.data.original.size()) != 0) {
-				logger::warn("{}: data mismatch for {}; skipping patch for that function", logPrefix, target.data.name);
+			if (target.data.offsets.empty() || target.data.original.empty()) {
+				logger::warn("{}: invalid patch target {}; skipping patch for that function", logPrefix, target.data.name);
 				++mismatches;
 				continue;
 			}
 
-			target.address = address;
+			bool matched = false;
+			for (const auto offset : target.data.offsets) {
+				const auto address = moduleBase + offset;
+				const auto* current_data = reinterpret_cast<const std::uint8_t*>(address);
+				if (std::memcmp(current_data, target.data.original.data(), target.data.original.size()) == 0) {
+					target.address = address;
+					matched = true;
+					break;
+				}
+			}
+
+			if (!matched) {
+				logger::warn("{}: data mismatch for {}; skipping patch for that function", logPrefix, target.data.name);
+				++mismatches;
+				continue;
+			}
 		}
 
 		return mismatches;
