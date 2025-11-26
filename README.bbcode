@@ -1,15 +1,20 @@
+[size=6][b]ISPVR - Immersive Spellcasting VR[/b][/size]
+
+[center][img]images/log-transparent.png[/img][/center]
+
+Magic in Skyrim VR no longer feels like merely shooting a gun. Your physical hand position is now used as input for spellcasting, and you can feel the Magicka flowing through your hands thanks to a dynamic haptic system. Basically a much better version of VRIK's "Open Hand Casting".
 
 [size=5][b]Features[/b][/size]
-
 [list]
 [*] Cast spells immersively by opening and closing your hands!
 [*] Get dynamic haptic feedback based on spell charge progress
 [*] Allows jumping while holding a charged spell
+[*] Allows pressing shout while casting/charging a spell (the spell will be interrupted and magicka refunded). This is great for [url=https://www.nexusmods.com/skyrimspecialedition/mods/26627]Spellsiphon[/url] where you frequently shout while casting spells.
 [*] Removes transition animations that cause in-game hand animations to lag behind your physical hand
 [*] Supports all controller types by allowing both grip_touch and grip_press as input methods
 [*] Fully configurable via INI file or MCM
 [*] Fully compatible with [url=https://www.nexusmods.com/skyrimspecialedition/mods/20364]Haptic Skyrim VR[/url] (only replaces spellcasting haptics), [url=https://www.nexusmods.com/skyrimspecialedition/mods/23416]VRIK[/url], [url=https://www.nexusmods.com/skyrimspecialedition/mods/43930]HIGGS[/url], [url=https://www.nexusmods.com/skyrimspecialedition/mods/55751]Magic Improvements for Skyrim VR[/url]
-[*][i]Advanced[/i] Includes an optional patch for HIGGS 1.10.6 that makes it use grip_touch instead of grip_press for grabbing objects. This allows you to use grip_press for other inputs if you decide to use grip_touch for your hands.
+[*][i]Advanced[/i] Includes an optional patch for HIGGS 1.10.6, 1.10.7 that makes it use grip_touch instead of grip_press for grabbing objects. This allows you to use grip_press for other inputs if you decide to use grip_touch for your hands.
 [/list]
 
 [size=5][b]Installation[/b][/size]
@@ -26,7 +31,7 @@ Use a mod manager, or manually put the files into your Data folder. Make sure to
 
 [size=5][b]Compatibility[/b][/size]
 
-The mod is incompatible with VRIK's "Open Hand Casting" as it replaces that feature. You have to disable it in the VRIK MCM (Controls → Cast Spells → NEVER).
+The mod is incompatible with VRIK's "Open Hand Casting" as it replaces that feature. You have to disable it in the VRIK MCM (Controls -> Cast Spells -> NEVER).
 
 Other than that, ISPVR was designed to be as compatible with other mods as possible. Compatibility with VRIK, HIGGS, Magic Improvements for Skyrim VR, and Haptic Skyrim VR has been tested.
 
@@ -46,10 +51,9 @@ Close your hand to charge the spell. Once the haptic feedback spikes, the spell 
 [size=4][b]Concentration spells (Flames, Sparks, Healing, Wards)[/b][/size]
 
 [url=https://ibb.co/nqtvmLqx][img]https://i.ibb.co/NgbPCygc/Concentration-Demo.png[/img][/url]
-
 Open your hand to cast the spell, close it to stop.
 
-But beware, with great power comes great responsibility! So don’t accidentally let go and shoot innocent bystanders (unless that’s your playstyle, of course).
+But beware, with great power comes great responsibility! So don't accidentally let go and shoot innocent bystanders (unless that's your playstyle, of course).
 
 [quote][b]TIP:[/b] Sheathing your weapons can be helpful to avoid unwanted massacres.[/quote]
 
@@ -59,6 +63,12 @@ You can configure the mod either through the INI file (located at "<SKYRIM_DATA>
 Both configuration methods are synced automatically.
 
 [size=5][b]FAQ[/b][/size]
+
+[size=3][b]Does this mod also work on Oculus/Non-Index controllers?[/b][/size]
+ISPVR was designed to work with most VR controllers. However, to avoid dropping your controllers, you should consider disabling the "Immersive Input" option on controllers that don't have hand straps.
+The dynamic Haptic System also works when using the vanilla trigger based input for spellcasting.
+
+[quote]For many controller types (such as Quest 3) you can also [url=https://amzn.eu/d/anon4Ke]buy hand strap addons[/url].[/quote]
 
 [size=3][b]Fire & Forget spells keep firing when I open my hand or start charging only after I open my hand.[/b][/size]
 You likely still have VRIK's "Open Hand Casting" enabled. This mod replaces that feature, so you must disable it in the VRIK MCM (Controls → Cast Spells → NEVER).
@@ -73,36 +83,36 @@ Alternatively, use the INI file for configuration.
 [spoiler]
 [b]grip_touch[/b]
 Triggered when you touch the grip button without significant force. On Valve Index controllers this correlates to closing your hands. On Oculus controllers this means touching the button without pressing it.
+
 This input is not used by vanilla Skyrim VR at all, so using it avoids conflicts with vanilla inputs.
 
 [b]grip_press[/b]
 Triggered when you apply force to the grip button. On Valve Index controllers this means squeezing the controller. On Oculus controllers this correlates to pressing down the grip button by closing your hand.
-This input is used by vanilla Skyrim during gameplay for various actions. To avoid conflicts, you must remap the input using a tool like MoDErahN's [url=https://www.nexusmods.com/skyrimspecialedition/mods/68164]Key Remapping Tool[/url].
-If this input method is used for ImmersiveSpellcastingVR, it will hide it from the game for every hand currently holding a drawn spell. You will be warned about this in-game.
+
+This input is used by vanilla Skyrim during gameplay for various actions. To avoid conflicts, you must remap the input using a tool like MoDErahN's [url=https://www.nexusmods.com/skyrimspecialedition/mods/68164]Key Remapping Tool[/url]. If this input method is used for ImmersiveSpellcastingVR, it will hide it from the game for every hand currently holding a drawn spell. You will be warned about this in-game.
 [/spoiler]
 
-[size=3][b]I'm using the grip_touch input method but still trigger unwanted in-game actions when touching the grip button.[/b][/size]
-[spoiler]
+[spoiler=[b]I'm using the grip_touch input method but still trigger unwanted in-game actions when touching the grip button.[/b]]
 You probably have remapped the grip_touch button to emulate grip_press via a SteamVR Controller Binding.
 
 To disable this:
 [list]
 [*] Open your SteamVR settings
-[*] Go to "Controllers" → "SHOW BINDING UI"
-[*] In the new window, click on "SHOW MORE BINDINGS" → "THE ELDER SCROLLS V: SKYRIM VR"
+[*] Go to "Controllers" -> "SHOW BINDING UI"
+[*] In the new window, click on "SHOW MORE BINDINGS" -> "THE ELDER SCROLLS V: SKYRIM VR"
 [*] Wait a few seconds for the bindings to load
 [*] On the top left, under "Current Binding", click "Edit"
 [*] On the left side, scroll down to the "Grip" section
-[*] Under "Use as Button" it should say "Touch → Left Grip Button [b]Touch[/b]". If it only says "Touch → Left Grip Button", click the pencil icon and change it to "Left Grip Button [b]Touch[/b]"
+[*] Under "Use as Button" it should say "Touch -> Left Grip Button [b]Touch[/b]". If it only says "Touch -> Left Grip Button", click the pencil icon and change it to "Left Grip Button [b]Touch[/b]"
 [*] Repeat this on the right side of the screen
-[*] On the bottom, click "Save Personal Binding" → "Save"
+[*] On the bottom, click "Save Personal Binding" -> "Save"
 [/list]
 [/spoiler]
 
-[size=3][b]I think I’ve encountered a bug. Please help![/b][/size]
-Please [url=https://github.com/tom300z/ImmersiveSpellcastingVR/issues]open an issue[/url] on GitHub. I’ll try to fix it as soon as I can.
+[size=3][b]I think I've encountered a bug. Please help![/b][/size]
+Please [url=https://github.com/tom300z/ImmersiveSpellcastingVR/issues]open an issue[/url] on GitHub. I'll try to fix it as soon as I can.
 
-[size=3][b]I have a question and the FAQ doesn’t answer it[/b][/size]
+[size=3][b]I have a question and the FAQ doesn't answer it[/b][/size]
 Feel free to reach out via a post on the NexusMods mod page.
 [size=3][b]
 Is ImmersiveSpellcastingVR open source?[/b][/size]

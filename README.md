@@ -68,6 +68,15 @@ You can configure the mod either through the INI file (located at `<SKYRIM_VR_IN
 Both configuration methods are synced automatically.
 
 ## FAQ
+<details>
+<summary><b>Does this mod also work on Oculus/Non-Index controllers?</b></summary>
+
+ISPVR was designed to work with most VR controllers. However, to avoid dropping your controllers, you should consider disabling the **Immersive Input** option on controllers that don't have hand straps.
+The dynamic haptic system also works when using the vanilla trigger-based input for spellcasting.
+
+> For many controller types (such as Quest 3) you can also
+> [buy hand strap addons](https://amzn.eu/d/anon4Ke).
+</details>
 
 <details>
 <summary><b>Fire & Forget spells keep firing when I open my hand or start charging only after I open my hand.</b></summary>
